@@ -42,11 +42,19 @@ struct StoryListView: View {
                             .accessibilityLabel("Story: \(story.title)")
                             .accessibilityHint("Tap to view story details")
                             .accessibilityIdentifier("storyItem_\(story.id)")
+                            .accessibilityAction(named: "Delete story") {
+                                if let index = stories.firstIndex(where: { $0.id == story.id }) {
+                                    deleteStories(offsets: IndexSet([index]))
+                                }
+                            }
                         }
                         .onDelete(perform: deleteStories)
                     }
                     .accessibilityLabel("Bedtime stories list")
                     .accessibilityIdentifier("storiesList")
+                    .refreshable {
+                        await loadStories()
+                    }
                 }
             }
             .navigationTitle("Bedtime Stories")
@@ -68,9 +76,6 @@ struct StoryListView: View {
                 }
             }
             .task {
-                await loadStories()
-            }
-            .refreshable {
                 await loadStories()
             }
         }
