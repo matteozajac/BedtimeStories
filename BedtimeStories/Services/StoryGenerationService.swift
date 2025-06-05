@@ -65,8 +65,11 @@ class StoryGenerationService: ObservableObject {
         
         do {
             let storyResponse = try JSONDecoder().decode(StoryResponse.self, from: data)
+            // Use the generated content when creating the Story so it can be
+            // shown in the UI and persisted to Firestore.
             return Story(
                 title: storyResponse.title,
+                content: storyResponse.content,
                 duration: duration,
                 description: description,
                 favoriteCharacters: favoriteCharacters
