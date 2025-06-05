@@ -1,5 +1,6 @@
 import SwiftUI
 import FirebaseVertexAI
+import MarkdownUI
 
 struct CreateStoryView: View {
     @Environment(\.dismiss) private var dismiss
@@ -51,8 +52,7 @@ struct CreateStoryView: View {
                 
                 if let content = generatedContent {
                     Section("Generated Story") {
-                        Text(content)
-                            .font(.body)
+                        Markdown(content)
                     }
                 }
             }
@@ -77,7 +77,7 @@ struct CreateStoryView: View {
                         onSave(story)
                         dismiss()
                     }
-                    .disabled(title.isEmpty)
+                    .disabled(title.isEmpty || (generatedContent?.isEmpty ?? true))
                 }
             }
             .alert("Error", isPresented: $showError) {

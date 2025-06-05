@@ -37,11 +37,12 @@ class StoryGenerationService: ObservableObject {
     private func buildPrompt(duration: ReadingDuration, description: String?, favoriteCharacters: String?) -> String {
         var prompt = """
         Generate a bedtime story that is approximately \(duration.rawValue) minutes long when read aloud.
-        
+
         Requirements:
         - The story should be calming and suitable for bedtime
         - Include gentle, peaceful themes
         - End with a soothing conclusion that helps children fall asleep
+        - Provide the story content formatted as Markdown
         """
         
         if let description = description, !description.isEmpty {
