@@ -18,7 +18,7 @@ enum ReadingDuration: Int, CaseIterable, Codable {
 }
 
 struct Story: Identifiable, Codable {
-    let id = UUID()
+    let id: UUID
     let title: String
     let content: String?
     let duration: ReadingDuration
@@ -26,12 +26,13 @@ struct Story: Identifiable, Codable {
     let favoriteCharacters: String?
     let createdAt: Date
     
-    init(title: String, content: String? = nil, duration: ReadingDuration = .ten, description: String? = nil, favoriteCharacters: String? = nil) {
+    init(id: UUID = UUID(), title: String, content: String? = nil, duration: ReadingDuration = .ten, description: String? = nil, favoriteCharacters: String? = nil, createdAt: Date = Date()) {
+        self.id = id
         self.title = title
         self.content = content
         self.duration = duration
         self.description = description
         self.favoriteCharacters = favoriteCharacters
-        self.createdAt = Date()
+        self.createdAt = createdAt
     }
 }

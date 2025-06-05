@@ -35,6 +35,9 @@ struct StoryDetailView: View {
                             .font(.body)
                     }
                 }
+                if let content = story.content {
+                    Text(content)
+                }
                 
                 Spacer()
                 

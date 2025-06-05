@@ -23,7 +23,7 @@ class FirestoreService: ObservableObject {
             .order(by: "createdAt", descending: true)
             .getDocuments()
         
-        return snapshot.documents.compactMap { document in
+        return snapshot.documents.compactMap { document -> Story? in
             let data = document.data()
             
             guard let title = data["title"] as? String,

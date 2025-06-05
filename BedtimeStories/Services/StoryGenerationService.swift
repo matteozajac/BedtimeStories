@@ -53,14 +53,6 @@ class StoryGenerationService: ObservableObject {
         }
         
         prompt += """
-        
-        Please respond with a JSON object in this exact format:
-        {
-            "title": "Story Title",
-            "content": "The full story content here..."
-        }
-        
-        Make sure the JSON is valid and properly formatted.
         """
         
         return prompt
