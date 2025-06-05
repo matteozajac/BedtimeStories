@@ -9,12 +9,19 @@ struct StoryDetailView: View {
                 Text(story.title)
                     .font(.largeTitle)
                     .fontWeight(.bold)
+                    .accessibilityAddTraits(.isHeader)
+                    .accessibilityLabel("Story title: \(story.title)")
+                    .accessibilityIdentifier("storyDetailTitle")
                 
                 HStack {
                     Label(story.duration.displayText, systemImage: "clock")
+                        .accessibilityLabel("Reading duration: \(story.duration.displayText)")
+                        .accessibilityIdentifier("storyDetailDuration")
                     Spacer()
                     Text("Created: \(story.createdAt, style: .date)")
                         .foregroundColor(.secondary)
+                        .accessibilityLabel("Created on \(story.createdAt, style: .date)")
+                        .accessibilityIdentifier("storyDetailCreatedDate")
                 }
                 .font(.subheadline)
                 
@@ -22,8 +29,12 @@ struct StoryDetailView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Description")
                             .font(.headline)
+                            .accessibilityAddTraits(.isHeader)
+                            .accessibilityIdentifier("descriptionHeader")
                         Text(description)
                             .font(.body)
+                            .accessibilityLabel("Story description: \(description)")
+                            .accessibilityIdentifier("storyDetailDescription")
                     }
                 }
                 
@@ -31,8 +42,12 @@ struct StoryDetailView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Favorite Characters")
                             .font(.headline)
+                            .accessibilityAddTraits(.isHeader)
+                            .accessibilityIdentifier("charactersHeader")
                         Text(characters)
                             .font(.body)
+                            .accessibilityLabel("Favorite characters: \(characters)")
+                            .accessibilityIdentifier("storyDetailCharacters")
                     }
                 }
                 
@@ -49,9 +64,13 @@ struct StoryDetailView: View {
                         .foregroundColor(.white)
                         .cornerRadius(12)
                 }
+                .accessibilityLabel("Start reading \(story.title)")
+                .accessibilityHint("Begins reading the bedtime story aloud")
+                .accessibilityIdentifier("startReadingButton")
             }
             .padding()
         }
         .navigationBarTitleDisplayMode(.inline)
+        .accessibilityIdentifier("storyDetailView")
     }
 }

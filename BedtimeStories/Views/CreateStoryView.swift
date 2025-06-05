@@ -21,19 +21,31 @@ struct CreateStoryView: View {
             Form {
                 Section("Story Details") {
                     TextField("Title", text: $title)
+                        .accessibilityLabel("Story title")
+                        .accessibilityHint("Enter a title for your bedtime story")
+                        .accessibilityIdentifier("storyTitleField")
                     
                     Picker("Reading Duration", selection: $selectedDuration) {
                         ForEach(ReadingDuration.allCases, id: \.self) { duration in
                             Text(duration.displayText).tag(duration)
                         }
                     }
+                    .accessibilityLabel("Reading duration")
+                    .accessibilityHint("Select how long the story should take to read")
+                    .accessibilityIdentifier("durationPicker")
                 }
                 
                 Section("Optional Details") {
                     TextField("Description", text: $description, axis: .vertical)
                         .lineLimit(3...6)
+                        .accessibilityLabel("Story description")
+                        .accessibilityHint("Add an optional description or theme for your story")
+                        .accessibilityIdentifier("descriptionField")
                     
                     TextField("Favorite Characters", text: $favoriteCharacters)
+                        .accessibilityLabel("Favorite characters")
+                        .accessibilityHint("Enter character names to include in the story")
+                        .accessibilityIdentifier("charactersField")
                 }
                 
                 Section {
@@ -42,17 +54,24 @@ struct CreateStoryView: View {
                             if isGenerating {
                                 ProgressView()
                                     .scaleEffect(0.8)
+                                    .accessibilityHidden(true)
                             }
                             Text(isGenerating ? "Generating..." : "Generate Story with AI")
                         }
                     }
                     .disabled(isGenerating)
+                    .accessibilityLabel(isGenerating ? "Generating story" : "Generate story with AI")
+                    .accessibilityHint("Uses artificial intelligence to create a bedtime story based on your preferences")
+                    .accessibilityIdentifier("generateStoryButton")
                 }
                 
                 if let content = generatedContent {
                     Section("Generated Story") {
                         Text(content)
                             .font(.body)
+                            .accessibilityLabel("Generated story content")
+                            .accessibilityHint("This is the AI-generated story content")
+                            .accessibilityIdentifier("generatedStoryContent")
                     }
                 }
             }
@@ -63,6 +82,9 @@ struct CreateStoryView: View {
                     Button("Cancel") {
                         dismiss()
                     }
+                    .accessibilityLabel("Cancel story creation")
+                    .accessibilityHint("Discards changes and returns to the stories list")
+                    .accessibilityIdentifier("cancelButton")
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -78,12 +100,18 @@ struct CreateStoryView: View {
                         dismiss()
                     }
                     .disabled(title.isEmpty)
+                    .accessibilityLabel("Save story")
+                    .accessibilityHint(title.isEmpty ? "Enter a title to save the story" : "Saves the story to your collection")
+                    .accessibilityIdentifier("saveStoryButton")
                 }
             }
             .alert("Error", isPresented: $showError) {
                 Button("OK") { }
+                    .accessibilityLabel("Acknowledge error")
+                    .accessibilityIdentifier("errorOkButton")
             } message: {
                 Text(errorMessage)
+                    .accessibilityLabel("Error message: \(errorMessage)")
             }
         }
     }
