@@ -8,6 +8,7 @@
 import SwiftUI
 import FirebaseCore
 import FirebaseFirestore
+import FirebaseVertexAI
 
 @main
 struct BedtimeStoriesApp: App {
