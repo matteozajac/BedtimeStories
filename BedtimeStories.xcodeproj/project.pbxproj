@@ -20,6 +20,7 @@
 		61EC4C5E2DF197250069B96B /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 61EC4C5D2DF197250069B96B /* FirebaseRemoteConfig */; };
 		61EC4C602DF197250069B96B /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 61EC4C5F2DF197250069B96B /* FirebaseStorage */; };
 		61EC4C622DF197250069B96B /* FirebaseVertexAI in Frameworks */ = {isa = PBXBuildFile; productRef = 61EC4C612DF197250069B96B /* FirebaseVertexAI */; };
+		61EC4F7A2DF1E3BD0069B96B /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 61EC4F792DF1E3BD0069B96B /* MarkdownUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +41,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				61EC4C5E2DF197250069B96B /* FirebaseRemoteConfig in Frameworks */,
+				61EC4F7A2DF1E3BD0069B96B /* MarkdownUI in Frameworks */,
 				61EC4C502DF197250069B96B /* FirebaseAppCheck in Frameworks */,
 				61EC4C522DF197250069B96B /* FirebaseAuth in Frameworks */,
 				61EC4C4C2DF197250069B96B /* FirebaseAnalytics in Frameworks */,
@@ -107,6 +109,7 @@
 				61EC4C5D2DF197250069B96B /* FirebaseRemoteConfig */,
 				61EC4C5F2DF197250069B96B /* FirebaseStorage */,
 				61EC4C612DF197250069B96B /* FirebaseVertexAI */,
+				61EC4F792DF1E3BD0069B96B /* MarkdownUI */,
 			);
 			productName = BedtimeStories;
 			productReference = 61EC4C3A2DF195A20069B96B /* BedtimeStories.app */;
@@ -138,6 +141,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				61EC4C482DF197250069B96B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				61EC4F782DF1E3BD0069B96B /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 61EC4C3B2DF195A20069B96B /* Products */;
@@ -379,6 +383,14 @@
 				minimumVersion = 11.14.0;
 			};
 		};
+		61EC4F782DF1E3BD0069B96B /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gonzalezreal/swift-markdown-ui";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -446,6 +458,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 61EC4C482DF197250069B96B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseVertexAI;
+		};
+		61EC4F792DF1E3BD0069B96B /* MarkdownUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 61EC4F782DF1E3BD0069B96B /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
+			productName = MarkdownUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
