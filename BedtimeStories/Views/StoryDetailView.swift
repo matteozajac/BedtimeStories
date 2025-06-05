@@ -1,7 +1,12 @@
 import SwiftUI
+import MarkdownUI
 
 struct StoryDetailView: View {
     let story: Story
+    let onDelete: (Story) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var showingDeleteAlert = false
     
     var body: some View {
         ScrollView {
@@ -36,7 +41,7 @@ struct StoryDetailView: View {
                     }
                 }
                 if let content = story.content {
-                    Text(content)
+                    Markdown(content)
                 }
                 
                 Spacer()
@@ -56,5 +61,23 @@ struct StoryDetailView: View {
             .padding()
         }
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(role: .destructive) {
+                    showingDeleteAlert = true
+                } label: {
+                    Image(systemName: "trash")
+                }
+            }
+        }
+        .alert("Delete Story?", isPresented: $showingDeleteAlert) {
+            Button("Delete", role: .destructive) {
+                onDelete(story)
+                dismiss()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This action cannot be undone.")
+        }
     }
 }

@@ -28,7 +28,14 @@ struct StoryListView: View {
                 } else {
                     List {
                         ForEach(stories) { story in
-                            NavigationLink(destination: StoryDetailView(story: story)) {
+                            NavigationLink(
+                                destination: StoryDetailView(
+                                    story: story,
+                                    onDelete: { deleted in
+                                        Task { await deleteStory(deleted) }
+                                    }
+                                )
+                            ) {
                                 StoryRowView(story: story)
                             }
                         }
@@ -96,6 +103,19 @@ struct StoryListView: View {
                     print("Error deleting story: \(error)")
                 }
             }
+        }
+    }
+
+    @MainActor
+    private func deleteStory(_ story: Story) async {
+        guard let index = stories.firstIndex(where: { $0.id == story.id }) else {
+            return
+        }
+        do {
+            try await firestoreService.deleteStory(story)
+            stories.remove(at: index)
+        } catch {
+            print("Error deleting story: \(error)")
         }
     }
 }
