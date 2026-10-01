@@ -97,3 +97,6 @@ iOSInjectionProject/
 # Google Services
 GoogleService-Info.plist
 google-services.json
+# Python helpers
+__pycache__/
+*.pyc

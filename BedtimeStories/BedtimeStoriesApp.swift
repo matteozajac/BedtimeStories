@@ -1,24 +1,13 @@
-//
-//  BedtimeStoriesApp.swift
-//  BedtimeStories
-//
-//  Created by Mateusz Zajac UR  on 05/06/2025.
-//
-
 import SwiftUI
-import FirebaseCore
-import FirebaseFirestore
-import FirebaseVertexAI
 
 @main
 struct BedtimeStoriesApp: App {
-    init() {
-        FirebaseApp.configure()
-    }
-    
+    @State private var library = LibraryModel()
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
+                .environment(library)
+                .tint(.indigo)
         }
     }
 }

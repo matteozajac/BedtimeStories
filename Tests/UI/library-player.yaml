@@ -1,0 +1,46 @@
+appId: com.matteozajac.bedtimestories
+name: Library Reading and Playback
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: library-actions
+    timeout: 10000
+- tapOn:
+    id: book-11111111-1111-4111-8111-111111111111
+- assertVisible:
+    id: read-book
+- tapOn:
+    id: listen-book
+- extendedWaitUntil:
+    visible: Pause
+    timeout: 5000
+- tapOn: Pause
+- assertVisible: Play
+- tapOn:
+    id: close-player
+- assertVisible:
+    id: mini-player-open
+- tapOn:
+    id: read-book
+- assertVisible: Reading options
+- tapOn:
+    id: BackButton
+- tapOn:
+    id: mini-player-open
+- assertVisible:
+    id: player-toggle
+- tapOn:
+    id: close-player
+- tapOn:
+    id: BackButton
+- tapOn:
+    id: library-actions
+- tapOn: Settings
+- assertVisible: Library Folder
+- scrollUntilVisible:
+    element: Created by Mateusz Zając
+    direction: DOWN
+    timeout: 5000
+- assertVisible: Created by Mateusz Zając
+- tapOn: Done

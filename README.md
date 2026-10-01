@@ -1,22 +1,19 @@
-# BedtimeStories
+# Always Near Stories
 
-This repository contains a small iOS application built as part of an AI agents
-exercise. The app allows users to generate short bedtime stories using Google's
-Gemini model through the Firebase Vertex AI SDK. Generated stories are stored in
-Firestore so they can be viewed later.
+An iOS 27 / iPadOS 27 audiobook library built with SwiftUI and Apple frameworks.
+Bundle ID: `com.matteozajac.bedtimestories`. Created by **Mateusz Zając**.
 
-## Idea
+Choose an iCloud Drive folder (including one shared with family) at first launch. Add book folders containing `book.json` and optional text, covers, chapter illustrations, and audio. Read, listen in the background, keep books offline, and share portable `.bedtimestory` files. Reading/listening progress belongs to each device. There are no accounts, AI services, analytics, or third-party dependencies.
 
-The goal of the app is to help parents quickly create calming stories for their
-children. Users enter a title, choose how long the story should take to read and
-optionally add a description or favourite characters. The app then asks Gemini
-for a story matching the criteria and renders the result in Markdown.
+See the [book format](skills/bedtime-book-create/references/book-format.md) and [authoring skill](skills/bedtime-book-create/SKILL.md). The skill's maintained source is in this repository; a copy is installed in `~/.codex/skills/bedtime-book-create` for Codex discovery. To update it, copy this skill directory into that location.
 
-## Frameworks Used
+```sh
+python3 skills/bedtime-book-create/scripts/book.py create --title 'The Sleepy Fox' --text story.md --output /tmp/SleepyFox --archive /tmp/SleepyFox.bedtimestory
+swift test
+python3 -m unittest discover -s Tests/Authoring -v
+xcodebuild -project BedtimeStories.xcodeproj -scheme BedtimeStories -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
+```
 
-- **SwiftUI** – the UI framework used for the entire app interface.
-- **FirebaseCore** and **FirebaseFirestore** – provide app configuration and
-  cloud storage of generated stories.
-- **FirebaseVertexAI** – wraps the Gemini generative model used to create the
-  story text.
-- **MarkdownUI** – renders the Markdown formatted story content.
+Open `BedtimeStories.xcodeproj` with Xcode 27. The UI uses a book grid, an adaptive iPad detail pane, a floating Liquid Glass mini player, and a full-screen audio player, without tabs. The root Swift package is a dependency-free host test harness for the same core sources compiled by the app.
+
+For device checks and evidence boundaries, see [validation](docs/VALIDATION.md).
