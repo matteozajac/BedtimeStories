@@ -12,12 +12,14 @@ struct FolderWelcomeView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     Label("Create or choose a folder in iCloud Drive.", systemImage: "folder")
                     Label("Share the folder with your family in Files.", systemImage: "person.2")
-                    Label("Add book folders with text, pictures, or audio.", systemImage: "books.vertical")
+                    Label("Create a book with your own text, pictures, and voice.", systemImage: "books.vertical")
                 }
                 .foregroundStyle(.secondary)
                 Button("Choose Library Folder", systemImage: "folder.badge.plus") { library.showingFolderPicker = true }
                     .buttonStyle(.borderedProminent).controlSize(.large)
                     .accessibilityIdentifier("choose-library-folder")
+                Button("Create a Book", systemImage: "square.and.pencil", action: library.createBook)
+                    .buttonStyle(.bordered).controlSize(.large).accessibilityIdentifier("create-book")
                 Text("You can change the folder later in Settings. Sharing is managed in Files.")
                     .font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
             }

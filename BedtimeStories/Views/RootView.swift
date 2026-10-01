@@ -43,6 +43,7 @@ struct RootView: View {
             }
         }
         .sheet(isPresented: $library.showingSettings) { NavigationStack { SettingsView() } }
+        .sheet(isPresented: $library.showingCreator) { BookCreatorView() }
         .fullScreenCover(isPresented: $library.showingPlayer) { NowPlayingView() }
         .sheet(item: $library.importCandidate) { candidate in
             ImportReviewView(book: candidate).interactiveDismissDisabled()

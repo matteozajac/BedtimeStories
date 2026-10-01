@@ -5,6 +5,8 @@ Bundle ID: `com.matteozajac.bedtimestories`. Created by **Mateusz Zając**.
 
 Choose an iCloud Drive folder (including one shared with family) at first launch. Add book folders containing `book.json` and optional text, covers, chapter illustrations, and audio. Read, listen in the background, keep books offline, and share portable `.bedtimestory` files. Reading/listening progress belongs to each device. There are no accounts, AI services, analytics, or third-party dependencies.
 
+Tap **+ → Create a Book** to write chapter text, add photos, and record narration inside the app. Pause/resume a take, review it, then choose **Use Recording**; M4A, MP3 and WAV imports are also supported. Drafts autosave on the device and can be reopened from **Book Creator**. **Add to Library** writes the completed book to the chosen library folder in the same portable format. See [the creator guide and validation](docs/CREATOR.md).
+
 See the [book format](skills/bedtime-book-create/references/book-format.md) and [authoring skill](skills/bedtime-book-create/SKILL.md). The skill's maintained source is in this repository; a copy is installed in `~/.codex/skills/bedtime-book-create` for Codex discovery. To update it, copy this skill directory into that location.
 
 ```sh

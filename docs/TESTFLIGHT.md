@@ -1,4 +1,19 @@
-# Internal TestFlight — 1 October 2026
+# Internal TestFlight
+
+## 1.0 (3) — 1 October 2026
+
+The Book Creator build is processed and available to **Internal Testers**. Readback confirms `VALID`, `INTERNAL_ONLY`, `IN_BETA_TESTING`, effective group access and saved English What to Test notes.
+
+- Build ID: `0ec597ed-6b7c-4695-aaf6-8f0f4e6f6837`.
+- App ID: `6818278413`; bundle: `com.matteozajac.bedtimestories`; team: `4TCJLR98Y5`.
+- Group: `20328e88-9f9c-4c47-be78-c33a809d1a71` (**Internal Testers**, all-build access).
+- Minimum OS: iOS / iPadOS 27.0.
+- IPA SHA-256: `c4062e8f34be9b41bc239edaf0f90fdc855996e70bf229969bb4b4aca974980d`.
+- Signature, embedded profile, version and English/Polish microphone purpose strings verified in the exported IPA. All 55 release input hashes remained unchanged.
+
+Adds local drafts, chapter writing/reordering, cover/chapter photos, audio import and in-app recording with pause/resume, review and acceptance. Created books use the existing reading, playback, offline and sharing format. See [CREATOR.md](CREATOR.md) for use, tests and device checks.
+
+## 1.0 (2) — 1 October 2026
 
 Always Near Stories **1.0 (2)** is processed and available to the **Internal Testers** group.
 

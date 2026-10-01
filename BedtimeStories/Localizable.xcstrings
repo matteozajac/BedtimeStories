@@ -49,6 +49,22 @@
         }
       }
     },
+    "A draft could not be created. Free some space on this device and try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A draft could not be created. Free some space on this device and try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się utworzyć szkicu. Zwolnij trochę miejsca na urządzeniu i spróbuj ponownie."
+          }
+        }
+      }
+    },
     "A little story.\nA peaceful night.": {
       "localizations": {
         "en": {
@@ -81,6 +97,70 @@
         }
       }
     },
+    "About this story (optional)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About this story (optional)"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O tej opowieści (opcjonalnie)"
+          }
+        }
+      }
+    },
+    "Add Chapter": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Chapter"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodaj rozdział"
+          }
+        }
+      }
+    },
+    "Add Chapter Photo": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Chapter Photo"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodaj zdjęcie do rozdziału"
+          }
+        }
+      }
+    },
+    "Add Cover Photo": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Cover Photo"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodaj zdjęcie na okładkę"
+          }
+        }
+      }
+    },
     "Add book folders in Files or import a .bedtimestory book. A title is all a book needs to begin.": {
       "localizations": {
         "en": {
@@ -109,6 +189,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dodaj książki z tekstem, ilustracjami lub nagraniem."
+          }
+        }
+      }
+    },
+    "Add the finished book to your chosen folder to read, listen, and share it with your family.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add the finished book to your chosen folder to read, listen, and share it with your family."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodaj gotową książkę do wybranego folderu, aby ją czytać, słuchać i udostępniać rodzinie."
           }
         }
       }
@@ -161,6 +257,38 @@
         }
       }
     },
+    "Allow microphone access in Settings to record your narration. You can still write your book or import audio.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow microphone access in Settings to record your narration. You can still write your book or import audio."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zezwól na dostęp do mikrofonu w Ustawieniach, aby nagrywać narrację. Nadal możesz pisać książkę lub importować nagrania."
+          }
+        }
+      }
+    },
+    "Always Near Stories": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Always Near Stories"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Always Near Stories"
+          }
+        }
+      }
+    },
     "Appearance": {
       "localizations": {
         "en": {
@@ -173,6 +301,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wygląd"
+          }
+        }
+      }
+    },
+    "Audio was interrupted. Start a new take when you’re ready.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio was interrupted. Start a new take when you’re ready."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagrywanie zostało przerwane. Rozpocznij nowe nagranie, gdy będziesz gotowy."
           }
         }
       }
@@ -209,6 +353,22 @@
         }
       }
     },
+    "Author (optional)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Author (optional)"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autor (opcjonalnie)"
+          }
+        }
+      }
+    },
     "Back 15 seconds": {
       "localizations": {
         "en": {
@@ -225,18 +385,34 @@
         }
       }
     },
-    "Always Near Stories": {
+    "Book Creator": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Always Near Stories"
+            "value": "Book Creator"
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Always Near Stories"
+            "value": "Tworzenie książek"
+          }
+        }
+      }
+    },
+    "Book Details": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Book Details"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informacje o książce"
           }
         }
       }
@@ -253,6 +429,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Opcje książki"
+          }
+        }
+      }
+    },
+    "Book artwork": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Book artwork"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ilustracja książki"
+          }
+        }
+      }
+    },
+    "Book title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Book title"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tytuł książki"
           }
         }
       }
@@ -305,6 +513,38 @@
         }
       }
     },
+    "Change Chapter Photo": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change Chapter Photo"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zmień zdjęcie w rozdziale"
+          }
+        }
+      }
+    },
+    "Change Cover Photo": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change Cover Photo"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zmień zdjęcie na okładce"
+          }
+        }
+      }
+    },
     "Change Library Folder": {
       "localizations": {
         "en": {
@@ -337,6 +577,22 @@
         }
       }
     },
+    "Chapter Details": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chapter Details"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informacje o rozdziale"
+          }
+        }
+      }
+    },
     "Chapter illustration": {
       "localizations": {
         "en": {
@@ -365,6 +621,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ilustracja rozdziału jest niedostępna."
+          }
+        }
+      }
+    },
+    "Chapter text": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chapter text"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tekst rozdziału"
+          }
+        }
+      }
+    },
+    "Chapter title (optional)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chapter title (optional)"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tytuł rozdziału (opcjonalnie)"
           }
         }
       }
@@ -433,6 +721,22 @@
         }
       }
     },
+    "Choose a photo that can be opened on this device.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a photo that can be opened on this device."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wybierz zdjęcie, które można otworzyć na tym urządzeniu."
+          }
+        }
+      }
+    },
     "Clear Temporary Downloads": {
       "localizations": {
         "en": {
@@ -477,6 +781,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zamknij odtwarzacz"
+          }
+        }
+      }
+    },
+    "Create Book": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create Book"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utwórz książkę"
+          }
+        }
+      }
+    },
+    "Create a Book": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create a Book"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utwórz książkę"
+          }
+        }
+      }
+    },
+    "Create a book with your own text, pictures, and voice.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create a book with your own text, pictures, and voice."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utwórz książkę z własnym tekstem, zdjęciami i głosem."
+          }
+        }
+      }
+    },
+    "Create a book with your own words and voice, or import a .bedtimestory book.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create a book with your own words and voice, or import a .bedtimestory book."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utwórz książkę z własnym tekstem i głosem albo importuj plik .bedtimestory."
           }
         }
       }
@@ -545,6 +913,70 @@
         }
       }
     },
+    "Delete Draft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Draft"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuń szkic"
+          }
+        }
+      }
+    },
+    "Delete this draft?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this draft?"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usunąć ten szkic?"
+          }
+        }
+      }
+    },
+    "Discard Take": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discard Take"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odrzuć nagranie"
+          }
+        }
+      }
+    },
+    "Discard this take?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discard this take?"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odrzucić to nagranie?"
+          }
+        }
+      }
+    },
     "Done": {
       "localizations": {
         "en": {
@@ -609,6 +1041,22 @@
         }
       }
     },
+    "Draft Saved": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Draft Saved"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Szkic zapisany"
+          }
+        }
+      }
+    },
     "Each book is a folder with book.json and optional text, illustrations, and audio. Import or share a .bedtimestory file to send a complete book.": {
       "localizations": {
         "en": {
@@ -621,6 +1069,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Każda książka to folder z plikiem book.json oraz opcjonalnym tekstem, ilustracjami i nagraniami. Aby przesłać całą książkę, użyj pliku .bedtimestory."
+          }
+        }
+      }
+    },
+    "Edit Chapter": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit Chapter"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edytuj rozdział"
           }
         }
       }
@@ -653,6 +1117,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Znajdź opowieść"
+          }
+        }
+      }
+    },
+    "Finish Recording": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finish Recording"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zakończ nagrywanie"
           }
         }
       }
@@ -705,6 +1185,22 @@
         }
       }
     },
+    "Import Audio": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import Audio"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importuj nagranie"
+          }
+        }
+      }
+    },
     "Import Book": {
       "localizations": {
         "en": {
@@ -737,6 +1233,22 @@
         }
       }
     },
+    "Its text, pictures, and recordings will be removed from this device.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Its text, pictures, and recordings will be removed from this device."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tekst, zdjęcia i nagrania tego szkicu zostaną usunięte z urządzenia."
+          }
+        }
+      }
+    },
     "Keep Offline": {
       "localizations": {
         "en": {
@@ -749,6 +1261,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pobierz na urządzenie"
+          }
+        }
+      }
+    },
+    "Keep each book in its own folder, or import a .bedtimestory file. Text, artwork, and audio are optional.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep each book in its own folder, or import a .bedtimestory file. Text, artwork, and audio are optional."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przechowuj każdą książkę w osobnym folderze lub zaimportuj plik .bedtimestory. Tekst, ilustracje i nagrania są opcjonalne."
           }
         }
       }
@@ -865,6 +1393,38 @@
         }
       }
     },
+    "Microphone level": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microphone level"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poziom mikrofonu"
+          }
+        }
+      }
+    },
+    "Narration": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Narration"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Narracja"
+          }
+        }
+      }
+    },
     "Next": {
       "localizations": {
         "en": {
@@ -945,6 +1505,54 @@
         }
       }
     },
+    "Open Files to manage this folder and its sharing.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Files to manage this folder and its sharing."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Folderem i jego udostępnianiem zarządzasz w aplikacji Pliki."
+          }
+        }
+      }
+    },
+    "Open Settings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Settings"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otwórz Ustawienia"
+          }
+        }
+      }
+    },
+    "Open a chapter to write, add a picture, or record narration. Use Edit to reorder or remove chapters.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open a chapter to write, add a picture, or record narration. Use Edit to reorder or remove chapters."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otwórz rozdział, aby napisać tekst, dodać zdjęcie lub nagrać narrację. Wybierz Edytuj, aby zmienić kolejność lub usunąć rozdziały."
+          }
+        }
+      }
+    },
     "Opening book…": {
       "localizations": {
         "en": {
@@ -973,6 +1581,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wczytywanie rozdziału…"
+          }
+        }
+      }
+    },
+    "Opening drafts…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opening drafts…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otwieranie szkiców…"
           }
         }
       }
@@ -1009,6 +1633,54 @@
         }
       }
     },
+    "Pause Recording": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause Recording"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wstrzymaj nagrywanie"
+          }
+        }
+      }
+    },
+    "Paused": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paused"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wstrzymano"
+          }
+        }
+      }
+    },
+    "Picture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Picture"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zdjęcie"
+          }
+        }
+      }
+    },
     "Play": {
       "localizations": {
         "en": {
@@ -1021,6 +1693,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Odtwórz"
+          }
+        }
+      }
+    },
+    "Play Narration": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play Narration"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odsłuchaj narrację"
+          }
+        }
+      }
+    },
+    "Play Take": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play Take"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odsłuchaj nagranie"
           }
         }
       }
@@ -1105,6 +1809,22 @@
         }
       }
     },
+    "Preparing audio…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparing audio…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przygotowywanie nagrania…"
+          }
+        }
+      }
+    },
     "Preparing book…": {
       "localizations": {
         "en": {
@@ -1185,6 +1905,150 @@
         }
       }
     },
+    "Ready for your story": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ready for your story"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Miejsce na Twoją opowieść"
+          }
+        }
+      }
+    },
+    "Record Again": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record Again"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagraj ponownie"
+          }
+        }
+      }
+    },
+    "Record Narration": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record Narration"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagraj narrację"
+          }
+        }
+      }
+    },
+    "Record Your Story": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record Your Story"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagraj swoją opowieść"
+          }
+        }
+      }
+    },
+    "Record a New Take": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record a New Take"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagraj ponownie"
+          }
+        }
+      }
+    },
+    "Record a chapter at a time. Review each take before keeping it. Imported audio can be M4A, MP3, or WAV.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record a chapter at a time. Review each take before keeping it. Imported audio can be M4A, MP3, or WAV."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagrywaj po jednym rozdziale. Odsłuchaj każde nagranie, zanim je zachowasz. Możesz też importować pliki M4A, MP3 lub WAV."
+          }
+        }
+      }
+    },
+    "Recording": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recording"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagrywanie"
+          }
+        }
+      }
+    },
+    "Recording duration": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recording duration"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Czas nagrania"
+          }
+        }
+      }
+    },
+    "Recording paused. Tap Resume when you’re ready.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recording paused. Tap Resume when you’re ready."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagrywanie wstrzymane. Wybierz Wznów nagrywanie, gdy będziesz gotowy."
+          }
+        }
+      }
+    },
     "Refresh": {
       "localizations": {
         "en": {
@@ -1197,6 +2061,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Odśwież"
+          }
+        }
+      }
+    },
+    "Remove Cover": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove Cover"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuń okładkę"
+          }
+        }
+      }
+    },
+    "Remove Narration": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove Narration"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuń narrację"
           }
         }
       }
@@ -1217,6 +2113,38 @@
         }
       }
     },
+    "Remove Picture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove Picture"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuń zdjęcie"
+          }
+        }
+      }
+    },
+    "Remove this chapter’s narration?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove this chapter’s narration?"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usunąć narrację tego rozdziału?"
+          }
+        }
+      }
+    },
     "Replace Book": {
       "localizations": {
         "en": {
@@ -1233,6 +2161,22 @@
         }
       }
     },
+    "Replace this take?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Replace this take?"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zastąpić to nagranie?"
+          }
+        }
+      }
+    },
     "Resume": {
       "localizations": {
         "en": {
@@ -1245,6 +2189,102 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kontynuuj"
+          }
+        }
+      }
+    },
+    "Resume Recording": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume Recording"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wznów nagrywanie"
+          }
+        }
+      }
+    },
+    "Review Your Take": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review Your Take"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odsłuchaj nagranie"
+          }
+        }
+      }
+    },
+    "Save Draft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save Draft"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zapisz szkic"
+          }
+        }
+      }
+    },
+    "Saving Draft…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saving Draft…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zapisywanie szkicu…"
+          }
+        }
+      }
+    },
+    "Saving book…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saving book…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zapisywanie książki…"
+          }
+        }
+      }
+    },
+    "Saving…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saving…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zapisywanie…"
           }
         }
       }
@@ -1377,6 +2417,38 @@
         }
       }
     },
+    "Speak in your own words. Your recording stays on this device until you add the book to your library.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speak in your own words. Your recording stays on this device until you add the book to your library."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opowiedz historię własnymi słowami. Nagranie pozostaje na tym urządzeniu, dopóki nie dodasz książki do biblioteki."
+          }
+        }
+      }
+    },
+    "Start Recording": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start Recording"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rozpocznij nagrywanie"
+          }
+        }
+      }
+    },
     "Stop Listening": {
       "localizations": {
         "en": {
@@ -1389,6 +2461,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zakończ słuchanie"
+          }
+        }
+      }
+    },
+    "Stop Preview": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop Preview"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zatrzymaj odsłuch"
           }
         }
       }
@@ -1409,6 +2497,22 @@
         }
       }
     },
+    "Text": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tekst"
+          }
+        }
+      }
+    },
     "Text, pictures, and recordings can be added to this book’s folder whenever you’re ready.": {
       "localizations": {
         "en": {
@@ -1421,6 +2525,150 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tekst, ilustracje i nagrania możesz dodać do folderu tej książki w dowolnej chwili."
+          }
+        }
+      }
+    },
+    "The book could not be added to your library. Your draft is safe. Check the folder in Files, then try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The book could not be added to your library. Your draft is safe. Check the folder in Files, then try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się dodać książki do biblioteki. Twój szkic jest bezpieczny. Sprawdź folder w aplikacji Pliki i spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "The draft could not be deleted. Try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The draft could not be deleted. Try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się usunąć szkicu. Spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "The microphone could not start. Close other recording apps, then try again. Your saved narration is unchanged.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The microphone could not start. Close other recording apps, then try again. Your saved narration is unchanged."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się uruchomić mikrofonu. Zamknij inne aplikacje nagrywające i spróbuj ponownie. Zapisana narracja pozostaje bez zmian."
+          }
+        }
+      }
+    },
+    "The narration already saved in your chapter will be kept.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The narration already saved in your chapter will be kept."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Narracja zapisana wcześniej w rozdziale zostanie zachowana."
+          }
+        }
+      }
+    },
+    "The narration could not be played. Try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The narration could not be played. Try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się odtworzyć narracji. Spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "The photo could not be opened. Try another photo.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The photo could not be opened. Try another photo."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się otworzyć zdjęcia. Wybierz inne zdjęcie."
+          }
+        }
+      }
+    },
+    "The recording could not be added. Your previous narration is still saved. Try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The recording could not be added. Your previous narration is still saved. Try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się dodać nagrania. Poprzednia narracja jest nadal zapisana. Spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "The take could not be finished. Try recording again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The take could not be finished. Try recording again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się zakończyć nagrania. Spróbuj nagrać ponownie."
+          }
+        }
+      }
+    },
+    "The take could not be played. Try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The take could not be played. Try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się odtworzyć nagrania. Spróbuj ponownie."
           }
         }
       }
@@ -1489,6 +2737,54 @@
         }
       }
     },
+    "Unable to play": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unable to play"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie można odtworzyć"
+          }
+        }
+      }
+    },
+    "Unable to save recording": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unable to save recording"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie można zapisać nagrania"
+          }
+        }
+      }
+    },
+    "Untitled Book": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Untitled Book"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Książka bez tytułu"
+          }
+        }
+      }
+    },
     "Updating downloads…": {
       "localizations": {
         "en": {
@@ -1501,6 +2797,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aktualizowanie pobranych książek…"
+          }
+        }
+      }
+    },
+    "Use Recording": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use Recording"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zachowaj nagranie"
           }
         }
       }
@@ -1537,6 +2849,22 @@
         }
       }
     },
+    "Write a story, add pictures, and record it in your own voice. Drafts are saved on this device until you add them to your library.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Write a story, add pictures, and record it in your own voice. Drafts are saved on this device until you add them to your library."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Napisz opowieść, dodaj zdjęcia i nagraj ją własnym głosem. Szkice są zapisane na tym urządzeniu, dopóki nie dodasz ich do biblioteki."
+          }
+        }
+      }
+    },
     "You can change the folder later in Settings. Sharing is managed in Files.": {
       "localizations": {
         "en": {
@@ -1553,6 +2881,54 @@
         }
       }
     },
+    "Your Chapter": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your Chapter"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Twój rozdział"
+          }
+        }
+      }
+    },
+    "Your Drafts": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your Drafts"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Twoje szkice"
+          }
+        }
+      }
+    },
+    "Your Voice": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your Voice"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Twój głos"
+          }
+        }
+      }
+    },
     "Your bookshelf is ready": {
       "localizations": {
         "en": {
@@ -1565,6 +2941,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Twoja biblioteka jest gotowa"
+          }
+        }
+      }
+    },
+    "Your draft could not be saved. Keep the editor open and try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your draft could not be saved. Keep the editor open and try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się zapisać szkicu. Nie zamykaj edytora i spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "Your drafts could not be opened. Try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your drafts could not be opened. Try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się otworzyć szkiców. Spróbuj ponownie."
           }
         }
       }
@@ -1601,34 +3009,34 @@
         }
       }
     },
-    "Open Files to manage this folder and its sharing.": {
+    "Your next story starts here.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Open Files to manage this folder and its sharing."
+            "value": "Your next story starts here."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Folderem i jego udostępnianiem zarządzasz w aplikacji Pliki."
+            "value": "Tutaj zaczyna się Twoja kolejna opowieść."
           }
         }
       }
     },
-    "Keep each book in its own folder, or import a .bedtimestory file. Text, artwork, and audio are optional.": {
+    "Your take is still here. Try again before closing the recorder.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Keep each book in its own folder, or import a .bedtimestory file. Text, artwork, and audio are optional."
+            "value": "Your take is still here. Try again before closing the recorder."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Przechowuj każdą książkę w osobnym folderze lub zaimportuj plik .bedtimestory. Tekst, ilustracje i nagrania są opcjonalne."
+            "value": "Twoje nagranie nadal tu jest. Spróbuj ponownie, zanim zamkniesz okno nagrywania."
           }
         }
       }

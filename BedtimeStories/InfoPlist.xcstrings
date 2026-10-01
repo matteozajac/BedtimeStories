@@ -1,0 +1,22 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "NSMicrophoneUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record your voice to narrate the books you create for your family."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagraj swój głos, aby czytać książki tworzone dla Twojej rodziny."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

@@ -25,8 +25,10 @@ struct LibraryGridView: View {
                     ContentUnavailableView {
                         Label("Your bookshelf is ready", systemImage: "books.vertical")
                     } description: {
-                        Text("Add book folders in Files or import a .bedtimestory book. A title is all a book needs to begin.")
+                        Text("Create a book with your own words and voice, or import a .bedtimestory book.")
                     } actions: {
+                        Button("Create a Book", systemImage: "square.and.pencil", action: library.createBook)
+                            .buttonStyle(.borderedProminent)
                         Button("Import Book", systemImage: "square.and.arrow.down") { library.showingImportPicker = true }
                             .buttonStyle(.bordered)
                     }
@@ -54,7 +56,12 @@ struct LibraryGridView: View {
         .searchable(text: $library.search, placement: .navigationBarDrawer(displayMode: .always), prompt: "Find a story")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
+                Button("Create a Book", systemImage: "plus", action: library.createBook)
+                    .accessibilityIdentifier("create-book").disabled(library.activity != nil)
+            }
+            ToolbarItem(placement: .topBarTrailing) {
                 Menu {
+                    Button("Book Creator", systemImage: "square.and.pencil", action: library.createBook)
                     Button("Import Book", systemImage: "square.and.arrow.down") { library.showingImportPicker = true }
                     Button("Refresh", systemImage: "arrow.clockwise") { Task { await library.refresh() } }
                     Button("Settings", systemImage: "gearshape") { library.showingSettings = true }

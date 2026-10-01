@@ -20,6 +20,7 @@ final class LibraryModel {
     var showingFolderPicker = false
     var showingImportPicker = false
     var showingPlayer = false
+    var showingCreator = false
     var search = ""
     private(set) var repository: LibraryRepository
     private(set) var progress: LocalProgress
@@ -202,6 +203,23 @@ final class LibraryModel {
 
     func clearCache() {
         perform("Clearing cache…") { [self] in try await repository.clearUnpinned(protecting: player.book?.id) }
+    }
+
+    func createBook() {
+        guard activity == nil else { return }
+        player.stop()
+        showingCreator = true
+    }
+
+    func addCreatedBook(_ book: LibraryBook) async throws {
+        guard let root, activity == nil else { throw BookError.unavailable("Select an available library folder first.") }
+        activity = String(localized: "Saving book…")
+        do {
+            try await repository.commitImport(book, root: root, replacing: false)
+        } catch { activity = nil; throw error }
+        activity = nil
+        await refresh()
+        selectedBook = books.first { $0.id == book.id }
     }
 
     func cancelOperation() { operationTask?.cancel() }
