@@ -3040,6 +3040,758 @@
           }
         }
       }
+    },
+    "On This Device": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On This Device"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Na tym urządzeniu"
+          }
+        }
+      }
+    },
+    "Private Cloud Compute": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private Cloud Compute"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private Cloud Compute"
+          }
+        }
+      }
+    },
+    "Describe the story you would like to create.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Describe the story you would like to create."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opisz historię, którą chcesz stworzyć."
+          }
+        }
+      }
+    },
+    "Keep your description within 600 characters so there is room for the story.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep your description within 600 characters so there is room for the story."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skróć opis do 600 znaków, żeby model miał miejsce na napisanie historii."
+          }
+        }
+      }
+    },
+    "The story was incomplete. Try a simpler description or fewer chapters.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The story was incomplete. Try a simpler description or fewer chapters."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się stworzyć całej historii. Uprość opis lub wybierz mniej rozdziałów."
+          }
+        }
+      }
+    },
+    "This model does not support the selected language. Choose another language or write the story yourself.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This model does not support the selected language. Choose another language or write the story yourself."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ten model nie obsługuje wybranego języka. Wybierz inny język lub napisz historię samodzielnie."
+          }
+        }
+      }
+    },
+    "There is too much detail for this model. Shorten your description and try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There is too much detail for this model. Shorten your description and try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opis jest zbyt szczegółowy dla tego modelu. Skróć go i spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "The model could not create this story. Try a gentle, child-friendly idea.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The model could not create this story. Try a gentle, child-friendly idea."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model nie mógł stworzyć tej historii. Spróbuj opisać spokojną opowieść odpowiednią dla dzieci."
+          }
+        }
+      }
+    },
+    "The model is busy. Wait a moment and try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The model is busy. Wait a moment and try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model jest teraz zajęty. Poczekaj chwilę i spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "Private Cloud Compute could not connect. Check your connection or choose On This Device.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private Cloud Compute could not connect. Check your connection or choose On This Device."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się połączyć z Private Cloud Compute. Sprawdź połączenie z internetem lub wybierz opcję „Na tym urządzeniu”."
+          }
+        }
+      }
+    },
+    "Your Private Cloud Compute limit has been reached. Try again later or choose On This Device.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your Private Cloud Compute limit has been reached. Try again later or choose On This Device."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wykorzystano Twój limit Private Cloud Compute. Spróbuj później lub wybierz opcję „Na tym urządzeniu”."
+          }
+        }
+      }
+    },
+    "Private Cloud Compute is unavailable right now. Try again later or choose On This Device.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private Cloud Compute is unavailable right now. Try again later or choose On This Device."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private Cloud Compute jest teraz niedostępne. Spróbuj później lub wybierz opcję „Na tym urządzeniu”."
+          }
+        }
+      }
+    },
+    "The story could not be completed. Try again with fewer chapters or a simpler idea.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The story could not be completed. Try again with fewer chapters or a simpler idea."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się dokończyć historii. Spróbuj ponownie z mniejszą liczbą rozdziałów lub prostszym pomysłem."
+          }
+        }
+      }
+    },
+    "The generated draft could not be saved. Free some space on this device and try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The generated draft could not be saved. Free some space on this device and try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się zapisać stworzonego szkicu. Zwolnij trochę miejsca na urządzeniu i spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "On-device creation needs a device that supports Apple Intelligence. You can still write a book yourself.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On-device creation needs a device that supports Apple Intelligence. You can still write a book yourself."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tworzenie historii na urządzeniu wymaga obsługi Apple Intelligence. Nadal możesz napisać książkę samodzielnie."
+          }
+        }
+      }
+    },
+    "Turn on Apple Intelligence in Settings to create a story on this device.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn on Apple Intelligence in Settings to create a story on this device."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Włącz Apple Intelligence w Ustawieniach, aby stworzyć historię na tym urządzeniu."
+          }
+        }
+      }
+    },
+    "Apple Intelligence is preparing the model. Try again after its download finishes.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Intelligence is preparing the model. Try again after its download finishes."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Intelligence przygotowuje model. Spróbuj ponownie, gdy zakończy się pobieranie."
+          }
+        }
+      }
+    },
+    "On-device creation is unavailable right now. You can still write a book yourself.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On-device creation is unavailable right now. You can still write a book yourself."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tworzenie historii na urządzeniu jest teraz niedostępne. Nadal możesz napisać książkę samodzielnie."
+          }
+        }
+      }
+    },
+    "Private Cloud Compute is not enabled for this version of the app. Choose On This Device to create a story.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private Cloud Compute is not enabled for this version of the app. Choose On This Device to create a story."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private Cloud Compute nie jest włączone w tej wersji aplikacji. Aby stworzyć historię, wybierz opcję „Na tym urządzeniu”."
+          }
+        }
+      }
+    },
+    "Private Cloud Compute is not available on this device. You can still write a book yourself.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private Cloud Compute is not available on this device. You can still write a book yourself."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private Cloud Compute nie jest dostępne na tym urządzeniu. Nadal możesz napisać książkę samodzielnie."
+          }
+        }
+      }
+    },
+    "Private Cloud Compute is getting ready. Check Apple Intelligence in Settings and try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private Cloud Compute is getting ready. Check Apple Intelligence in Settings and try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private Cloud Compute jest w trakcie przygotowania. Sprawdź Apple Intelligence w Ustawieniach i spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "Creation stopped. Any completed chapters are saved in Your Drafts.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Creation stopped. Any completed chapters are saved in Your Drafts."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tworzenie zostało zatrzymane. Gotowe rozdziały znajdziesz w sekcji „Twoje szkice”."
+          }
+        }
+      }
+    },
+    "A sleepy fox follows the stars home…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A sleepy fox follows the stars home…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Śpiący lisek wraca do domu, podążając za gwiazdami…"
+          }
+        }
+      }
+    },
+    "Story description": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Story description"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opis historii"
+          }
+        }
+      }
+    },
+    "%lld / 600 characters": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld / 600 characters"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld / 600 znaków"
+          }
+        }
+      }
+    },
+    "Your Story Idea": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your Story Idea"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Twój pomysł na historię"
+          }
+        }
+      }
+    },
+    "Describe the characters, setting, and what happens. Your idea is saved on this device.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Describe the characters, setting, and what happens. Your idea is saved on this device."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opisz bohaterów, miejsce i wydarzenia. Twój pomysł jest zapisywany na tym urządzeniu."
+          }
+        }
+      }
+    },
+    "Story Options": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Story Options"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ustawienia historii"
+          }
+        }
+      }
+    },
+    "Language": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Język"
+          }
+        }
+      }
+    },
+    "Reader Age": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reader Age"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiek dziecka"
+          }
+        }
+      }
+    },
+    "Chapters: %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chapters: %lld"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liczba rozdziałów: %lld"
+          }
+        }
+      }
+    },
+    "Each chapter is a short bedtime read. You can make changes in the editor.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each chapter is a short bedtime read. You can make changes in the editor."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Każdy rozdział to krótka opowieść na dobranoc. Gotowy tekst możesz zmienić w edytorze."
+          }
+        }
+      }
+    },
+    "Create With": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create With"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Miejsce tworzenia"
+          }
+        }
+      }
+    },
+    "Your description and story are processed on this device. No internet connection is needed once the model is ready.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your description and story are processed on this device. No internet connection is needed once the model is ready."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opis i historia są przetwarzane na tym urządzeniu. Gdy model jest gotowy, połączenie z internetem nie jest potrzebne."
+          }
+        }
+      }
+    },
+    "Your description and story context are sent to Apple's Private Cloud Compute to create the book. An internet connection is required.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your description and story context are sent to Apple's Private Cloud Compute to create the book. An internet connection is required."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aby stworzyć książkę, opis i kontekst historii są wysyłane do Private Cloud Compute firmy Apple. Wymagane jest połączenie z internetem."
+          }
+        }
+      }
+    },
+    "Check Availability": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check Availability"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprawdź dostępność"
+          }
+        }
+      }
+    },
+    "Processing": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Processing"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przetwarzanie"
+          }
+        }
+      }
+    },
+    "Planning your story…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planning your story…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planowanie historii…"
+          }
+        }
+      }
+    },
+    "Writing chapter %lld of %lld…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Writing chapter %lld of %lld…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pisanie rozdziału %lld z %lld…"
+          }
+        }
+      }
+    },
+    "Stop Creating": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop Creating"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zatrzymaj tworzenie"
+          }
+        }
+      }
+    },
+    "Completed chapters save to Your Drafts as the story is written.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completed chapters save to Your Drafts as the story is written."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gotowe rozdziały są na bieżąco zapisywane w sekcji „Twoje szkice”."
+          }
+        }
+      }
+    },
+    "Saved chapters: %lld of %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved chapters: %lld of %lld"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zapisane rozdziały: %lld z %lld"
+          }
+        }
+      }
+    },
+    "Open Saved Draft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Saved Draft"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otwórz zapisany szkic"
+          }
+        }
+      }
+    },
+    "Create Story Draft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create Story Draft"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stwórz szkic historii"
+          }
+        }
+      }
+    },
+    "Create Another Draft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create Another Draft"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stwórz kolejny szkic"
+          }
+        }
+      }
+    },
+    "Apple Intelligence creates the title and chapter text. Review the story before sharing it with a child, then add your own pictures and narration.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Intelligence creates the title and chapter text. Review the story before sharing it with a child, then add your own pictures and narration."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Intelligence tworzy tytuł i tekst rozdziałów. Przeczytaj historię, zanim pokażesz ją dziecku, a potem dodaj własne obrazki i nagrania."
+          }
+        }
+      }
+    },
+    "Create from an Idea": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create from an Idea"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stwórz z pomysłu"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

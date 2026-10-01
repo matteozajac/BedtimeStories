@@ -13,6 +13,10 @@ struct BookCreatorView: View {
         NavigationStack(path: $path) {
             List {
                 Section {
+                    NavigationLink(value: BookCreatorRoute.storyIdea) {
+                        Label("Create from an Idea", systemImage: "sparkles")
+                    }
+                        .accessibilityIdentifier("create-book-from-idea")
                     Button("Create a Book", systemImage: "square.and.pencil") {
                         Task {
                             do { let draft = try await store.create(); path.append(draft) }
@@ -39,6 +43,11 @@ struct BookCreatorView: View {
             .navigationTitle("Book Creator")
             .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() } } }
             .navigationDestination(for: BookDraft.self) { BookEditorView(draft: $0, store: store) }
+            .navigationDestination(for: BookCreatorRoute.self) { _ in
+                StoryIdeaView(store: store) { draft in
+                    path = NavigationPath([draft])
+                }
+            }
             .task { await reload() }
             .onChange(of: path.isEmpty) { _, empty in if empty { Task { await reload() } } }
             .alert("Delete this draft?", isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } })) {

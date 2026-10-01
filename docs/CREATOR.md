@@ -2,6 +2,8 @@
 
 Open **+** in Library, or **Create a Book** on the welcome screen. Choose **Create a Book** in the draft browser, enter a title and optional author/description, and add a cover photo.
 
+Choose **Create from an Idea** in the draft browser to generate a title and 1–4 short chapters from a description using Apple Foundation Models. Choose the story language and reader age, then review the generated draft in the same editor before adding photos, narration, or publishing it. Completed chapters are saved on this device even if creation is stopped or a later chapter fails. See [AI creation, language support, and Private Cloud Compute setup](AI_CREATOR.md).
+
 Open a chapter to write its text, choose a picture, and record narration. The recorder shows the chapter text while you read. It supports pause/resume, finishing, preview, rerecording and **Use Recording**. Canceling a take leaves existing chapter narration intact. You can also import M4A, MP3 or WAV audio and preview it from the chapter editor.
 
 Use **Edit** to reorder or remove chapters. Text, photos and accepted recordings autosave to a local draft; **Save Draft** saves immediately and returns to the draft browser. Reopen the draft to continue. Drafts belong to this device and are not placed in the shared library until you choose **Add to Library**. A book can begin with just its title.
