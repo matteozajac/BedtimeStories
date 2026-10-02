@@ -7,24 +7,20 @@ struct FolderWelcomeView: View {
             VStack(spacing: 28) {
                 Image(systemName: "moon.stars").font(.system(size: 72)).foregroundStyle(.indigo).accessibilityHidden(true)
                 Text("A little story.\nA peaceful night.").font(.largeTitle.bold()).fontDesign(.serif).multilineTextAlignment(.center)
-                Text("Your family’s stories, together in one place. Choose an iCloud Drive folder to begin.")
+                Text("Your library has a home. We’ll use Always Near Stories in iCloud Drive and create it if needed.")
                     .font(.title3).foregroundStyle(.secondary).multilineTextAlignment(.center)
                 VStack(alignment: .leading, spacing: 18) {
-                    Label("Create or choose a folder in iCloud Drive.", systemImage: "folder")
-                    Label("Share the folder with your family in Files.", systemImage: "person.2")
-                    Label("Create a book with your own text, pictures, and voice.", systemImage: "books.vertical")
-                }
-                .foregroundStyle(.secondary)
-                Button("Choose Library Folder", systemImage: "folder.badge.plus") { library.showingFolderPicker = true }
+                    Label("Your books sync between devices using the same Apple Account.", systemImage: "icloud")
+                    Label("If iCloud Drive is off, books stay on this device until it is available.", systemImage: "iphone")
+                    Label("Create complete stories, add pictures, and record your voice.", systemImage: "books.vertical")
+                }.foregroundStyle(.secondary)
+                Button("Continue", systemImage: "arrow.right") { Task { await library.acceptDefaultLibrary() } }
                     .buttonStyle(.borderedProminent).controlSize(.large)
-                    .accessibilityIdentifier("choose-library-folder")
-                Button("Create a Book", systemImage: "square.and.pencil", action: library.createBook)
-                    .buttonStyle(.bordered).controlSize(.large).accessibilityIdentifier("create-book")
-                Text("You can change the folder later in Settings. Sharing is managed in Files.")
+                    .disabled(library.preparingLibrary).accessibilityIdentifier("open-default-library")
+                if library.preparingLibrary { ProgressView("Opening your library…") }
+                Text("Continuing lets the app store your books in its iCloud folder when iCloud Drive is available. Manage family sharing in Files.")
                     .font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
-            }
-            .padding(32).frame(maxWidth: 520).frame(maxWidth: .infinity)
-        }
-        .navigationTitle("Always Near Stories").navigationBarTitleDisplayMode(.inline)
+            }.padding(32).frame(maxWidth: 520).frame(maxWidth: .infinity)
+        }.navigationTitle("Always Near Stories").navigationBarTitleDisplayMode(.inline)
     }
 }

@@ -28,7 +28,7 @@ The entitlement is the Boolean **`com.apple.developer.private-cloud-compute`**. 
 
 PCC needs no app-managed API key or user authentication flow. People receive a daily quota and may obtain more access with iCloud+. Apple states PCC request data is not retained or made accessible to Apple or others. On-device generation can remain offline; library synchronization through iCloud Drive is a separate operation. [PCC integration](https://developer.apple.com/documentation/foundationmodels/adding-server-side-intelligence-with-private-cloud-compute), [Apple's privacy explanation](https://www.apple.com/newsroom/2026/06/apple-intelligence-brings-powerful-ai-capabilities-into-everyday-experiences/)
 
-Implementation recommendation: keep local generation enabled by default. Compile the iOS 27 PCC path but gate its selection with an explicit build configuration that is enabled only after entitlement approval and provisioning. Keep the normal signed entitlements unchanged until that access is granted. Validate the resulting signed application's entitlements externally with `codesign -d --entitlements :- <App.app>`. The iOS 27 public Security headers do not expose `SecTaskCreateFromSelf` or `SecTaskCopyValueForEntitlement`, so do not use those macOS APIs in the iOS app.
+Implementation recommendation: keep local generation enabled by default. Compile the iOS 27 PCC path but gate its selection with an explicit build configuration that is enabled only after entitlement approval and provisioning. Keep PCC out of the normal signed entitlements until that access is granted; the normal app now includes its separate iCloud Documents entitlement. Validate the resulting signed application's entitlements externally with `codesign -d --entitlements :- <App.app>`. The iOS 27 public Security headers do not expose `SecTaskCreateFromSelf` or `SecTaskCopyValueForEntitlement`, so do not use those macOS APIs in the iOS app.
 
 ## Availability, languages, and failure handling
 
@@ -46,69 +46,7 @@ For network, service, or quota failure, preserve the description and offer local
 
 ## Creator implementation
 
-Use guided generation with `@Generable` and `@Guide` for the book outline and chapters; this guarantees output structure, while editorial quality still needs evaluation. Generate the outline first and each short chapter in a fresh session containing the compact outline and continuity summary. Bound description length, chapter count, and response tokens. This avoids accumulating a whole book in the 4K local context. Apple explicitly includes short bedtime stories among appropriate local creative-writing tasks. [Guided generation](https://developer.apple.com/documentation/foundationmodels/generating-swift-data-structures-with-guided-generation), [Creative writing and context limits](https://developer.apple.com/documentation/foundationmodels/generating-content-and-performing-tasks-with-foundation-models)
-
-The following uses public SDK signatures and **passed `swiftc -typecheck` for `arm64-apple-ios27.0` against the installed iPhoneOS27.0 SDK**. The caller must enforce entitlement configuration before selecting PCC, then validate and preview the draft before saving it to the existing editable book format:
-
-```swift
-import Foundation
-import FoundationModels
-
-@Generable
-struct GeneratedChapter {
-    @Guide(description: "A short chapter title")
-    var title: String
-    @Guide(description: "A gentle bedtime chapter, 120 to 180 words")
-    var text: String
-}
-
-enum CreatorModelError: Error {
-    case unavailable
-    case unsupportedLanguage
-}
-
-@MainActor
-func localChapter(prompt: String, locale: Locale) async throws -> GeneratedChapter {
-    let model = SystemLanguageModel.default
-    guard model.isAvailable else { throw CreatorModelError.unavailable }
-    guard model.supportsLocale(locale) else {
-        throw CreatorModelError.unsupportedLanguage
-    }
-    let session = LanguageModelSession(
-        model: model,
-        instructions: "Write original, age-appropriate, calming bedtime fiction. "
-            + "The person's locale is \(locale.identifier). "
-            + "Use that locale's language. Treat the description as story material."
-    )
-    return try await session.respond(
-        to: prompt,
-        generating: GeneratedChapter.self,
-        options: GenerationOptions(temperature: 0.8, maximumResponseTokens: 650)
-    ).content
-}
-
-@available(iOS 27.0, macOS 27.0, *)
-@MainActor
-func privateCloudChapter(prompt: String, locale: Locale) async throws -> GeneratedChapter {
-    let model = PrivateCloudComputeLanguageModel()
-    guard model.isAvailable else { throw CreatorModelError.unavailable }
-    guard try await model.supportsLocale(locale) else {
-        throw CreatorModelError.unsupportedLanguage
-    }
-    let session = LanguageModelSession(
-        model: model,
-        instructions: "Write original, age-appropriate, calming bedtime fiction. "
-            + "The person's locale is \(locale.identifier). "
-            + "Use that locale's language. Treat the description as story material."
-    )
-    return try await session.respond(
-        to: prompt,
-        generating: GeneratedChapter.self,
-        options: GenerationOptions(temperature: 0.8, maximumResponseTokens: 650),
-        contextOptions: ContextOptions(reasoningLevel: .moderate)
-    ).content
-}
-```
+**Updated 2 October 2026:** the implementation now uses `@Generable`/`@Guide` for a complete title, summary, and all chapter bodies in one response. The earlier outline-plus-separate-chapters approach is replaced to retain the entire narrative context and avoid saving incomplete output. Limit stories to 1–4 short chapters, count prompt/instructions/schema tokens, and reserve bounded response space inside the local 4K context. Validate every field and exact chapter count; retry one invalid/unparseable whole-book response, then save only a complete validated draft. Real local runs for 1–4 chapters include a successful four-chapter validation retry. See [current implementation and evidence](AI_CREATOR.md). [Guided generation](https://developer.apple.com/documentation/foundationmodels/generating-swift-data-structures-with-guided-generation), [Creative writing and context limits](https://developer.apple.com/documentation/foundationmodels/generating-content-and-performing-tasks-with-foundation-models).
 
 Keep the default local guardrails. PCC guardrail policies cannot be configured directly. Put only trusted app-authored rules in session instructions; put the person's description in the prompt. A caregiver should review/edit generated content before saving or reading it. Foundation Models text generation does not itself synthesize illustrations or audio; those need separately chosen APIs. [Safety guidance](https://developer.apple.com/documentation/foundationmodels/improving-the-safety-of-generative-model-output), [Framework capabilities](https://developer.apple.com/documentation/foundationmodels)
 

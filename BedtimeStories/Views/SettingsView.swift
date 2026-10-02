@@ -6,10 +6,15 @@ struct SettingsView: View {
     var body: some View {
         Form {
             Section {
-                LabeledContent("Folder", value: library.root?.lastPathComponent ?? String(localized: "Not selected"))
-                Text("Open Files to manage this folder and its sharing.").font(.footnote).foregroundStyle(.secondary)
-                Button("Change Library Folder", systemImage: "folder") { dismiss(); library.showingFolderPicker = true }.disabled(library.activity != nil)
-            } header: { Text("Library Folder") } footer: { Text("Share your iCloud Drive folder with family in Files. Listening and reading positions are saved separately on each device.") }
+                LabeledContent("Storage", value: library.cloudStorage ? String(localized: "iCloud Drive") : String(localized: "On This Device"))
+                LabeledContent("Folder", value: "Always Near Stories / Books")
+                Text("The app uses its default library automatically. Open Files to manage its books and sharing.").font(.footnote).foregroundStyle(.secondary)
+                Button("Retry Library Setup", systemImage: "arrow.clockwise") { Task { await library.start() } }
+                    .disabled(library.activity != nil || library.preparingLibrary)
+                if let message = library.migrationMessage { Text(message).font(.footnote).foregroundStyle(.secondary) }
+            } header: { Text("Library") } footer: {
+                Text("iCloud syncs books across your devices using the same Apple Account. Family members need an invitation to a shared folder in Files. Sharing does not automatically connect their app libraries; they can import a shared .bedtimestory file. Reading and listening positions stay on each device.")
+            }
             Section {
                 LabeledContent("Books Kept Offline", value: "\(library.pinned.count)")
                 Button("Clear Temporary Downloads", systemImage: "trash", action: library.clearCache).disabled(library.activity != nil)

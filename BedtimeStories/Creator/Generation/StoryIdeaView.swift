@@ -63,14 +63,10 @@ struct StoryIdeaView: View {
 
             if model.working {
                 Section {
-                    if model.draft == nil { ProgressView("Planning your story…") }
-                    else {
-                        ProgressView(value: Double(model.completedChapterCount), total: Double(model.plannedChapterCount))
-                        Text("Writing chapter \(min(model.completedChapterCount + 1, model.plannedChapterCount)) of \(model.plannedChapterCount)…")
-                    }
+                    ProgressView(model.saving ? "Saving the complete story…" : model.retrying ? "Completing missing story text…" : "Writing your complete story…")
                     Button("Stop Creating", role: .cancel) { generationID = nil }
                         .accessibilityIdentifier("stop-story-generation")
-                } footer: { Text("Completed chapters save to Your Drafts as the story is written.") }
+                } footer: { Text("The entire book is written together and checked before it is saved to Your Drafts.") }
             } else {
                 if let message = model.message {
                     Section {

@@ -3792,6 +3792,406 @@
           }
         }
       }
+    },
+    "Writing your complete story…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Writing your complete story…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Piszę całą opowieść…"
+          }
+        }
+      }
+    },
+    "Completing missing story text…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completing missing story text…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uzupełniam brakujący tekst opowieści…"
+          }
+        }
+      }
+    },
+    "Saving the complete story…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saving the complete story…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zapisuję gotową opowieść…"
+          }
+        }
+      }
+    },
+    "The entire book is written together and checked before it is saved to Your Drafts.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The entire book is written together and checked before it is saved to Your Drafts."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cała książka powstaje w jednej odpowiedzi. Sprawdzę ją przed zapisaniem w Twoich szkicach."
+          }
+        }
+      }
+    },
+    "Creation stopped. Your previous drafts are safe. Try again when you are ready.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Creation stopped. Your previous drafts are safe. Try again when you are ready."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tworzenie zostało zatrzymane. Twoje wcześniejsze szkice są bezpieczne. Możesz spróbować ponownie."
+          }
+        }
+      }
+    },
+    "Your library has a home. We’ll use Always Near Stories in iCloud Drive and create it if needed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your library has a home. We’ll use Always Near Stories in iCloud Drive and create it if needed."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Twoje książki będą w folderze Always Near Stories w iCloud Drive. Jeśli go jeszcze nie ma, utworzymy go automatycznie."
+          }
+        }
+      }
+    },
+    "Your books sync between devices using the same Apple Account.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your books sync between devices using the same Apple Account."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Książki synchronizują się między urządzeniami korzystającymi z tego samego konta Apple."
+          }
+        }
+      }
+    },
+    "If iCloud Drive is off, books stay on this device until it is available.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "If iCloud Drive is off, books stay on this device until it is available."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gdy iCloud Drive jest wyłączony, książki pozostają na tym urządzeniu. Zsynchronizują się, gdy iCloud będzie dostępny."
+          }
+        }
+      }
+    },
+    "Create complete stories, add pictures, and record your voice.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create complete stories, add pictures, and record your voice."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Twórz całe opowieści, dodawaj zdjęcia i nagrywaj swój głos."
+          }
+        }
+      }
+    },
+    "Continuing lets the app store your books in its iCloud folder when iCloud Drive is available. Manage family sharing in Files.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuing lets the app store your books in its iCloud folder when iCloud Drive is available. Manage family sharing in Files."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontynuując, pozwalasz aplikacji zapisywać książki w jej folderze iCloud, gdy iCloud Drive jest dostępny. Udostępnianiem rodzinie zarządzasz w aplikacji Pliki."
+          }
+        }
+      }
+    },
+    "The app uses its default library automatically. Open Files to manage its books and sharing.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The app uses its default library automatically. Open Files to manage its books and sharing."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aplikacja automatycznie korzysta ze swojego folderu biblioteki. Książkami i udostępnianiem zarządzasz w aplikacji Pliki."
+          }
+        }
+      }
+    },
+    "iCloud syncs books across your devices using the same Apple Account. Family members need an invitation to a shared folder in Files. Sharing does not automatically connect their app libraries; they can import a shared .bedtimestory file. Reading and listening positions stay on each device.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud syncs books across your devices using the same Apple Account. Family members need an invitation to a shared folder in Files. Sharing does not automatically connect their app libraries; they can import a shared .bedtimestory file. Reading and listening positions stay on each device."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud synchronizuje książki między Twoimi urządzeniami korzystającymi z tego samego konta Apple. Rodzinę zapraszasz do udostępnionego folderu w aplikacji Pliki. Nie łączy to automatycznie bibliotek w aplikacji — bliscy mogą zaimportować udostępniony plik .bedtimestory. Miejsce czytania i słuchania jest zapisywane osobno na każdym urządzeniu."
+          }
+        }
+      }
+    },
+    "Books are stored on this device. Turn on iCloud Drive in Settings to sync them across your devices.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Books are stored on this device. Turn on iCloud Drive in Settings to sync them across your devices."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Książki są zapisane na tym urządzeniu. Włącz iCloud Drive w Ustawieniach, aby synchronizować je między urządzeniami."
+          }
+        }
+      }
+    },
+    "Some existing books could not be copied yet. Their originals are safe. Check their downloads in Files, then retry library setup.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Some existing books could not be copied yet. Their originals are safe. Check their downloads in Files, then retry library setup."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się jeszcze skopiować niektórych książek. Oryginały są bezpieczne. Sprawdź w aplikacji Pliki, czy zostały pobrane, a potem spróbuj ponownie otworzyć bibliotekę."
+          }
+        }
+      }
+    },
+    "Your library could not be opened. Check available storage and iCloud Drive in Settings, then try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your library could not be opened. Check available storage and iCloud Drive in Settings, then try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się otworzyć biblioteki. Sprawdź wolne miejsce i iCloud Drive w Ustawieniach, a potem spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "Your library is still opening. Try again in a moment.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your library is still opening. Try again in a moment."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biblioteka jeszcze się otwiera. Spróbuj ponownie za chwilę."
+          }
+        }
+      }
+    },
+    "Retry Library Setup": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retry Library Setup"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otwórz bibliotekę ponownie"
+          }
+        }
+      }
+    },
+    "Storage": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storage"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Miejsce zapisu"
+          }
+        }
+      }
+    },
+    "iCloud Drive": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud Drive"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud Drive"
+          }
+        }
+      }
+    },
+    "Continue": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontynuuj"
+          }
+        }
+      }
+    },
+    "Add the finished book to your library to read, listen, and share it with your family.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add the finished book to your library to read, listen, and share it with your family."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodaj gotową książkę do biblioteki, aby ją czytać, słuchać i udostępniać rodzinie."
+          }
+        }
+      }
+    },
+    " (Recovered copy)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " (Recovered copy)"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " (odzyskana kopia)"
+          }
+        }
+      }
+    },
+    "Your previous library is unavailable. Its books have not been removed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your previous library is unavailable. Its books have not been removed."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poprzednia biblioteka jest niedostępna. Jej książki nie zostały usunięte."
+          }
+        }
+      }
+    },
+    "Some previous books are not ready to copy. The originals are safe. Try again after their downloads finish in Files.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Some previous books are not ready to copy. The originals are safe. Try again after their downloads finish in Files."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niektóre wcześniejsze książki nie są jeszcze gotowe do skopiowania. Oryginały są bezpieczne. Spróbuj ponownie po zakończeniu pobierania w aplikacji Pliki."
+          }
+        }
+      }
+    },
+    "Library migration could not be saved. The originals are safe.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Library migration could not be saved. The originals are safe."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się zapisać przeniesienia biblioteki. Oryginały są bezpieczne."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

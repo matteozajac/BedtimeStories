@@ -1,4 +1,8 @@
-# Validation — 30 September 2026
+# Validation
+
+Current creator/default-library checks are in [AI_CREATOR.md](AI_CREATOR.md) and [ICLOUD_LIBRARY.md](ICLOUD_LIBRARY.md). The evidence below records the original 30 September baseline; its folder-picker UI was replaced on 2 October.
+
+## Baseline — 30 September 2026
 
 Built with Xcode 27 and the iOS 27 SDK. The Release device build succeeds with signing disabled; this is build evidence, not a signed archive or distribution upload. The built Info.plist confirms bundle `com.matteozajac.bedtimestories`, minimum OS 27.0, iPhone/iPad support, background audio, and the `.bedtimestory` document type.
 
@@ -38,11 +42,11 @@ xcodebuild -project BedtimeStories.xcodeproj -scheme BedtimeStories \
   CODE_SIGNING_ALLOWED=NO build
 ```
 
-For UI checks, install the Debug app on a disposable iOS 27 simulator, then run `python3 scripts/seed-simulator.py YOUR_SIMULATOR_UUID`. Launch normally and choose **On My iPhone → Bedtime Stories → QA Library**. Alternatively, the Debug-only `--qa-library` launch argument chooses that existing simulator fixture folder. `--qa-book` selects the first sample book and `--qa-player` opens its player for layout capture. Release builds ignore these arguments. Run `maestro --device YOUR_SIMULATOR_UUID test Tests/UI/library-player.yaml` in English. The authoring skill and simulator fixture tooling do not write to your iCloud library.
+For UI checks, install the Debug app on a disposable iOS 27 simulator, then run `python3 scripts/seed-simulator.py YOUR_SIMULATOR_UUID`. Launch with the Debug-only `--qa-library` argument to select the existing fixture without changing product library setup. Normal launches use the automatic default library; they copy a previously selected fixture through the migration path after consent. `--qa-book` selects the first sample book and `--qa-player` opens its player for layout capture. Release builds ignore these arguments. Run `maestro --device YOUR_SIMULATOR_UUID test Tests/UI/library-player.yaml` in English. The authoring skill and simulator fixture tooling do not write to your iCloud library.
 
 ## Real-device checks still required
 
-1. Choose the same shared iCloud Drive folder on two Apple accounts. Add/edit/remove a book from Files and verify each library refreshes. Check evicted iCloud placeholders, slow download/cancellation, a moved folder, revoked access, and reselection after relaunch.
+1. On two devices signed into the same Apple Account, accept the automatic library and verify published books synchronize. Check Files visibility, evicted placeholders, slow download/cancellation, account changes, local fallback and copy recovery. For different family accounts, verify portable book sharing/import through Files; no automatic family-library connection is claimed.
 2. Pin a book, disconnect the network, then relaunch and read/listen. Remove its offline download and verify the source folder remains intact.
 3. Play real narration with the screen locked and the app in the background. Exercise Control Center/Lock Screen play, pause, seeking, artwork, sleep timer, interruptions, headset disconnect, and AirPlay.
 4. Share a `.bedtimestory` through Files/AirDrop to another device and open it in the app. Check replacement confirmation and a read-only destination folder.

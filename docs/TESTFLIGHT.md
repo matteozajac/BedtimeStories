@@ -1,5 +1,25 @@
 # Internal TestFlight
 
+## 1.0 (5) — 2 October 2026
+
+The complete-book generator and automatic iCloud library are processed and available to **Internal Testers**. Exact-build readback confirms `VALID`, `INTERNAL_ONLY`, `IN_BETA_TESTING`, effective internal group access, and saved English What to Test notes matching the uploaded text.
+
+- Build/upload ID: `6277121b-b7de-4a10-953e-3ebbced6ee7c`.
+- App ID: `6818278413`; bundle: `com.matteozajac.bedtimestories`; team: `4TCJLR98Y5`.
+- Group: `20328e88-9f9c-4c47-be78-c33a809d1a71` (**Internal Testers**, all-build access; exact build lookup complete).
+- Minimum OS: iOS / iPadOS 27.0.
+- IPA SHA-256: `16f6d4b6315b0bba3a229c9b51f7be6f8835ff6c4c3dcfc04bb00ee77d41ebff`.
+- Release source fingerprint: `ebd8dbf33c80c42b73203c0bd948dca71382ed9eda7877094ffc943b48c7c16f`; all **76 release input hashes** matched before/after archive and export, upload, processing, and Git closeout.
+- Signed archive and Internal-only export passed. Exported app identity, signature, profile, device families, minimum OS, version/build and **Production** iCloud entitlement for `iCloud.com.matteozajac.bedtimestories` were verified.
+
+Creates all requested chapters in one response, validates complete text and chapter count, and retries an invalid response once before saving only a complete new draft. The default **Always Near Stories / Books** library is created after consent with local fallback, coordinated cloud discovery, and copying of previous/local books without deleting originals or replacing changed content. There is no library folder picker. Family sharing uses portable files in Files/AirDrop; folder invitations do not automatically connect another person’s app library.
+
+Validation: 20 native tests passed on iPad and the final fresh iPhone simulator, 8 Swift core tests and 6 Python authoring tests passed. Real local model checks produced complete 1-, 2-, 3-, and 4-chapter books, including recovery from an invalid four-chapter response. A four-chapter simulator UI book was saved, published, survived relaunch, and opened in the reader. See [AI_CREATOR.md](AI_CREATOR.md) and [ICLOUD_LIBRARY.md](ICLOUD_LIBRARY.md).
+
+PCC is not enabled in this IPA: Apple’s entitlement grant and a new entitled distribution are required. Physical-device performance, successful PCC inference, and real iCloud visibility/synchronization remain device checks. The two existing tester records remain `INSTALLED`; this does not establish installation of build 5. No groups/testers were created and no external beta/App Review submission was made.
+
+[Open TestFlight in App Store Connect](https://appstoreconnect.apple.com/apps/6818278413/testflight/ios).
+
 ## 1.0 (4) — 1 October 2026
 
 The Foundation Models book creator is processed and available to **Internal Testers**. Exact-build readback confirms `VALID`, `INTERNAL_ONLY`, `IN_BETA_TESTING`, effective group access and saved English What to Test notes matching the uploaded text.

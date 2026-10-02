@@ -19,4 +19,10 @@
 <key>LSSupportsOpeningDocumentsInPlace</key><true/>
 <key>CFBundleDocumentTypes</key><array><dict><key>CFBundleTypeName</key><string>Bedtime Story</string><key>CFBundleTypeRole</key><string>Viewer</string><key>LSHandlerRank</key><string>Owner</string><key>LSItemContentTypes</key><array><string>com.matteozajac.bedtimestories.book</string></array></dict></array>
 <key>UTExportedTypeDeclarations</key><array><dict><key>UTTypeIdentifier</key><string>com.matteozajac.bedtimestories.book</string><key>UTTypeDescription</key><string>Bedtime Story</string><key>UTTypeConformsTo</key><array><string>public.data</string><string>public.content</string><string>public.archive</string></array><key>UTTypeTagSpecification</key><dict><key>public.filename-extension</key><array><string>bedtimestory</string></array><key>public.mime-type</key><string>application/vnd.bedtimestory</string></dict></dict></array>
+<key>NSUbiquitousContainers</key><dict>
+<key>iCloud.com.matteozajac.bedtimestories</key><dict>
+<key>NSUbiquitousContainerIsDocumentScopePublic</key><true/>
+<key>NSUbiquitousContainerName</key><string>Always Near Stories</string>
+<key>NSUbiquitousContainerSupportedFolderLevels</key><string>ANY</string>
+</dict></dict>
 </dict></plist>

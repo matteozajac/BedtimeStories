@@ -51,12 +51,6 @@ struct RootView: View {
         .sheet(isPresented: Binding(get: { library.shareURL != nil && !library.showingPlayer }, set: { if !$0 { library.shareURL = nil } })) {
             if let url = library.shareURL { ShareSheet(url: url) }
         }
-        .fileImporter(isPresented: $library.showingFolderPicker, allowedContentTypes: [.folder]) { result in
-            switch result {
-            case .success(let url): Task { await library.selectFolder(url) }
-            case .failure(let error): library.message = error.localizedDescription
-            }
-        }
         .fileImporter(isPresented: $library.showingImportPicker, allowedContentTypes: [UTType(exportedAs: "com.matteozajac.bedtimestories.book"), .zip]) { result in
             switch result {
             case .success(let url): library.importBook(url)
@@ -68,7 +62,7 @@ struct RootView: View {
         } message: { Text(library.message ?? "") }
         .task { await library.start() }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { Task { await library.refresh() } }
+            if phase == .active { Task { await library.start() } }
         }
         .onOpenURL { library.importBook($0) }
     }

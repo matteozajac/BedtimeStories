@@ -11,13 +11,15 @@ final class LibraryModel {
     private(set) var pinned = Set<UUID>()
     private(set) var warnings: [String] = []
     private(set) var revision = 0
+    private(set) var preparingLibrary = false
+    private(set) var cloudStorage = false
+    private(set) var migrationMessage: String?
     var message: String?
     var activity: String?
     var importCandidate: LibraryBook?
     var shareURL: URL?
     var selectedBook: LibraryBook?
     var showingSettings = false
-    var showingFolderPicker = false
     var showingImportPicker = false
     var showingPlayer = false
     var showingCreator = false
@@ -27,27 +29,26 @@ final class LibraryModel {
     let player = StoryPlayer()
     @ObservationIgnored private var presenter: FolderPresenter?
     @ObservationIgnored private var debounce: Task<Void, Never>?
-    @ObservationIgnored private var folderAccess = false
+    @ObservationIgnored private let defaults: UserDefaults
+    @ObservationIgnored private let storage: DefaultLibraryStorage
+    @ObservationIgnored private var location: LibraryLocation?
+    @ObservationIgnored private var cloudObserver: CloudLibraryObserver?
+    @ObservationIgnored private var discoveredFolders: [URL] = []
+    @ObservationIgnored private var migrationPending = false
+    @ObservationIgnored private var refreshPending = false
+    @ObservationIgnored private var pendingImport: URL?
     @ObservationIgnored private var restoredPlayback = false
     @ObservationIgnored private var operationTask: Task<Void, Never>?
     @ObservationIgnored private var images: [String: UIImage] = [:]
     @ObservationIgnored private var session = UUID()
 
-    init() {
-        let namespace = UserDefaults.standard.string(forKey: "libraryNamespace") ?? UUID().uuidString
-        UserDefaults.standard.set(namespace, forKey: "libraryNamespace")
-        progress = LocalProgress(namespace: namespace)
+    init(defaults: UserDefaults = .standard, storage: DefaultLibraryStorage = DefaultLibraryStorage()) {
+        self.defaults = defaults
+        self.storage = storage
+        let namespace = defaults.string(forKey: "libraryNamespace") ?? UUID().uuidString
+        defaults.set(namespace, forKey: "libraryNamespace")
+        progress = LocalProgress(namespace: namespace, defaults: defaults)
         repository = LibraryRepository(cacheRoot: Self.cacheURL(namespace))
-        if let bookmark = UserDefaults.standard.data(forKey: "libraryFolder") {
-            do {
-                var stale = false
-                let folder = try URL(resolvingBookmarkData: bookmark, options: [.withoutUI], relativeTo: nil, bookmarkDataIsStale: &stale)
-                folderAccess = folder.startAccessingSecurityScopedResource()
-                root = folder
-                if stale { try saveBookmark(folder) }
-                observe(folder)
-            } catch { message = error.localizedDescription }
-        }
     }
 
     var filteredBooks: [LibraryBook] {
@@ -55,41 +56,20 @@ final class LibraryModel {
         return books.filter { $0.manifest.title.localizedStandardContains(search) || ($0.manifest.author?.localizedStandardContains(search) ?? false) }
     }
 
-    func selectFolder(_ folder: URL) async {
-        guard activity == nil else { return }
-        let access = folder.startAccessingSecurityScopedResource()
-        do {
-            guard try folder.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true else { throw BookError.invalid("Choose a folder in Files.") }
-            let bookmark = try folder.bookmarkData(options: [.minimalBookmark], includingResourceValuesForKeys: nil, relativeTo: nil)
-            let sameFolder = root?.standardizedFileURL == folder.standardizedFileURL
-            player.stop()
-            operationTask?.cancel(); debounce?.cancel()
-            if let presenter { NSFileCoordinator.removeFilePresenter(presenter) }
-            if let root, folderAccess { root.stopAccessingSecurityScopedResource() }
-            session = UUID()
-            folderAccess = access
-            root = folder
-            let namespace = sameFolder ? (UserDefaults.standard.string(forKey: "libraryNamespace") ?? UUID().uuidString) : UUID().uuidString
-            UserDefaults.standard.set(namespace, forKey: "libraryNamespace")
-            UserDefaults.standard.set(bookmark, forKey: "libraryFolder")
-            repository = LibraryRepository(cacheRoot: Self.cacheURL(namespace))
-            progress = LocalProgress(namespace: namespace)
-            books = []; images = [:]; selectedBook = nil; restoredPlayback = false; refreshing = false; warnings = []; offline = false
-            observe(folder)
-            await refresh()
-        } catch {
-            if access { folder.stopAccessingSecurityScopedResource() }
-            message = error.localizedDescription
-        }
+    func acceptDefaultLibrary() async {
+        defaults.set(true, forKey: "defaultLibraryAccepted")
+        await start()
     }
 
     func start() async {
+        guard !preparingLibrary, activity == nil else { return }
         #if DEBUG
         let arguments = ProcessInfo.processInfo.arguments
         if arguments.contains("--qa-library") {
             let fixture = URL.documentsDirectory.appendingPathComponent("QA Library", isDirectory: true)
             if FileManager.default.fileExists(atPath: fixture.path) {
-                await selectFolder(fixture)
+                activate(LibraryLocation(root: fixture, isCloud: false, account: "qa"))
+                await refresh()
                 if arguments.contains("--qa-book"), let book = books.first(where: { $0.id.uuidString == "11111111-1111-4111-8111-111111111111" }) {
                     selectedBook = book
                     if arguments.contains("--qa-player") { listen(book) }
@@ -98,17 +78,71 @@ final class LibraryModel {
             }
         }
         #endif
-        await refresh()
+        guard defaults.bool(forKey: "defaultLibraryAccepted") else { return }
+        preparingLibrary = true
+        defer { preparingLibrary = false; if refreshPending { refreshPending = false; scheduleRefresh() } }
+        do {
+            let next = try await storage.prepare()
+            let changed = location != next
+            if changed { activate(next) }
+            if changed || migrationPending {
+                migrationPending = false; migrationMessage = nil
+                do {
+                    if let bookmark = defaults.data(forKey: "libraryFolder"), !defaults.bool(forKey: "defaultLibraryLegacyMigrated") {
+                        var stale = false
+                        let previous = try URL(resolvingBookmarkData: bookmark, options: [.withoutUI], relativeTo: nil, bookmarkDataIsStale: &stale)
+                        try await repository.migrateBooks(from: previous, to: next.root)
+                        defaults.set(true, forKey: "defaultLibraryLegacyMigrated")
+                    }
+                    let local = storage.localRoot
+                    if next.isCloud, FileManager.default.fileExists(atPath: local.path) {
+                        try await repository.migrateBooks(from: local, to: next.root)
+                    }
+                } catch is CancellationError { migrationPending = true; throw CancellationError() }
+                catch {
+                    migrationPending = true
+                    migrationMessage = String(localized: "Some existing books could not be copied yet. Their originals are safe. Check their downloads in Files, then retry library setup.")
+                }
+            }
+            await refresh(allowWhilePreparing: true)
+            if let url = pendingImport { pendingImport = nil; preparingLibrary = false; importBook(url) }
+        } catch is CancellationError { }
+        catch { message = String(localized: "Your library could not be opened. Check available storage and iCloud Drive in Settings, then try again.") }
     }
 
-    func refresh() async {
-        guard let root, !refreshing, activity == nil else { return }
+    private func activate(_ next: LibraryLocation) {
+        guard location != next else { return }
+        player.stop(); operationTask?.cancel(); debounce?.cancel()
+        if let presenter { NSFileCoordinator.removeFilePresenter(presenter) }
+        cloudObserver?.stop()
+        session = UUID(); root = next.root; location = next; cloudStorage = next.isCloud
+        var namespaces = defaults.dictionary(forKey: "defaultLibraryNamespaces") as? [String: String] ?? [:]
+        let namespace = namespaces[next.account] ?? (namespaces.isEmpty || (namespaces.count == 1 && namespaces["device"] != nil) ? defaults.string(forKey: "libraryNamespace") ?? UUID().uuidString : UUID().uuidString)
+        namespaces[next.account] = namespace
+        defaults.set(namespaces, forKey: "defaultLibraryNamespaces")
+        repository = LibraryRepository(cacheRoot: Self.cacheURL(namespace))
+        progress = LocalProgress(namespace: namespace, defaults: defaults)
+        books = []; images = [:]; selectedBook = nil; restoredPlayback = false; refreshing = false; warnings = []; offline = false; discoveredFolders = []
+        observe(next.root)
+        if next.isCloud {
+            let token = session
+            cloudObserver = CloudLibraryObserver(root: next.root) { [weak self] folders in
+                guard let self, self.session == token else { return }
+                self.discoveredFolders = folders
+                self.scheduleRefresh()
+            }
+        }
+    }
+
+    func refresh(allowWhilePreparing: Bool = false) async {
+        guard let root, !refreshing, activity == nil, !preparingLibrary || allowWhilePreparing else { return }
+        let discovered = discoveredFolders
         let token = session
         let repo = repository
         refreshing = true
-        defer { if token == session { refreshing = false } }
+        defer { if token == session { refreshing = false; if discovered != discoveredFolders { scheduleRefresh() } } }
         do {
-            let scan = try await repo.scan(root: root)
+            let scan = try await repo.scan(root: root, discoveredFolders: discovered)
             guard token == session else { return }
             books = scan.books; warnings = scan.warnings; offline = scan.isOffline
             pinned = await repo.pinnedIDs(); images = [:]; revision += 1
@@ -139,7 +173,7 @@ final class LibraryModel {
     }
 
     func text(_ path: String, book: LibraryBook) async throws -> String {
-        guard let root else { throw BookError.unavailable("Select your library folder first.") }
+        guard let root else { throw BookError.unavailable("Your library is still opening. Try again in a moment.") }
         let url = try await repository.asset(path, book: book, root: root)
         return try await repository.textContents(url)
     }
@@ -174,7 +208,7 @@ final class LibraryModel {
 
     func importBook(_ url: URL) {
         guard root != nil else {
-            message = String(localized: "Select your library folder, then open the book again.")
+            pendingImport = url
             return
         }
         perform("Opening book…") { [self] in
@@ -206,13 +240,13 @@ final class LibraryModel {
     }
 
     func createBook() {
-        guard activity == nil else { return }
+        guard activity == nil, !preparingLibrary else { return }
         player.stop()
         showingCreator = true
     }
 
     func addCreatedBook(_ book: LibraryBook) async throws {
-        guard let root, activity == nil else { throw BookError.unavailable("Select an available library folder first.") }
+        guard let root, activity == nil, !preparingLibrary else { throw BookError.unavailable("Your library is still opening. Try again in a moment.") }
         activity = String(localized: "Saving book…")
         do {
             try await repository.commitImport(book, root: root, replacing: false)
@@ -225,7 +259,7 @@ final class LibraryModel {
     func cancelOperation() { operationTask?.cancel() }
 
     private func perform(_ label: String, operation: @escaping @MainActor () async throws -> Void) {
-        guard activity == nil else { return }
+        guard activity == nil, !preparingLibrary else { return }
         activity = NSLocalizedString(label, comment: "")
         operationTask = Task {
             do { try await operation() }
@@ -241,20 +275,21 @@ final class LibraryModel {
         let observer = FolderPresenter(url: folder) { [weak self] in
             Task { @MainActor [weak self] in
                 guard let self, self.session == token else { return }
-                self.debounce?.cancel()
-                self.debounce = Task { [weak self] in
-                    do { try await Task.sleep(for: .milliseconds(500)) }
-                    catch { return }
-                    await self?.refresh()
-                }
+                self.scheduleRefresh()
             }
         }
         presenter = observer
         NSFileCoordinator.addFilePresenter(observer)
     }
 
-    private func saveBookmark(_ folder: URL) throws {
-        UserDefaults.standard.set(try folder.bookmarkData(options: [.minimalBookmark], includingResourceValuesForKeys: nil, relativeTo: nil), forKey: "libraryFolder")
+    private func scheduleRefresh() {
+        guard !preparingLibrary else { refreshPending = true; return }
+        debounce?.cancel()
+        debounce = Task { [weak self] in
+            do { try await Task.sleep(for: .milliseconds(500)) }
+            catch { return }
+            await self?.refresh()
+        }
     }
 
     private static func cacheURL(_ namespace: String) -> URL {
@@ -269,6 +304,6 @@ final class LibraryModel {
     isolated deinit {
         debounce?.cancel(); operationTask?.cancel()
         if let presenter { NSFileCoordinator.removeFilePresenter(presenter) }
-        if let root, folderAccess { root.stopAccessingSecurityScopedResource() }
+        cloudObserver?.stop()
     }
 }

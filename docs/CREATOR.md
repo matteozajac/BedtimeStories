@@ -1,14 +1,14 @@
 # Book Creator
 
-Open **+** in Library, or **Create a Book** on the welcome screen. Choose **Create a Book** in the draft browser, enter a title and optional author/description, and add a cover photo.
+Open **+** in Library, after accepting the default library on the welcome screen. Choose **Create a Book** in the draft browser, enter a title and optional author/description, and add a cover photo.
 
-Choose **Create from an Idea** in the draft browser to generate a title and 1–4 short chapters from a description using Apple Foundation Models. Choose the story language and reader age, then review the generated draft in the same editor before adding photos, narration, or publishing it. Completed chapters are saved on this device even if creation is stopped or a later chapter fails. See [AI creation, language support, and Private Cloud Compute setup](AI_CREATOR.md).
+Choose **Create from an Idea** in the draft browser to generate a title and 1–4 short chapters from a description using Apple Foundation Models. Choose the story language and reader age, then review the generated draft in the same editor before adding photos, narration, or publishing it. The entire story is generated together, validated, and saved atomically on this device. An invalid response is retried once. Cancellation or repeated invalid output leaves previous drafts intact without saving a new partial book. See [AI creation, language support, and Private Cloud Compute setup](AI_CREATOR.md).
 
 Open a chapter to write its text, choose a picture, and record narration. The recorder shows the chapter text while you read. It supports pause/resume, finishing, preview, rerecording and **Use Recording**. Canceling a take leaves existing chapter narration intact. You can also import M4A, MP3 or WAV audio and preview it from the chapter editor.
 
 Use **Edit** to reorder or remove chapters. Text, photos and accepted recordings autosave to a local draft; **Save Draft** saves immediately and returns to the draft browser. Reopen the draft to continue. Drafts belong to this device and are not placed in the shared library until you choose **Add to Library**. A book can begin with just its title.
 
-If no library folder has been selected, choose one from the editor first. Adding the book uses the existing coordinated import path and a new stable book ID. A failed write preserves the draft. The completed book appears in Library, works with reading and playback, and can be downloaded or exported as `.bedtimestory`. This creator makes new books; existing published books remain editable through their folders in Files.
+The default library is prepared automatically after first-launch consent; the editor does not offer a library folder picker. Adding the book uses the existing coordinated import path and a new stable book ID. A failed write preserves the draft. The completed book appears in Library, works with reading and playback, and can be downloaded or exported as `.bedtimestory`. This creator makes new books; existing published books remain editable through their folders in Files.
 
 ## Recording behavior
 

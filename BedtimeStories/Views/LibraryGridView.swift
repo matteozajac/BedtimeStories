@@ -7,10 +7,19 @@ struct LibraryGridView: View {
         @Bindable var library = library
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
+                if library.preparingLibrary { ProgressView("Opening your library…") }
                 if library.offline {
                     Label("Folder unavailable. Downloaded content remains available.", systemImage: "icloud.slash")
                         .font(.subheadline).foregroundStyle(.secondary)
-                    Button("Choose Folder Again") { library.showingFolderPicker = true }
+                    Button("Retry Library Setup") { Task { await library.start() } }
+                }
+                if !library.cloudStorage {
+                    Label("Books are stored on this device. Turn on iCloud Drive in Settings to sync them across your devices.", systemImage: "iphone")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
+                if let message = library.migrationMessage {
+                    Text(message).font(.footnote).foregroundStyle(.secondary)
+                    Button("Retry Library Setup") { Task { await library.start() } }
                 }
                 if !library.warnings.isEmpty {
                     DisclosureGroup {
@@ -57,7 +66,7 @@ struct LibraryGridView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Create a Book", systemImage: "plus", action: library.createBook)
-                    .accessibilityIdentifier("create-book").disabled(library.activity != nil)
+                    .accessibilityIdentifier("create-book").disabled(library.activity != nil || library.preparingLibrary)
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {

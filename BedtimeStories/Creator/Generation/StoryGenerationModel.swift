@@ -8,6 +8,8 @@ final class StoryGenerationModel {
     private(set) var draft: BookDraft?
     private(set) var completedChapterCount = 0
     private(set) var plannedChapterCount = 0
+    private(set) var retrying = false
+    private(set) var saving = false
     private(set) var message: String?
     private(set) var completed = false
     private let generator: any StoryGenerating
@@ -30,45 +32,58 @@ final class StoryGenerationModel {
         plannedChapterCount = request.chapterCount
         message = nil
         completed = false
-        defer { working = false }
+        retrying = false
+        saving = false
+        defer { working = false; saving = false }
 
         do {
             try request.validate()
             if let reason = generator.unavailabilityReason(for: mode, language: request.language) {
                 throw StoryGenerationFailure.unavailable(reason)
             }
-            let plan = try await generator.plan(for: request, mode: mode)
+            var result: GeneratedStoryBook?
+            for attempt in 0..<2 {
+                try Task.checkCancellation()
+                retrying = attempt > 0
+                do {
+                    let generated = try await generator.book(for: request, mode: mode)
+                    try Task.checkCancellation()
+                    result = try StoryOutputValidator.validate(generated, chapterCount: request.chapterCount)
+                    break
+                } catch {
+                    guard !Task.isCancelled, attempt == 0, Self.canRetry(error) else { throw error }
+                }
+            }
+            guard let book = result else { throw StoryGenerationFailure.invalidResponse }
             try Task.checkCancellation()
-            try plan.validate(chapterCount: request.chapterCount)
             var snapshot = BookDraft()
-            snapshot.title = plan.title.trimmingCharacters(in: .whitespacesAndNewlines)
-            snapshot.summary = plan.summary.trimmingCharacters(in: .whitespacesAndNewlines)
-            snapshot.chapters = plan.chapters.map { DraftChapter(title: $0.title) }
+            snapshot.title = book.title
+            snapshot.summary = book.summary
+            snapshot.chapters = book.chapters.map {
+                var chapter = DraftChapter(title: $0.title)
+                chapter.text = $0.text
+                return chapter
+            }
+            saving = true
             try await save(snapshot)
             draft = snapshot
-            var continuity = ""
-
-            for index in plan.chapters.indices {
-                try Task.checkCancellation()
-                let chapter = try await generator.chapter(for: request, plan: plan, index: index, continuity: continuity, mode: mode)
-                try Task.checkCancellation()
-                try chapter.validate()
-                snapshot.chapters[index].text = chapter.text.trimmingCharacters(in: .whitespacesAndNewlines)
-                snapshot.modifiedAt = Date()
-                try await save(snapshot)
-                draft = snapshot
-                completedChapterCount = index + 1
-                continuity = chapter.continuity
-            }
+            completedChapterCount = snapshot.chapters.count
             try Task.checkCancellation()
             completed = true
         } catch {
             if error is CancellationError || Task.isCancelled {
-                message = String(localized: "Creation stopped. Any completed chapters are saved in Your Drafts.")
+                message = String(localized: "Creation stopped. Your previous drafts are safe. Try again when you are ready.")
             } else {
                 message = Self.message(for: error)
             }
         }
+    }
+
+    private static func canRetry(_ error: Error) -> Bool {
+        if case StoryGenerationFailure.invalidResponse = error { return true }
+        if error is DecodingError { return true }
+        if error is GeneratedContent.ParsingError { return true }
+        return false
     }
 
     private func save(_ snapshot: BookDraft) async throws {

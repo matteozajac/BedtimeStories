@@ -6,24 +6,26 @@ actor LibraryRepository {
 
     init(cacheRoot: URL) { self.cacheRoot = cacheRoot }
 
-    func scan(root: URL) async throws -> LibraryScan {
+    func scan(root: URL, discoveredFolders: [URL] = []) async throws -> LibraryScan {
         let access = root.startAccessingSecurityScopedResource()
         defer { if access { root.stopAccessingSecurityScopedResource() } }
         let previousBooks = cachedCatalog()
         do {
-            let folders: [URL] = try coordinatedRead(root) { url in
+            let localFolders: [URL] = try coordinatedRead(root) { url in
                 try files.contentsOfDirectory(at: url, includingPropertiesForKeys: [.isDirectoryKey, .isSymbolicLinkKey], options: [.skipsHiddenFiles])
                     .filter { (try? $0.resourceValues(forKeys: [.isDirectoryKey, .isSymbolicLinkKey])).map { $0.isDirectory == true && $0.isSymbolicLink != true } ?? false }
             }
+            let prefix = root.standardizedFileURL.path + "/"
+            let folders = Set(localFolders + discoveredFolders.filter { $0.standardizedFileURL.path.hasPrefix(prefix) && $0.resolvingSymlinksInPath().path.hasPrefix(root.resolvingSymlinksInPath().path + "/") })
             var books: [LibraryBook] = []
             var warnings: [String] = []
             var ids = Set<UUID>()
             for folder in folders {
                 try Task.checkCancellation()
                 let manifestURL = folder.appendingPathComponent("book.json")
-                guard files.fileExists(atPath: manifestURL.path) || files.fileExists(atPath: folder.appendingPathComponent(".book.json.icloud").path) else { continue }
+                guard discoveredFolders.contains(folder) || files.fileExists(atPath: manifestURL.path) || files.fileExists(atPath: folder.appendingPathComponent(".book.json.icloud").path) else { continue }
                 do {
-                    try await download(manifestURL)
+                    try await download(manifestURL, knownUbiquitous: discoveredFolders.contains(folder))
                     let manifest = try coordinatedRead(folder) { try BookManifest.load(from: $0) }
                     guard ids.insert(manifest.id).inserted else { throw BookError.invalid("Duplicate book identity.") }
                     books.append(LibraryBook(manifest: manifest, folder: folder))
@@ -53,11 +55,11 @@ actor LibraryRepository {
         defer { if access { root.stopAccessingSecurityScopedResource() } }
         do {
             let source = try SafeBookPath.resolve(path, inside: book.folder)
+            try await download(source)
             let sourceValues = try source.resourceValues(forKeys: [.contentModificationDateKey, .fileSizeKey, .isRegularFileKey])
             let destinationValues = try? destination.resourceValues(forKeys: [.contentModificationDateKey, .fileSizeKey])
             if files.fileExists(atPath: destination.path), sourceValues.contentModificationDate == destinationValues?.contentModificationDate,
                sourceValues.fileSize == destinationValues?.fileSize { return destination }
-            try await download(source)
             try files.createDirectory(at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
             let temporary = destination.deletingLastPathComponent().appendingPathComponent(".\(UUID().uuidString)")
             defer { try? files.removeItem(at: temporary) }
@@ -179,25 +181,26 @@ actor LibraryRepository {
 
     private func bookCache(_ id: UUID) -> URL { cacheRoot.appendingPathComponent(id.uuidString, isDirectory: true) }
 
-    private func download(_ url: URL) async throws {
+    func download(_ url: URL, knownUbiquitous: Bool = false) async throws {
         let placeholder = url.deletingLastPathComponent().appendingPathComponent("." + url.lastPathComponent + ".icloud")
         let resource = !files.fileExists(atPath: url.path) && files.fileExists(atPath: placeholder.path) ? placeholder : url
-        let values = try resource.resourceValues(forKeys: [.isUbiquitousItemKey, .ubiquitousItemDownloadingStatusKey])
-        guard values.isUbiquitousItem == true else { return }
-        if values.ubiquitousItemDownloadingStatus == .current { return }
+        let values = try? resource.resourceValues(forKeys: [.isUbiquitousItemKey, .ubiquitousItemDownloadingStatusKey])
+        if files.fileExists(atPath: url.path), values?.isUbiquitousItem != true { return }
+        guard knownUbiquitous || values?.isUbiquitousItem == true else { return }
+        if values?.ubiquitousItemDownloadingStatus == .current { return }
         try files.startDownloadingUbiquitousItem(at: resource)
         let deadline = ContinuousClock.now.advanced(by: .seconds(45))
         while ContinuousClock.now < deadline {
             try Task.checkCancellation()
-            let status = try url.resourceValues(forKeys: [.ubiquitousItemDownloadingStatusKey, .ubiquitousItemDownloadingErrorKey])
-            if let error = status.ubiquitousItemDownloadingError { throw error }
-            if status.ubiquitousItemDownloadingStatus == .current { return }
+            let status = try? url.resourceValues(forKeys: [.ubiquitousItemDownloadingStatusKey, .ubiquitousItemDownloadingErrorKey])
+            if let error = status?.ubiquitousItemDownloadingError { throw error }
+            if status?.ubiquitousItemDownloadingStatus == .current { return }
             try await Task.sleep(for: .milliseconds(250))
         }
         throw BookError.unavailable("iCloud has not finished downloading this file. Check your connection and try again.")
     }
 
-    private func coordinatedRead<T>(_ url: URL, _ action: (URL) throws -> T) throws -> T {
+    func coordinatedRead<T>(_ url: URL, _ action: (URL) throws -> T) throws -> T {
         var error: NSError?
         var result: Result<T, Error>?
         NSFileCoordinator().coordinate(readingItemAt: url, options: [], error: &error) { location in

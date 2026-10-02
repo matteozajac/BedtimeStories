@@ -9,7 +9,6 @@ struct BookEditorView: View {
     @State private var editor: BookEditorModel
     @State private var photo: PhotosPickerItem?
     @State private var loadingPhoto = false
-    @State private var chooseFolder = false
 
     init(draft: BookDraft, store: BookDraftStore) {
         _editor = State(initialValue: BookEditorModel(draft: draft, store: store))
@@ -48,15 +47,11 @@ struct BookEditorView: View {
                 Button("Add Chapter", systemImage: "plus", action: editor.addChapter).accessibilityIdentifier("add-draft-chapter")
             } header: { Text("Chapters") } footer: { Text("Open a chapter to write, add a picture, or record narration. Use Edit to reorder or remove chapters.") }
             Section {
-                if library.root == nil {
-                    Button("Choose Library Folder", systemImage: "folder") { chooseFolder = true }
-                } else {
-                    Button("Add to Library", systemImage: "books.vertical") { Task { await editor.publish(to: library) } }
-                        .disabled(editor.draft.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || library.activity != nil)
-                        .accessibilityIdentifier("publish-book")
-                }
+                Button("Add to Library", systemImage: "books.vertical") { Task { await editor.publish(to: library) } }
+                    .disabled(library.root == nil || library.preparingLibrary || editor.draft.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || library.activity != nil)
+                    .accessibilityIdentifier("publish-book")
             } footer: {
-                Text("Add the finished book to your chosen folder to read, listen, and share it with your family.")
+                Text("Add the finished book to your library to read, listen, and share it with your family.")
             }
             if editor.working || loadingPhoto { ProgressView("Saving…") }
         }
@@ -86,12 +81,6 @@ struct BookEditorView: View {
         }
         .onChange(of: phase) { _, new in
             if new != .active { Task { do { try await editor.persist() } catch { editor.message = String(localized: "Your draft could not be saved. Keep the editor open and try again.") } } }
-        }
-        .fileImporter(isPresented: $chooseFolder, allowedContentTypes: [.folder]) { result in
-            switch result {
-            case .success(let url): Task { await library.selectFolder(url) }
-            case .failure(let error): editor.message = error.localizedDescription
-            }
         }
         .alert("Unable to complete", isPresented: Binding(get: { editor.message != nil }, set: { if !$0 { editor.message = nil } })) { } message: { Text(editor.message ?? "") }
     }

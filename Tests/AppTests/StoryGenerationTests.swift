@@ -5,7 +5,7 @@ import Testing
 
 @Suite(.serialized) @MainActor
 struct StoryGenerationTests {
-    @Test func generatedDraftSurvivesRelaunchAndUsesExistingBookFormat() async throws {
+    @Test func completeBookIsGeneratedOnceValidatedSavedAndExported() async throws {
         let root = workspace()
         defer { try? FileManager.default.removeItem(at: root) }
         let store = BookDraftStore(root: root.appendingPathComponent("Drafts"))
@@ -13,18 +13,16 @@ struct StoryGenerationTests {
         let model = StoryGenerationModel(store: store, generator: generator)
         await model.generate(request(), mode: .onDevice)
         #expect(model.completed && !model.working && model.message == nil)
+        #expect(generator.modes == [.onDevice])
         let draft = try #require(model.draft)
-        let recovered = try await BookDraftStore(root: store.root).load(draft.id)
-        #expect(recovered == draft)
-        #expect(recovered.chapters.map(\.text) == ["The fox found a star.", "The fox came home and slept."])
-        #expect(generator.continuityReceived == ["", "The fox found a star."])
-        #expect(generator.modes == [.onDevice, .onDevice, .onDevice])
-        #expect(draft.cover == nil && draft.author.isEmpty && draft.mediaPaths.isEmpty)
+        #expect(draft.chapters.count == 2 && model.completedChapterCount == 2)
+        #expect(draft.chapters.map(\.text) == TestGenerator.validBook.chapters.map(\.text))
+        #expect(try await BookDraftStore(root: store.root).load(draft.id) == draft)
         let staged = try await store.stageBook(draft)
         defer { try? FileManager.default.removeItem(at: staged.folder.deletingLastPathComponent()) }
         let manifest = try BookManifest.load(from: staged.folder, requireAssets: true)
         #expect(manifest.hasReading && !manifest.hasAudio)
-        #expect(manifest.orderedChapters.map(\.id) == draft.chapters.map(\.id))
+        #expect(manifest.orderedChapters.allSatisfy { $0.text != nil })
         let repository = LibraryRepository(cacheRoot: root.appendingPathComponent("Cache"))
         let library = root.appendingPathComponent("Library")
         try FileManager.default.createDirectory(at: library, withIntermediateDirectories: true)
@@ -37,93 +35,103 @@ struct StoryGenerationTests {
         await repository.discardImport(imported)
     }
 
-    @Test func cloudQuotaFailurePreservesChaptersWithoutChangingProcessingMode() async throws {
+    @Test func emptyGeneratedTextIsRecoveredBeforeReportingSuccess() async throws {
         let root = workspace()
         defer { try? FileManager.default.removeItem(at: root) }
         let generator = TestGenerator()
-        generator.secondChapterError = PrivateCloudComputeLanguageModel.Error.quotaLimitReached(.init(debugDescription: "private backend detail"))
+        generator.emptyOnce = true
+        let model = StoryGenerationModel(store: BookDraftStore(root: root), generator: generator)
+        await model.generate(request(), mode: .onDevice)
+        #expect(model.completed && model.message == nil)
+        #expect(generator.modes == [.onDevice, .onDevice])
+        #expect(model.draft?.chapters.allSatisfy { !$0.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty } == true)
+        #expect(try await model.store.list().count == 1)
+    }
+
+    @Test func validatorRejectsMissingShortDuplicateAndUnfinishedContent() throws {
+        let valid = TestGenerator.validBook
+        var invalidBooks: [GeneratedStoryBook] = []
+        for body in ["", " \n ", "\u{200B}\u{FEFF}", "A title only.", String(repeating: "... ", count: 80), String(valid.chapters[0].text.dropLast())] {
+            var invalid = valid; invalid.chapters[0].text = body; invalidBooks.append(invalid)
+        }
+        var missing = valid; missing.chapters.removeLast(); invalidBooks.append(missing)
+        var duplicate = valid; duplicate.chapters[1] = duplicate.chapters[0]; invalidBooks.append(duplicate)
+        var noTitle = valid; noTitle.title = " \n "; invalidBooks.append(noTitle)
+        for invalid in invalidBooks {
+            #expect(throws: StoryGenerationFailure.self) { try StoryOutputValidator.validate(invalid, chapterCount: 2) }
+        }
+        var padded = valid; padded.title = " \u{FEFF}The Fox and the Star \n"
+        #expect(try StoryOutputValidator.validate(padded, chapterCount: 2).title == "The Fox and the Star")
+    }
+
+    @Test func repeatedInvalidResponseNeverSavesAnEmptyOrPartialBook() async throws {
+        let root = workspace()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let generator = TestGenerator(); generator.invalidAlways = true
+        let model = StoryGenerationModel(store: BookDraftStore(root: root), generator: generator)
+        await model.generate(request(), mode: .onDevice)
+        #expect(!model.completed && model.draft == nil && model.completedChapterCount == 0)
+        #expect(generator.modes.count == 2)
+        #expect(model.message == StoryGenerationFailure.invalidResponse.errorDescription)
+        #expect(try await model.store.list().isEmpty)
+    }
+
+    @Test func refusalAndCloudQuotaDoNotRetryAndPreservePreviousDrafts() async throws {
+        let root = workspace()
+        defer { try? FileManager.default.removeItem(at: root) }
         let store = BookDraftStore(root: root)
+        let previous = try await store.create()
+        let generator = TestGenerator()
+        generator.failure = PrivateCloudComputeLanguageModel.Error.quotaLimitReached(.init(debugDescription: "private backend detail"))
         let model = StoryGenerationModel(store: store, generator: generator)
         await model.generate(request(), mode: .privateCloud)
-        #expect(!model.completed && !model.working && model.completedChapterCount == 1)
         #expect(model.message == StoryGenerationFailure.cloudQuota.errorDescription)
-        #expect(model.message?.contains("private backend detail") == false)
-        let draft = try #require(model.draft)
-        #expect(try await store.load(draft.id) == draft)
-        #expect(draft.chapters[0].text == "The fox found a star.")
-        #expect(draft.chapters[1].text.isEmpty)
-        #expect(generator.modes.allSatisfy { $0 == .privateCloud })
+        #expect(generator.modes == [.privateCloud] && model.draft == nil)
+        #expect(try await store.load(previous.id) == previous)
+        generator.failure = LanguageModelError.guardrailViolation(.init(debugDescription: "do not expose the prompt"))
+        await model.generate(request(), mode: .onDevice)
+        #expect(model.message == StoryGenerationFailure.refused.errorDescription)
+        #expect(generator.modes == [.privateCloud, .onDevice])
+        #expect(try await store.list().count == 1)
     }
 
-    @Test func cancellationPreservesCompletedChapterAndAllowsAnotherDraft() async throws {
+    @Test func cancellationSavesNoOutlineAndAnotherAttemptKeepsExistingDrafts() async throws {
         let root = workspace()
         defer { try? FileManager.default.removeItem(at: root) }
-        let generator = TestGenerator()
-        generator.pauseSecondChapter = true
         let store = BookDraftStore(root: root)
+        let previous = try await store.create()
+        let generator = TestGenerator(); generator.pause = true
         let model = StoryGenerationModel(store: store, generator: generator)
         let task = Task { await model.generate(request(), mode: .onDevice) }
-        await generator.waitForSecondChapter()
-        task.cancel()
-        await task.value
-        #expect(!model.working && !model.completed && model.completedChapterCount == 1)
-        let first = try #require(model.draft)
-        #expect(try await store.load(first.id).chapters[0].text == "The fox found a star.")
-        generator.pauseSecondChapter = false
+        await generator.waitForRequest()
+        task.cancel(); await task.value
+        #expect(!model.working && !model.completed && model.draft == nil)
+        #expect(try await store.list().count == 1)
+        generator.pause = false
         await model.generate(request(), mode: .onDevice)
         #expect(model.completed)
-        #expect(model.draft?.id != first.id)
         #expect(try await store.list().count == 2)
-        #expect(try await store.load(first.id) == first)
+        #expect(try await store.load(previous.id) == previous)
     }
 
-    @Test func invalidBriefUnavailableModelAndInvalidOutlineDoNotCreateDrafts() async throws {
+    @Test func invalidInputUnavailableModelAndFailedSaveCreateNoRecoverableDraft() async throws {
         let root = workspace()
         defer { try? FileManager.default.removeItem(at: root) }
-        let store = BookDraftStore(root: root)
         let generator = TestGenerator()
-        let model = StoryGenerationModel(store: store, generator: generator)
-        await model.generate(request(description: " \n "), mode: .onDevice)
-        #expect(generator.modes.isEmpty && model.draft == nil)
-        await model.generate(request(description: String(repeating: "a", count: 601)), mode: .onDevice)
-        #expect(generator.modes.isEmpty)
+        let model = StoryGenerationModel(store: BookDraftStore(root: root), generator: generator)
+        for description in [" \n ", String(repeating: "a", count: 601)] {
+            await model.generate(request(description: description), mode: .onDevice)
+            #expect(generator.modes.isEmpty && model.draft == nil)
+        }
         generator.unavailable = "Model is downloading."
         await model.generate(request(), mode: .onDevice)
         #expect(model.message == "Model is downloading." && generator.modes.isEmpty)
         generator.unavailable = nil
-        generator.invalidPlan = true
-        await model.generate(request(), mode: .onDevice)
-        #expect(model.draft == nil && model.message == StoryGenerationFailure.invalidResponse.errorDescription)
-        #expect(try await store.list().isEmpty)
-    }
-
-    @Test func failedSaveDoesNotReportUnsavedDraftAsRecoverable() async throws {
-        let root = workspace()
-        defer { try? FileManager.default.removeItem(at: root) }
         try Data("blocked".utf8).write(to: root)
-        let model = StoryGenerationModel(store: BookDraftStore(root: root), generator: TestGenerator())
         await model.generate(request(), mode: .onDevice)
-        #expect(model.draft == nil && model.completedChapterCount == 0 && !model.completed)
+        #expect(model.draft == nil && !model.completed)
         #expect(model.message == StoryGenerationFailure.saveFailed.errorDescription)
-    }
-
-    @Test func invalidChapterAndSafetyRefusalKeepPreviousContent() async throws {
-        let root = workspace()
-        defer { try? FileManager.default.removeItem(at: root) }
-        let generator = TestGenerator()
-        generator.invalidChapter = true
-        let store = BookDraftStore(root: root)
-        let model = StoryGenerationModel(store: store, generator: generator)
-        await model.generate(request(), mode: .onDevice)
-        #expect(model.completedChapterCount == 1 && !model.completed)
-        let first = try #require(model.draft)
-        #expect(try await store.load(first.id).chapters[1].text.isEmpty)
-        generator.invalidChapter = false
-        generator.secondChapterError = LanguageModelError.guardrailViolation(.init(debugDescription: "do not expose the prompt"))
-        await model.generate(request(), mode: .onDevice)
-        #expect(model.message == StoryGenerationFailure.refused.errorDescription)
-        #expect(model.message?.contains("do not expose") == false)
-        #expect(try await store.load(first.id) == first)
+        #expect(generator.modes.count == 1)
     }
 
     @Test func defaultCloudBuildCannotSendRequests() {
@@ -137,45 +145,35 @@ struct StoryGenerationTests {
     private func request(description: String = "A fox follows a star home.") -> StoryGenerationRequest {
         StoryGenerationRequest(description: description, language: .english, readerAge: .preschool, chapterCount: 2)
     }
-
     private func workspace() -> URL {
         FileManager.default.temporaryDirectory.appendingPathComponent("StoryGenerationTests-\(UUID().uuidString)")
     }
 
-    @MainActor
-    private final class TestGenerator: StoryGenerating {
+    @MainActor private final class TestGenerator: StoryGenerating {
+        static var validBook: GeneratedStoryBook {
+            let opening = "A sleepy fox walked beside a quiet stream. The moon shone above the trees, and a little star glimmered in the soft water. He followed its gentle light along the familiar path. A friendly owl showed him the way past a field of flowers. The fox thanked his friend and listened to the peaceful night. Soon he could see the warm window of his home shining between the trees."
+            let ending = "At home, the little fox found his family waiting beside the glowing window. He told them about the star and his kind friend in the forest. They shared a warm drink and watched the moon together. Then the fox curled up beneath a soft blanket. He knew the path would always lead him home. His family wished him sweet dreams, and the fox closed his eyes as the stars twinkled quietly above."
+            return GeneratedStoryBook(title: "The Fox and the Star", summary: "A fox follows a star home.", chapters: [GeneratedBookChapter(title: "The Star", text: opening), GeneratedBookChapter(title: "Home", text: ending)])
+        }
         var modes: [StoryGenerationMode] = []
-        var continuityReceived: [String] = []
-        var secondChapterError: Error?
         var unavailable: String?
-        var invalidPlan = false
-        var invalidChapter = false
-        var pauseSecondChapter = false
-        private var secondChapterStarted = false
+        var failure: Error?
+        var emptyOnce = false
+        var invalidAlways = false
+        var pause = false
+        private var started = false
         private var waiter: CheckedContinuation<Void, Never>?
-
         func unavailabilityReason(for mode: StoryGenerationMode, language: StoryLanguage) -> String? { unavailable }
-
-        func plan(for request: StoryGenerationRequest, mode: StoryGenerationMode) async throws -> GeneratedStoryPlan {
-            modes.append(mode)
-            return GeneratedStoryPlan(title: invalidPlan ? "" : "The Fox and the Star", summary: "A fox finds the way home.", characters: "A kind, sleepy fox.", chapters: [GeneratedChapterPlan(title: "A Star", plot: "Find the star."), GeneratedChapterPlan(title: "Home", plot: "Get home and fall asleep.")])
+        func book(for request: StoryGenerationRequest, mode: StoryGenerationMode) async throws -> GeneratedStoryBook {
+            modes.append(mode); started = true; waiter?.resume(); waiter = nil
+            if pause { try await Task.sleep(for: .seconds(30)) }
+            if let failure { throw failure }
+            var result = Self.validBook
+            if emptyOnce || invalidAlways { emptyOnce = false; result.chapters[0].text = " \n " }
+            return result
         }
-
-        func chapter(for request: StoryGenerationRequest, plan: GeneratedStoryPlan, index: Int, continuity: String, mode: StoryGenerationMode) async throws -> GeneratedStoryChapter {
-            modes.append(mode)
-            continuityReceived.append(continuity)
-            if index == 1 {
-                secondChapterStarted = true
-                waiter?.resume(); waiter = nil
-                if pauseSecondChapter { try await Task.sleep(for: .seconds(30)) }
-                if let secondChapterError { throw secondChapterError }
-                if invalidChapter { return GeneratedStoryChapter(text: " \n ", continuity: "") }
-            }
-            return GeneratedStoryChapter(text: index == 0 ? "The fox found a star." : "The fox came home and slept.", continuity: "The fox found a star.")
-        }
-
-        func waitForSecondChapter() async {
-            if secondChapterStarted { return }
+        func waitForRequest() async {
+            if started { return }
             await withCheckedContinuation { waiter = $0 }
         }
     }
