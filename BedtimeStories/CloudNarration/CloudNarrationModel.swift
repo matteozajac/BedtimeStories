@@ -7,6 +7,7 @@ import CryptoKit
 @preconcurrency import FirebaseFunctions
 @preconcurrency import FirebaseStorage
 import Foundation
+import MZAppFoundation
 import Observation
 import Security
 
@@ -33,9 +34,12 @@ final class CloudNarrationModel {
     @ObservationIgnored private var signInTask: Task<Void, Never>?
     @ObservationIgnored private var signInAttempt = UUID()
     @ObservationIgnored private var acceptsAuthChanges = true
+    @ObservationIgnored private let logger: any AppLogging
 
-    init(configureFirebase: Bool = true) {
+    init(configureFirebase: Bool = true, logger: any AppLogging = AppLog.logger) {
+        self.logger = logger
         guard configureFirebase,
+              RuntimeSafety.permitsRemote(environment: MZBootstrap.services.configuration.environment),
               let url = Bundle.main.url(forResource: "GoogleService-Info", withExtension: "plist"),
               let options = FirebaseOptions(contentsOfFile: url.path),
               options.bundleID == Bundle.main.bundleIdentifier else { return }
@@ -114,12 +118,14 @@ final class CloudNarrationModel {
                     self.message = nil
                 } catch {
                     if self.signInAttempt == attempt, !Task.isCancelled {
+                        self.logger.error("Cloud sign-in failed", error: error, category: "cloud_narration")
                         self.message = String(localized: "Sign-in could not finish. Try again.")
                     }
                 }
             }
         } catch {
             if (error as NSError).code != ASAuthorizationError.canceled.rawValue {
+                logger.error("Apple sign-in failed", error: error, category: "cloud_narration")
                 message = String(localized: "Sign-in could not finish. Try again.")
             }
         }
@@ -131,7 +137,10 @@ final class CloudNarrationModel {
         signInTask?.cancel()
         isWorking = false
         do { try auth?.signOut(); changedAccount(to: nil) }
-        catch { message = String(localized: "Sign-out could not finish. Try again.") }
+        catch {
+            logger.error("Cloud sign-out failed", error: error, category: "cloud_narration")
+            message = String(localized: "Sign-out could not finish. Try again.")
+        }
     }
 
     func beginEnrollment(name: String, language: String, retentionAccepted: Bool) async throws -> VoiceEnrollment {
@@ -147,7 +156,10 @@ final class CloudNarrationModel {
         for (kind, url) in [("reference", referenceURL), ("consent", consentURL)] {
             let data: Data
             do { data = try Data(contentsOf: url, options: .mappedIfSafe) }
-            catch { throw CloudNarrationFailure.invalidRecording }
+            catch {
+                logger.error("Enrollment recording read failed", error: error, category: "cloud_narration")
+                throw CloudNarrationFailure.invalidRecording
+            }
             guard data.count <= 1_500_000 else { throw CloudNarrationFailure.invalidAudio }
             try validate(session)
             _ = try await call("uploadEnrollmentRecording", payload: ["enrollmentId": enrollment.enrollmentId,
@@ -200,7 +212,10 @@ final class CloudNarrationModel {
         do {
             requestID = try NarrationRequestReceipt.requestID(uid: session.uid, draftID: draft.id,
                                                             snapshotHash: hash, voiceID: voiceID, preview: preview)
-        } catch { throw CloudNarrationFailure.retryLater }
+        } catch {
+            logger.error("Narration request receipt failed", error: error, category: "cloud_narration")
+            throw CloudNarrationFailure.retryLater
+        }
         let response = try await call("startNarration", payload: ["requestId": requestID,
                    "voiceProfileId": voiceID, "draftId": draft.id.uuidString, "snapshotHash": hash,
                    "language": voice.language, "preview": preview, "chapters": wireChapters])
@@ -225,7 +240,10 @@ final class CloudNarrationModel {
         // Apple's authorization is separate from deleting our private cloud data.
         let session = try currentSession()
         do { try await auth.revokeToken(withAuthorizationCode: code) }
-        catch { throw CloudNarrationFailure.confirmWithApple }
+        catch {
+            logger.error("Apple account revocation failed", error: error, category: "cloud_narration")
+            throw CloudNarrationFailure.confirmWithApple
+        }
         try validate(session)
         appleAuthorizationCode = nil
         _ = try await call("deleteAccount", payload: [:])
@@ -242,7 +260,10 @@ final class CloudNarrationModel {
         do {
             directory = try privateCache(for: session.uid).appendingPathComponent(job.id, isDirectory: true)
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        } catch { throw CloudNarrationFailure.retryLater }
+        } catch {
+            logger.error("Narration cache preparation failed", error: error, category: "cloud_narration")
+            throw CloudNarrationFailure.retryLater
+        }
         var results: [UUID: URL] = [:]
         do {
             for output in job.outputs {
@@ -267,8 +288,9 @@ final class CloudNarrationModel {
         } catch {
             try? FileManager.default.removeItem(at: directory)
             try validate(session)
-            if let failure = error as? CloudNarrationFailure { throw failure }
             if error is CancellationError { throw error }
+            logger.error("Narration download failed", error: error, category: "cloud_narration")
+            if let failure = error as? CloudNarrationFailure { throw failure }
             throw CloudNarrationFailure.retryLater
         }
     }
@@ -298,6 +320,7 @@ final class CloudNarrationModel {
         }
         catch {
             try validate(session)
+            logger.error("Cloud narration request failed", error: error, category: "cloud_narration", metadata: ["operation": .string(name)])
             let code = (error as NSError).code
             switch FunctionsErrorCode(rawValue: code) {
             case .unauthenticated: throw CloudNarrationFailure.signInRequired
@@ -340,10 +363,13 @@ final class CloudNarrationModel {
                 var data = doc.data(); data["id"] = doc.documentID
                 return try? Self.decodeDocument(VoiceProfile.self, data: data)
             } ?? []
-            let failed = error != nil
+            let failure = error.map { ErrorSnapshot($0) }
             Task { @MainActor [weak self] in
                 guard let self, self.userID == uid, self.accountGeneration == generation else { return }
-                if failed { self.voices = []; self.message = String(localized: "Your voices could not be loaded. Try again.") }
+                if let failure {
+                    self.logger.log(LogEntry("Voice profiles load failed", level: .error, category: "cloud_narration", error: failure))
+                    self.voices = []; self.message = String(localized: "Your voices could not be loaded. Try again.")
+                }
                 else { self.voices = profiles.sorted { $0.createdAt > $1.createdAt } }
             }
         }
@@ -352,10 +378,13 @@ final class CloudNarrationModel {
                 var data = doc.data(); data["id"] = doc.documentID
                 return try? Self.decodeDocument(NarrationJob.self, data: data)
             } ?? []
-            let failed = error != nil
+            let failure = error.map { ErrorSnapshot($0) }
             Task { @MainActor [weak self] in
                 guard let self, self.userID == uid, self.accountGeneration == generation else { return }
-                if failed { self.jobs = []; self.message = String(localized: "Your narrations could not be loaded. Try again.") }
+                if let failure {
+                    self.logger.log(LogEntry("Narration jobs load failed", level: .error, category: "cloud_narration", error: failure))
+                    self.jobs = []; self.message = String(localized: "Your narrations could not be loaded. Try again.")
+                }
                 else {
                     self.jobs = jobs.sorted { $0.createdAt > $1.createdAt }
                     NarrationRequestReceipt.confirm(uid: uid, requestIDs: Set(jobs.map(\.id)))
@@ -375,7 +404,10 @@ final class CloudNarrationModel {
     }
     private func decode<T: Decodable>(_ type: T.Type, data: [String: Any]) throws -> T {
         do { return try Self.decodeDocument(type, data: data) }
-        catch { throw CloudNarrationFailure.invalidResponse }
+        catch {
+            logger.error("Cloud narration response decoding failed", error: error, category: "cloud_narration")
+            throw CloudNarrationFailure.invalidResponse
+        }
     }
 
     private func privateCache(for uid: String) throws -> URL {

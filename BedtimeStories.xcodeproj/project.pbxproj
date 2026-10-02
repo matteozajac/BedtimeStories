@@ -8,14 +8,28 @@
 
 /* Begin PBXBuildFile section */
 		035A3A0B0A0A203F0BD17B23 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = ACDD52B62FA697CC2D1473F9 /* FirebaseAppCheck */; };
-		0E6832B78CC48F8A0522C99D /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = FD437E43BD23C5F230845E3E /* FirebaseCore */; };
+		04F55525229ED09C833BE4B2 /* MZAppFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = B9CF3FA09FC9A76B593922BE /* MZAppFoundation */; };
+		1AC7ABA92552619AA3765F9D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D12C0E93DC1642D6D9289F8 /* Foundation.framework */; };
+		2647D774EB40CA537097BF25 /* MZBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36FFFE7796703E53912C9C90 /* MZBootstrap.swift */; };
 		3E94A54C17E503BFEC0DEB4B /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = E025CE269033CE410DB6587F /* FirebaseAuth */; };
 		5335E69267632AE47B1D29AA /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = F25B6F070D2FAE45A4B9F4BB /* FirebaseStorage */; };
+		5E4D8BD24AA5B76266BF97B1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D12C0E93DC1642D6D9289F8 /* Foundation.framework */; };
+		6BEB7820448C63E740B21355 /* MZAppFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 96540A75C1ECADF8137B91CD /* MZAppFoundation */; };
 		92ACC9018693EDBCE6898AED /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 312991D5AD08568E2246239A /* FirebaseFunctions */; };
+		B247302611BB02169A13A5B6 /* MZAppFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 6635A88F20CBA2D6CBFCEFF3 /* MZAppFoundation */; };
+		D7988E3066A69F3A73352AF2 /* MZAppFoundationFirebase in Frameworks */ = {isa = PBXBuildFile; productRef = B3805C9CE106044038711549 /* MZAppFoundationFirebase */; };
 		E251A974DFCE2898205FF51F /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = EC7B3F92A4E1EE4A7838E307 /* FirebaseFirestore */; };
+		E8D993D9C30C9D651A98B24F /* MZBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36FFFE7796703E53912C9C90 /* MZBootstrap.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		145544B6474A5F7FD2DEC783 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 61EC4C322DF195A20069B96B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 620E663E73037FDD49C5AB6D;
+			remoteInfo = BedtimeStoriesLocal;
+		};
 		ABCDEF000000000000000006 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 61EC4C322DF195A20069B96B /* Project object */;
@@ -26,18 +40,38 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0AB347E907A5D39F6355E610 /* BedtimeStoriesLocal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BedtimeStoriesLocal.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0C5D917C619F04C2F5D9F703 /* BedtimeStoriesLocalTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BedtimeStoriesLocalTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		36FFFE7796703E53912C9C90 /* MZBootstrap.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MZBootstrap.swift; sourceTree = "<group>"; };
+		3D12C0E93DC1642D6D9289F8 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		61EC4C3A2DF195A20069B96B /* BedtimeStories.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BedtimeStories.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ABCDEF000000000000000002 /* BedtimeStoriesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = BedtimeStoriesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		8C5F75129DA9DDCA75E4DCE3 /* Exceptions for "BedtimeStories" folder in "BedtimeStoriesLocal" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				CloudNarration/CloudAppCheckProviderFactory.swift,
+				CloudNarration/CloudNarrationModel.swift,
+			);
+			target = 620E663E73037FDD49C5AB6D /* BedtimeStoriesLocal */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		61EC4C3C2DF195A20069B96B /* BedtimeStories */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				8C5F75129DA9DDCA75E4DCE3 /* Exceptions for "BedtimeStories" folder in "BedtimeStoriesLocal" target */,
+			);
 			path = BedtimeStories;
 			sourceTree = "<group>";
 		};
 		ABCDEF000000000000000001 /* Tests/AppTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = Tests/AppTests;
 			sourceTree = "<group>";
 		};
@@ -48,12 +82,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0E6832B78CC48F8A0522C99D /* FirebaseCore in Frameworks */,
 				3E94A54C17E503BFEC0DEB4B /* FirebaseAuth in Frameworks */,
 				035A3A0B0A0A203F0BD17B23 /* FirebaseAppCheck in Frameworks */,
 				E251A974DFCE2898205FF51F /* FirebaseFirestore in Frameworks */,
 				92ACC9018693EDBCE6898AED /* FirebaseFunctions in Frameworks */,
 				5335E69267632AE47B1D29AA /* FirebaseStorage in Frameworks */,
+				D7988E3066A69F3A73352AF2 /* MZAppFoundationFirebase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -61,18 +95,55 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04F55525229ED09C833BE4B2 /* MZAppFoundation in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F3B372DBF896ADE1A4C86BF9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1AC7ABA92552619AA3765F9D /* Foundation.framework in Frameworks */,
+				6BEB7820448C63E740B21355 /* MZAppFoundation in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F84FDD5542F0A413D3E281DE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5E4D8BD24AA5B76266BF97B1 /* Foundation.framework in Frameworks */,
+				B247302611BB02169A13A5B6 /* MZAppFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1C8F7B57630FAB333142C07D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A162719EF25799B28BD99714 /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		35DA90F665342A6C9FAF66E5 /* .mzappfoundation */ = {
+			isa = PBXGroup;
+			children = (
+				792A0D1C468A4E3FEA39665D /* Generated */,
+			);
+			name = .mzappfoundation;
+			sourceTree = "<group>";
+		};
 		61EC4C312DF195A20069B96B = {
 			isa = PBXGroup;
 			children = (
 				ABCDEF000000000000000001 /* Tests/AppTests */,
 				61EC4C3C2DF195A20069B96B /* BedtimeStories */,
 				61EC4C3B2DF195A20069B96B /* Products */,
+				1C8F7B57630FAB333142C07D /* Frameworks */,
+				35DA90F665342A6C9FAF66E5 /* .mzappfoundation */,
 			);
 			sourceTree = "<group>";
 		};
@@ -81,8 +152,27 @@
 			children = (
 				ABCDEF000000000000000002 /* BedtimeStoriesTests.xctest */,
 				61EC4C3A2DF195A20069B96B /* BedtimeStories.app */,
+				0AB347E907A5D39F6355E610 /* BedtimeStoriesLocal.app */,
+				0C5D917C619F04C2F5D9F703 /* BedtimeStoriesLocalTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		792A0D1C468A4E3FEA39665D /* Generated */ = {
+			isa = PBXGroup;
+			children = (
+				36FFFE7796703E53912C9C90 /* MZBootstrap.swift */,
+			);
+			name = Generated;
+			path = .mzappfoundation/Generated;
+			sourceTree = SOURCE_ROOT;
+		};
+		A162719EF25799B28BD99714 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				3D12C0E93DC1642D6D9289F8 /* Foundation.framework */,
+			);
+			name = iOS;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -105,16 +195,63 @@
 			);
 			name = BedtimeStories;
 			packageProductDependencies = (
-				FD437E43BD23C5F230845E3E /* FirebaseCore */,
 				E025CE269033CE410DB6587F /* FirebaseAuth */,
 				ACDD52B62FA697CC2D1473F9 /* FirebaseAppCheck */,
 				EC7B3F92A4E1EE4A7838E307 /* FirebaseFirestore */,
 				312991D5AD08568E2246239A /* FirebaseFunctions */,
 				F25B6F070D2FAE45A4B9F4BB /* FirebaseStorage */,
+				B3805C9CE106044038711549 /* MZAppFoundationFirebase */,
 			);
 			productName = BedtimeStories;
 			productReference = 61EC4C3A2DF195A20069B96B /* BedtimeStories.app */;
 			productType = "com.apple.product-type.application";
+		};
+		620E663E73037FDD49C5AB6D /* BedtimeStoriesLocal */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B3E97F98E8AA52551AFA2441 /* Build configuration list for PBXNativeTarget "BedtimeStoriesLocal" */;
+			buildPhases = (
+				BA5E32C45664C0AC09FA9DA7 /* Sources */,
+				F3B372DBF896ADE1A4C86BF9 /* Frameworks */,
+				93AB5B8220BD1FE6B81D5B00 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				61EC4C3C2DF195A20069B96B /* BedtimeStories */,
+			);
+			name = BedtimeStoriesLocal;
+			packageProductDependencies = (
+				96540A75C1ECADF8137B91CD /* MZAppFoundation */,
+			);
+			productName = BedtimeStoriesLocal;
+			productReference = 0AB347E907A5D39F6355E610 /* BedtimeStoriesLocal.app */;
+			productType = "com.apple.product-type.application";
+		};
+		89FC34AAAD0EA2363FAB3058 /* BedtimeStoriesLocalTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7EEB05EFC14944DD2205AC3E /* Build configuration list for PBXNativeTarget "BedtimeStoriesLocalTests" */;
+			buildPhases = (
+				81AD2FFDD464B770C5226BD9 /* Sources */,
+				F84FDD5542F0A413D3E281DE /* Frameworks */,
+				035AC34CD3B12F90F272681A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E7DEDCBFD406717C993D6E1E /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				ABCDEF000000000000000001 /* Tests/AppTests */,
+			);
+			name = BedtimeStoriesLocalTests;
+			packageProductDependencies = (
+				6635A88F20CBA2D6CBFCEFF3 /* MZAppFoundation */,
+			);
+			productName = BedtimeStoriesLocalTests;
+			productReference = 0C5D917C619F04C2F5D9F703 /* BedtimeStoriesLocalTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		ABCDEF000000000000000008 /* BedtimeStoriesTests */ = {
 			isa = PBXNativeTarget;
@@ -133,6 +270,9 @@
 				ABCDEF000000000000000001 /* Tests/AppTests */,
 			);
 			name = BedtimeStoriesTests;
+			packageProductDependencies = (
+				B9CF3FA09FC9A76B593922BE /* MZAppFoundation */,
+			);
 			productName = BedtimeStoriesTests;
 			productReference = ABCDEF000000000000000002 /* BedtimeStoriesTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -164,6 +304,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				41380ABFC1B8187E6B42AC19 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				EEB9ED7AAC32B3FBB84B3FF3 /* XCRemoteSwiftPackageReference "MZAppFoundation" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 61EC4C3B2DF195A20069B96B /* Products */;
@@ -172,12 +313,28 @@
 			targets = (
 				ABCDEF000000000000000008 /* BedtimeStoriesTests */,
 				61EC4C392DF195A20069B96B /* BedtimeStories */,
+				620E663E73037FDD49C5AB6D /* BedtimeStoriesLocal */,
+				89FC34AAAD0EA2363FAB3058 /* BedtimeStoriesLocalTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		035AC34CD3B12F90F272681A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		61EC4C382DF195A20069B96B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		93AB5B8220BD1FE6B81D5B00 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -198,6 +355,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E8D993D9C30C9D651A98B24F /* MZBootstrap.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		81AD2FFDD464B770C5226BD9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -205,6 +370,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BA5E32C45664C0AC09FA9DA7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2647D774EB40CA537097BF25 /* MZBootstrap.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -216,9 +389,73 @@
 			target = 61EC4C392DF195A20069B96B /* BedtimeStories */;
 			targetProxy = ABCDEF000000000000000006 /* PBXContainerItemProxy */;
 		};
+		E7DEDCBFD406717C993D6E1E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = BedtimeStoriesLocal;
+			target = 620E663E73037FDD49C5AB6D /* BedtimeStoriesLocal */;
+			targetProxy = 145544B6474A5F7FD2DEC783 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		2CDD0FFF7A0FF07499CEA1C1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Config/BedtimeStories.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 9;
+				DEVELOPMENT_TEAM = 4TCJLR98Y5;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Config/Info.plist;
+				INFOPLIST_KEY_FIREBASE_ANALYTICS_COLLECTION_ENABLED = NO;
+				INFOPLIST_KEY_FirebaseAutomaticScreenReportingEnabled = NO;
+				INFOPLIST_KEY_GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS = NO;
+				INFOPLIST_KEY_GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED = NO;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories;
+				PRODUCT_MODULE_NAME = BedtimeStories;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = iphonesimulator;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) MZ_LOCAL";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		57F40A0CB909DB04F48F0830 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 4TCJLR98Y5;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories.localtests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = iphonesimulator;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) MZ_LOCAL";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BedtimeStoriesLocal.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BedtimeStoriesLocal";
+			};
+			name = Debug;
+		};
 		61EC4C432DF195A30069B96B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -341,68 +578,174 @@
 			name = Release;
 		};
 		61EC4C462DF195A30069B96B /* Debug */ = {
-	buildSettings = {
-		"ASSETCATALOG_COMPILER_APPICON_NAME" = AppIcon;
-		"ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME" = AccentColor;
-		"CODE_SIGN_ENTITLEMENTS" = "Config/BedtimeStories.entitlements";
-		"CODE_SIGN_STYLE" = Automatic;
-		"CURRENT_PROJECT_VERSION" = 8;
-		"DEVELOPMENT_TEAM" = 4TCJLR98Y5;
-		"ENABLE_PREVIEWS" = YES;
-		"GENERATE_INFOPLIST_FILE" = NO;
-		"INFOPLIST_FILE" = "Config/Info.plist";
-		"INFOPLIST_KEY_UIApplicationSceneManifest_Generation" = YES;
-		"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents" = YES;
-		"INFOPLIST_KEY_UILaunchScreen_Generation" = YES;
-		"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-		"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone" = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-		"LD_RUNPATH_SEARCH_PATHS" = (
-			"$(inherited)",
-			"@executable_path/Frameworks",
-		);
-		"MARKETING_VERSION" = "1.0";
-		"PRODUCT_BUNDLE_IDENTIFIER" = "com.matteozajac.bedtimestories";
-		"PRODUCT_NAME" = "$(TARGET_NAME)";
-		"SWIFT_EMIT_LOC_STRINGS" = YES;
-		"SWIFT_STRICT_CONCURRENCY" = complete;
-		"SWIFT_VERSION" = "6.0";
-		"TARGETED_DEVICE_FAMILY" = "1,2";
-	};
-	isa = XCBuildConfiguration;
-	name = Debug;
-};
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Config/BedtimeStories.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 9;
+				DEVELOPMENT_TEAM = 4TCJLR98Y5;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Config/Info.plist;
+				INFOPLIST_KEY_FIREBASE_ANALYTICS_COLLECTION_ENABLED = NO;
+				INFOPLIST_KEY_FirebaseAutomaticScreenReportingEnabled = NO;
+				INFOPLIST_KEY_GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS = NO;
+				INFOPLIST_KEY_GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED = NO;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 		61EC4C472DF195A30069B96B /* Release */ = {
-	buildSettings = {
-		"ASSETCATALOG_COMPILER_APPICON_NAME" = AppIcon;
-		"ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME" = AccentColor;
-		"CODE_SIGN_ENTITLEMENTS" = "Config/PrivateCloudCompute.entitlements";
-		"CODE_SIGN_STYLE" = Automatic;
-		"CURRENT_PROJECT_VERSION" = 8;
-		"DEVELOPMENT_TEAM" = 4TCJLR98Y5;
-		"ENABLE_PREVIEWS" = YES;
-		"GENERATE_INFOPLIST_FILE" = NO;
-		"INFOPLIST_FILE" = "Config/Info.plist";
-		"INFOPLIST_KEY_UIApplicationSceneManifest_Generation" = YES;
-		"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents" = YES;
-		"INFOPLIST_KEY_UILaunchScreen_Generation" = YES;
-		"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-		"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone" = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-		"LD_RUNPATH_SEARCH_PATHS" = (
-			"$(inherited)",
-			"@executable_path/Frameworks",
-		);
-		"MARKETING_VERSION" = "1.0";
-		"PRODUCT_BUNDLE_IDENTIFIER" = "com.matteozajac.bedtimestories";
-		"PRODUCT_NAME" = "$(TARGET_NAME)";
-		"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "$(inherited) BEDTIME_PRIVATE_CLOUD_COMPUTE";
-		"SWIFT_EMIT_LOC_STRINGS" = YES;
-		"SWIFT_STRICT_CONCURRENCY" = complete;
-		"SWIFT_VERSION" = "6.0";
-		"TARGETED_DEVICE_FAMILY" = "1,2";
-	};
-	isa = XCBuildConfiguration;
-	name = Release;
-};
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Config/PrivateCloudCompute.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 9;
+				DEVELOPMENT_TEAM = 4TCJLR98Y5;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Config/Info.plist;
+				INFOPLIST_KEY_FIREBASE_ANALYTICS_COLLECTION_ENABLED = NO;
+				INFOPLIST_KEY_FirebaseAutomaticScreenReportingEnabled = NO;
+				INFOPLIST_KEY_GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS = NO;
+				INFOPLIST_KEY_GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED = NO;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) BEDTIME_PRIVATE_CLOUD_COMPUTE";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		857E7928C21A1F55B591CA9A /* Internal */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 4TCJLR98Y5;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories.localtests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = iphonesimulator;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) BEDTIME_PRIVATE_CLOUD_COMPUTE MZ_LOCAL MZ_INTERNAL";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BedtimeStoriesLocal.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BedtimeStoriesLocal";
+			};
+			name = Internal;
+		};
+		8E203481E4EAEEA5503A5D25 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Config/PrivateCloudCompute.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 9;
+				DEVELOPMENT_TEAM = 4TCJLR98Y5;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Config/Info.plist;
+				INFOPLIST_KEY_FIREBASE_ANALYTICS_COLLECTION_ENABLED = NO;
+				INFOPLIST_KEY_FirebaseAutomaticScreenReportingEnabled = NO;
+				INFOPLIST_KEY_GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS = NO;
+				INFOPLIST_KEY_GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED = NO;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories;
+				PRODUCT_MODULE_NAME = BedtimeStories;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = iphonesimulator;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) BEDTIME_PRIVATE_CLOUD_COMPUTE MZ_LOCAL";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		A9FF491E9C7B38791C15B0DE /* Internal */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Config/PrivateCloudCompute.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 9;
+				DEVELOPMENT_TEAM = 4TCJLR98Y5;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Config/Info.plist;
+				INFOPLIST_KEY_FIREBASE_ANALYTICS_COLLECTION_ENABLED = NO;
+				INFOPLIST_KEY_FirebaseAutomaticScreenReportingEnabled = NO;
+				INFOPLIST_KEY_GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS = NO;
+				INFOPLIST_KEY_GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED = NO;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) BEDTIME_PRIVATE_CLOUD_COMPUTE MZ_INTERNAL";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Internal;
+		};
 		ABCDEF00000000000000000A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -440,6 +783,118 @@
 			};
 			name = Release;
 		};
+		AFBFEE3E6FD928BEDBC955AD /* Internal */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Internal;
+		};
+		CF2D2720A0C12307C7BC82F2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 4TCJLR98Y5;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories.localtests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = iphonesimulator;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) BEDTIME_PRIVATE_CLOUD_COMPUTE MZ_LOCAL";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BedtimeStoriesLocal.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BedtimeStoriesLocal";
+			};
+			name = Release;
+		};
+		D066119F07730425D5A00198 /* Internal */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Config/PrivateCloudCompute.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 9;
+				DEVELOPMENT_TEAM = 4TCJLR98Y5;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Config/Info.plist;
+				INFOPLIST_KEY_FIREBASE_ANALYTICS_COLLECTION_ENABLED = NO;
+				INFOPLIST_KEY_FirebaseAutomaticScreenReportingEnabled = NO;
+				INFOPLIST_KEY_GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS = NO;
+				INFOPLIST_KEY_GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED = NO;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories;
+				PRODUCT_MODULE_NAME = BedtimeStories;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = iphonesimulator;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) BEDTIME_PRIVATE_CLOUD_COMPUTE MZ_LOCAL MZ_INTERNAL";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Internal;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -448,6 +903,7 @@
 			buildConfigurations = (
 				61EC4C432DF195A30069B96B /* Debug */,
 				61EC4C442DF195A30069B96B /* Release */,
+				AFBFEE3E6FD928BEDBC955AD /* Internal */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -457,6 +913,17 @@
 			buildConfigurations = (
 				61EC4C462DF195A30069B96B /* Debug */,
 				61EC4C472DF195A30069B96B /* Release */,
+				A9FF491E9C7B38791C15B0DE /* Internal */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7EEB05EFC14944DD2205AC3E /* Build configuration list for PBXNativeTarget "BedtimeStoriesLocalTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CF2D2720A0C12307C7BC82F2 /* Release */,
+				57F40A0CB909DB04F48F0830 /* Debug */,
+				857E7928C21A1F55B591CA9A /* Internal */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -466,6 +933,16 @@
 			buildConfigurations = (
 				ABCDEF00000000000000000A /* Debug */,
 				ABCDEF00000000000000000B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B3E97F98E8AA52551AFA2441 /* Build configuration list for PBXNativeTarget "BedtimeStoriesLocal" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8E203481E4EAEEA5503A5D25 /* Release */,
+				2CDD0FFF7A0FF07499CEA1C1 /* Debug */,
+				D066119F07730425D5A00198 /* Internal */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -481,6 +958,14 @@
 				version = 12.19.2;
 			};
 		};
+		EEB9ED7AAC32B3FBB84B3FF3 /* XCRemoteSwiftPackageReference "MZAppFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@github.com:matteozajac/MZAppFoundation.git";
+			requirement = {
+				kind = exactVersion;
+				version = 0.3.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -489,10 +974,30 @@
 			package = 41380ABFC1B8187E6B42AC19 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFunctions;
 		};
+		6635A88F20CBA2D6CBFCEFF3 /* MZAppFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EEB9ED7AAC32B3FBB84B3FF3 /* XCRemoteSwiftPackageReference "MZAppFoundation" */;
+			productName = MZAppFoundation;
+		};
+		96540A75C1ECADF8137B91CD /* MZAppFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EEB9ED7AAC32B3FBB84B3FF3 /* XCRemoteSwiftPackageReference "MZAppFoundation" */;
+			productName = MZAppFoundation;
+		};
 		ACDD52B62FA697CC2D1473F9 /* FirebaseAppCheck */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 41380ABFC1B8187E6B42AC19 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAppCheck;
+		};
+		B3805C9CE106044038711549 /* MZAppFoundationFirebase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EEB9ED7AAC32B3FBB84B3FF3 /* XCRemoteSwiftPackageReference "MZAppFoundation" */;
+			productName = MZAppFoundationFirebase;
+		};
+		B9CF3FA09FC9A76B593922BE /* MZAppFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EEB9ED7AAC32B3FBB84B3FF3 /* XCRemoteSwiftPackageReference "MZAppFoundation" */;
+			productName = MZAppFoundation;
 		};
 		E025CE269033CE410DB6587F /* FirebaseAuth */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -508,11 +1013,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 41380ABFC1B8187E6B42AC19 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseStorage;
-		};
-		FD437E43BD23C5F230845E3E /* FirebaseCore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 41380ABFC1B8187E6B42AC19 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseCore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

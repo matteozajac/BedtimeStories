@@ -1,5 +1,6 @@
 import Foundation
 import FoundationModels
+import MZAppFoundation
 import Observation
 
 @Observable @MainActor
@@ -13,10 +14,13 @@ final class StoryGenerationModel {
     private(set) var completed = false
     private let generator: any StoryGenerating
     let store: BookDraftStore
+    @ObservationIgnored private let logger: any AppLogging
 
-    init(store: BookDraftStore, generator: any StoryGenerating = FoundationStoryGenerator()) {
+    init(store: BookDraftStore, generator: any StoryGenerating = FoundationStoryGenerator(),
+         logger: any AppLogging = AppLog.logger) {
         self.store = store
         self.generator = generator
+        self.logger = logger
     }
 
     func unavailabilityReason(for mode: StoryGenerationMode, language: StoryLanguage) -> String? {
@@ -32,6 +36,7 @@ final class StoryGenerationModel {
         completed = false
         retrying = false
         saving = false
+        logger.log(LogEntry("Story creation started", category: "creator", metadata: ["mode": .string(mode.rawValue)]))
         defer { working = false; saving = false }
 
         do {
@@ -52,6 +57,7 @@ final class StoryGenerationModel {
                     break
                 } catch {
                     guard !Task.isCancelled, attempt == 0, Self.canRetry(error) else { throw error }
+                    logger.log(LogEntry("Story creation retry", level: .warning, category: "creator", error: ErrorSnapshot(error)))
                 }
             }
             guard let book = result else { throw StoryGenerationFailure.invalidResponse }
@@ -72,10 +78,13 @@ final class StoryGenerationModel {
             completedChapterCount = snapshot.chapters.count
             try Task.checkCancellation()
             completed = true
+            logger.log(LogEntry("Story draft created", category: "creator", metadata: ["chapter_count": .integer(snapshot.chapters.count)]))
         } catch {
             if error is CancellationError || Task.isCancelled {
                 message = String(localized: "Creation stopped. Your previous drafts are safe. Try again when you are ready.")
             } else {
+                if case StoryGenerationFailure.saveFailed = error { /* Already recorded with its underlying error. */ }
+                else { logger.error("Story creation failed", error: error, category: "creator") }
                 message = Self.message(for: error)
             }
         }
@@ -91,7 +100,10 @@ final class StoryGenerationModel {
 
     private func save(_ snapshot: BookDraft) async throws {
         do { try await store.save(snapshot) }
-        catch { throw StoryGenerationFailure.saveFailed }
+        catch {
+            logger.error("Generated draft save failed", error: error, category: "creator")
+            throw StoryGenerationFailure.saveFailed
+        }
     }
 
     static func message(for error: Error) -> String {

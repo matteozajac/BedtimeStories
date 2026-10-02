@@ -45,6 +45,7 @@ struct SettingsView: View {
                 LabeledContent { Text(verbatim: "1.0") } label: { row("Version", systemImage: "info.circle.fill") }
             }
             .listRowBackground(Theme.surface)
+            AppDeveloperSettings()
         }
         .storyFormStyle()
         .navigationTitle("Settings")

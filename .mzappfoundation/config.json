@@ -1,0 +1,16 @@
+{
+  "project": "BedtimeStories.xcodeproj",
+  "project_type": "native",
+  "target": "BedtimeStories",
+  "bundle_id": "com.matteozajac.bedtimestories",
+  "url_scheme": "bedtimestories",
+  "platform": "iOS",
+  "deployment_target": "27.0",
+  "package_version": "0.3.1",
+  "bug_reporting": false,
+  "analytics_enabled": false,
+  "diagnostics_enabled": false,
+  "events": {},
+  "products": [],
+  "providers": {}
+}

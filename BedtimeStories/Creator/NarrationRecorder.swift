@@ -1,5 +1,6 @@
 import AVFoundation
 import Foundation
+import MZAppFoundation
 import Observation
 
 @Observable @MainActor
@@ -23,8 +24,10 @@ final class NarrationRecorder: NSObject, AVAudioRecorderDelegate, AVAudioPlayerD
     @ObservationIgnored private var generation = UUID()
     @ObservationIgnored private var recordingFailed = false
     @ObservationIgnored private var observers: [NSObjectProtocol] = []
+    @ObservationIgnored private let logger: any AppLogging
 
-    override init() {
+    init(logger: any AppLogging = AppLog.logger) {
+        self.logger = logger
         super.init()
         let center = NotificationCenter.default
         observers.append(center.addObserver(forName: AVAudioSession.didBecomeInactiveNotification, object: nil, queue: .main) { [weak self] note in
@@ -61,6 +64,7 @@ final class NarrationRecorder: NSObject, AVAudioRecorderDelegate, AVAudioPlayerD
             let allowed = await AVAudioApplication.requestRecordPermission()
             guard !Task.isCancelled, self.generation == token else { return }
             guard allowed else {
+                self.logger.log(LogEntry("Microphone permission denied", level: .notice, category: "recording"))
                 self.preparing = false; self.permissionDenied = true
                 self.message = String(localized: "Allow microphone access in Settings to record your narration. You can still write your book or import audio.")
                 return
@@ -118,7 +122,10 @@ final class NarrationRecorder: NSObject, AVAudioRecorderDelegate, AVAudioPlayerD
                 player.delegate = self
                 guard player.play() else { throw BookError.unavailable("Audio is unavailable.") }
                 self.preview = player; self.playing = true
-            } catch { self.message = String(localized: "The take could not be played. Try again."); self.releaseSession() }
+            } catch {
+                self.logger.error("Recording preview failed", error: error, category: "recording")
+                self.message = String(localized: "The take could not be played. Try again."); self.releaseSession()
+            }
             self.preparing = false
         }
     }
@@ -167,6 +174,7 @@ final class NarrationRecorder: NSObject, AVAudioRecorderDelegate, AVAudioPlayerD
                 }
             }
         } catch {
+            logger.error("Microphone session failed", error: error, category: "recording")
             preparing = false
             message = String(localized: "The microphone could not start. Close other recording apps, then try again. Your saved narration is unchanged.")
             releaseSession()
@@ -209,13 +217,18 @@ final class NarrationRecorder: NSObject, AVAudioRecorderDelegate, AVAudioPlayerD
         finishing = false; preparing = false
         if successfully, !recordingFailed, let duration, duration.isFinite, duration > 0 {
             elapsed = duration; ready = true
-        } else { ready = false; message = String(localized: "The take could not be finished. Try recording again.") }
+        } else {
+            logger.log(LogEntry("Recording did not complete", level: .warning, category: "recording"))
+            ready = false; message = String(localized: "The take could not be finished. Try recording again.")
+        }
     }
 
     nonisolated func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: (any Error)?) {
         let file = recorder.url
+        let snapshot = error.map { ErrorSnapshot($0) }
         Task { @MainActor [weak self] in
             guard let self, self.url == file else { return }
+            self.logger.log(LogEntry("Recording encoding failed", level: .error, category: "recording", error: snapshot))
             self.cancel(); self.message = String(localized: "The take could not be finished. Try recording again.")
         }
     }

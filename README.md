@@ -11,13 +11,15 @@ In **Book Creator → Create from an Idea**, describe a story and choose its lan
 
 Optional parent voice narration is implemented in **Settings → Your Voices** and **Book Creator → Create Narration**. It uses Sign in with Apple, Firebase Auth/App Check, owner-only metadata and audio, encrypted retained reference/consent recordings, and a private Gemini 3.8 worker. Choose a book delivery style or paragraph overrides, preview the opening, then explicitly accept the complete narration into the working draft. Only rendered audio enters the ordinary library or exports. Firebase Apple SDK dependencies are pinned to 12.19.2; Gemini authentication uses backend service accounts, with no Gemini API key in the app. Cloud narration is currently **disabled**: dedicated Google project creation was rejected because the account project quota is full, and live cloning/device checks remain pending. See [cloud narration architecture, setup and gates](docs/CLOUD_NARRATION.md).
 
+MZAppFoundation **0.3.1** supplies structured local Pulse logging. With **Settings → Developer → Developer Mode** enabled, shake the device to open the console, or choose **Open Logs**. Local/Debug/Internal builds default to enabled; production defaults to disabled, and an explicit choice persists. Remote analytics and diagnostics remain disabled. Use the **BedtimeStoriesLocal** scheme for simulator development; it excludes the Firebase backend SDKs and keeps cloud narration unavailable. See [diagnostics setup and verification](.mzappfoundation/README.md).
+
 See the [book format](skills/bedtime-book-create/references/book-format.md) and [authoring skill](skills/bedtime-book-create/SKILL.md). The skill's maintained source is in this repository; a copy is installed in `~/.codex/skills/bedtime-book-create` for Codex discovery. To update it, copy this skill directory into that location.
 
 ```sh
 python3 skills/bedtime-book-create/scripts/book.py create --title 'The Sleepy Fox' --text story.md --output /tmp/SleepyFox --archive /tmp/SleepyFox.bedtimestory
 swift test
 python3 -m unittest discover -s Tests/Authoring -v
-xcodebuild -project BedtimeStories.xcodeproj -scheme BedtimeStories -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
+xcodebuild -project BedtimeStories.xcodeproj -scheme BedtimeStoriesLocal -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
 ```
 
 Open `BedtimeStories.xcodeproj` with Xcode 27. The UI uses a book grid, an adaptive iPad detail pane, a floating Liquid Glass mini player, and a full-screen audio player, without tabs. Its storybook look (warm paper by day, a calm night sky by night, serif story text, rounded app chrome and illustrated placeholder covers) lives in `BedtimeStories/Design`. The root Swift package is a dependency-free host test harness for the same core sources compiled by the app.

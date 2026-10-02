@@ -69,7 +69,9 @@ struct RootView: View {
         .fileImporter(isPresented: $library.showingImportPicker, allowedContentTypes: [UTType(exportedAs: "com.matteozajac.bedtimestories.book"), .zip]) { result in
             switch result {
             case .success(let url): library.importBook(url)
-            case .failure(let error): library.message = error.localizedDescription
+            case .failure(let error):
+                AppLog.error("Document selection failed", error: error, category: "library")
+                library.message = error.localizedDescription
             }
         }
         .alert("Unable to complete", isPresented: Binding(get: { library.message != nil }, set: { if !$0 { library.message = nil } })) {
@@ -79,7 +81,10 @@ struct RootView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { Task { await library.start() } }
         }
-        .onOpenURL { library.importBook($0) }
+        .onOpenURL { url in
+            // Developer links belong to the foundation modifier; only file URLs are books.
+            if url.isFileURL { library.importBook(url) }
+        }
     }
 }
 

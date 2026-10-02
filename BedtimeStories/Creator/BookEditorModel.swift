@@ -1,4 +1,5 @@
 import Foundation
+import MZAppFoundation
 import Observation
 import SwiftUI
 import UIKit
@@ -21,8 +22,11 @@ final class BookEditorModel {
     let store: BookDraftStore
     @ObservationIgnored private var autosave: Task<Void, Never>?
     @ObservationIgnored private var closing = false
+    @ObservationIgnored private let logger: any AppLogging
 
-    init(draft: BookDraft, store: BookDraftStore) { self.draft = draft; baseline = draft; self.store = store }
+    init(draft: BookDraft, store: BookDraftStore, logger: any AppLogging = AppLog.logger) {
+        self.draft = draft; baseline = draft; self.store = store; self.logger = logger
+    }
 
     var hasChanges: Bool { (isEditingBook && !baselineAvailable) || !draft.hasSameContent(as: baseline) }
     var isEditingBook: Bool { draft.source != nil }
@@ -36,7 +40,10 @@ final class BookEditorModel {
         do {
             if let original = try await store.baseline(draft.id) { baseline = original }
             else { baselineAvailable = false }
-        } catch { baselineAvailable = false; message = String(localized: "The original editing copy could not be opened. Your library book is unchanged.") }
+        } catch {
+            logger.error("Editing baseline load failed", error: error, category: "creator")
+            baselineAvailable = false; message = String(localized: "The original editing copy could not be opened. Your library book is unchanged.")
+        }
     }
 
     func changed() {
@@ -53,7 +60,10 @@ final class BookEditorModel {
                 guard let self, self.draft.modifiedAt == snapshot.modifiedAt else { return }
                 self.saved = true
             } catch is CancellationError { }
-            catch { self?.message = String(localized: "Your draft could not be saved. Keep the editor open and try again.") }
+            catch {
+                self?.logger.error("Draft autosave failed", error: error, category: "creator")
+                self?.message = String(localized: "Your draft could not be saved. Keep the editor open and try again.")
+            }
         }
     }
 
@@ -84,7 +94,10 @@ final class BookEditorModel {
             }
             return true
         }
-        catch { closing = false; message = String(localized: "Your draft could not be saved. Keep the editor open and try again."); return false }
+        catch {
+            logger.error("Draft discard failed", error: error, category: "creator")
+            closing = false; message = String(localized: "Your draft could not be saved. Keep the editor open and try again."); return false
+        }
     }
 
     func addChapter() { clearChapterTimes(); draft.chapters.append(DraftChapter()) }
@@ -112,7 +125,10 @@ final class BookEditorModel {
                 draft.chapters[index].image = path
             } else { draft.cover = path }
             try await persist()
-        } catch { message = error.localizedDescription }
+        } catch {
+            logger.error("Draft image save failed", error: error, category: "creator")
+            message = error.localizedDescription
+        }
     }
 
     func setAudio(_ url: URL, chapterID: UUID) async -> Bool {
@@ -132,6 +148,7 @@ final class BookEditorModel {
             try await persist()
             return true
         } catch {
+            logger.error("Chapter recording save failed", error: error, category: "creator")
             if let previous, let index = draft.chapters.firstIndex(where: { $0.id == chapterID }) {
                 draft.chapters[index].audio = previous.audio
                 draft.chapters[index].audioDuration = previous.audioDuration
@@ -155,6 +172,7 @@ final class BookEditorModel {
             try await persist()
             return true
         } catch {
+            logger.error("Full book recording save failed", error: error, category: "creator")
             draft = previous
             message = String(localized: "The recording could not be added. Your previous narration is still saved. Try again.")
             return false
@@ -211,6 +229,7 @@ final class BookEditorModel {
         } catch {
             await store.removeMedia(copied.values.map(\.path), draftID: previous.id)
             if !(error is CancellationError) {
+                logger.error("Generated narration save failed", error: error, category: "creator")
                 message = String(localized: "Narration could not be added. Your previous recordings and text are still saved. Try again.")
             }
             return false
@@ -232,11 +251,14 @@ final class BookEditorModel {
             closing = true
             autosave?.cancel()
             try? await store.remove(draft.id)
+            logger.log(LogEntry("Book saved to library", category: "creator", metadata: ["as_copy": .bool(asCopy)]))
             return true
         } catch BookError.editConflict {
+            logger.log(LogEntry("Book editing conflict", level: .warning, category: "creator"))
             conflict = true
             return false
         } catch {
+            logger.error("Book publication failed", error: error, category: "creator")
             message = String(localized: "The book could not be saved to your library. Your edits are safe on this device. Check iCloud Drive and available storage, then try again.")
             return false
         }

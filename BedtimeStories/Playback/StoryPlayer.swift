@@ -1,5 +1,6 @@
 import AVFoundation
 import MediaPlayer
+import MZAppFoundation
 import Observation
 import UIKit
 
@@ -31,8 +32,10 @@ final class StoryPlayer {
     @ObservationIgnored private var artwork: MPMediaItemArtwork?
     @ObservationIgnored private var interruptionWasPlaying = false
     @ObservationIgnored private var wantsPlayback = false
+    @ObservationIgnored private let logger: any AppLogging
 
-    init() {
+    init(logger: any AppLogging = AppLog.logger) {
+        self.logger = logger
         timeObserver = audio.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.25, preferredTimescale: 600), queue: .main) { [weak self] _ in
             Task { @MainActor [weak self] in self?.tick() }
         }
@@ -42,6 +45,7 @@ final class StoryPlayer {
             guard context?.interruptionContext != nil else { return }
             Task { @MainActor [weak self] in
                 guard let self else { return }
+                self.logger.log(LogEntry("Playback interrupted", level: .notice, category: "playback"))
                 self.interruptionWasPlaying = self.playing || self.wantsPlayback
                 self.pause()
             }
@@ -64,6 +68,7 @@ final class StoryPlayer {
         interruptions.append(center.addObserver(forName: AVAudioSession.mediaServicesWereResetNotification, object: nil, queue: .main) { [weak self] _ in
             Task { @MainActor [weak self] in
                 self?.pause(); self?.resetEngine()
+                self?.logger.log(LogEntry("Audio services reset", level: .warning, category: "playback"))
                 self?.error = String(localized: "Audio was interrupted. Tap Play to reload the recording.")
             }
         })
@@ -126,8 +131,10 @@ final class StoryPlayer {
                 let activated = try await AVAudioSession.sharedInstance().activate(options: [])
                 guard activated, self.generation == token, self.wantsPlayback else { return }
                 self.audio.playImmediately(atRate: self.speed); self.playing = true; self.updateNowPlaying()
+                self.logger.log(LogEntry("Playback started", category: "playback", metadata: ["track_index": .integer(self.trackIndex)]))
             } catch {
                 guard self.generation == token else { return }
+                self.logger.error("Playback audio session failed", error: error, category: "playback")
                 self.error = error.localizedDescription; self.wantsPlayback = false; self.playing = false
             }
         }
@@ -217,17 +224,21 @@ final class StoryPlayer {
                 await self.audio.seek(to: CMTime(seconds: position, preferredTimescale: 600), toleranceBefore: .zero, toleranceAfter: .zero)
                 guard self.generation == token, !Task.isCancelled else { return }
                 self.elapsed = position; self.loading = false
+                self.logger.log(LogEntry("Recording loaded", level: .debug, category: "playback", metadata: ["track_index": .integer(index)]))
                 if self.wantsPlayback { self.resume() }
                 self.save(); self.updateNowPlaying()
                 if let cover = book.manifest.cover, let imageURL = try? await repository.asset(cover, book: book, root: root),
                    let data = try? await repository.imageData(imageURL), let decoded = await ArtworkDecoder.thumbnail(data), self.generation == token {
                     let image = UIImage(cgImage: decoded)
-                    self.artwork = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
+                    // MediaPlayer requests artwork on background queues. A Sendable
+                    // callback must not inherit StoryPlayer's MainActor isolation.
+                    self.artwork = MPMediaItemArtwork(boundsSize: image.size) { @Sendable _ in image }
                     self.updateNowPlaying()
                 }
             } catch is CancellationError { }
             catch {
                 guard let self, self.generation == token else { return }
+                self.logger.error("Recording load failed", error: error, category: "playback", metadata: ["track_index": .integer(index)])
                 self.loading = false; self.playing = false; self.wantsPlayback = false; self.error = error.localizedDescription; self.updateNowPlaying()
             }
         }
@@ -239,6 +250,11 @@ final class StoryPlayer {
         if time.isFinite { elapsed = max(0, time) }
         if let boundary = sleepBoundary, boundary.isFinite, elapsed >= boundary { pause(); cancelSleep() }
         if audio.currentItem?.status == .failed {
+            if let failure = audio.currentItem?.error {
+                logger.error("Playback failed", error: failure, category: "playback")
+            } else {
+                logger.error("Playback failed", category: "playback")
+            }
             error = audio.currentItem?.error?.localizedDescription ?? String(localized: "Playback failed. Try again.")
             pause(); audio.replaceCurrentItem(with: nil)
         }
@@ -277,13 +293,14 @@ final class StoryPlayer {
     }
     private func registerCommands() {
         let center = MPRemoteCommandCenter.shared()
-        commandTargets.append((center.playCommand, center.playCommand.addTarget { [weak self] _ in Task { @MainActor in self?.resume() }; return .success }))
-        commandTargets.append((center.pauseCommand, center.pauseCommand.addTarget { [weak self] _ in Task { @MainActor in self?.pause() }; return .success }))
-        commandTargets.append((center.togglePlayPauseCommand, center.togglePlayPauseCommand.addTarget { [weak self] _ in Task { @MainActor in self?.toggle() }; return .success }))
+        // Remote commands also arrive off the main actor; only the player action hops back.
+        commandTargets.append((center.playCommand, center.playCommand.addTarget { @Sendable [weak self] _ in Task { @MainActor in self?.resume() }; return .success }))
+        commandTargets.append((center.pauseCommand, center.pauseCommand.addTarget { @Sendable [weak self] _ in Task { @MainActor in self?.pause() }; return .success }))
+        commandTargets.append((center.togglePlayPauseCommand, center.togglePlayPauseCommand.addTarget { @Sendable [weak self] _ in Task { @MainActor in self?.toggle() }; return .success }))
         center.skipForwardCommand.preferredIntervals = [15]; center.skipBackwardCommand.preferredIntervals = [15]
-        commandTargets.append((center.skipForwardCommand, center.skipForwardCommand.addTarget { [weak self] _ in Task { @MainActor in self?.skip(15) }; return .success }))
-        commandTargets.append((center.skipBackwardCommand, center.skipBackwardCommand.addTarget { [weak self] _ in Task { @MainActor in self?.skip(-15) }; return .success }))
-        commandTargets.append((center.changePlaybackPositionCommand, center.changePlaybackPositionCommand.addTarget { [weak self] event in
+        commandTargets.append((center.skipForwardCommand, center.skipForwardCommand.addTarget { @Sendable [weak self] _ in Task { @MainActor in self?.skip(15) }; return .success }))
+        commandTargets.append((center.skipBackwardCommand, center.skipBackwardCommand.addTarget { @Sendable [weak self] _ in Task { @MainActor in self?.skip(-15) }; return .success }))
+        commandTargets.append((center.changePlaybackPositionCommand, center.changePlaybackPositionCommand.addTarget { @Sendable [weak self] event in
             guard let event = event as? MPChangePlaybackPositionCommandEvent else { return .commandFailed }
             let position = event.positionTime
             Task { @MainActor in self?.seek(position) }; return .success

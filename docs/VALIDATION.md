@@ -1,6 +1,6 @@
 # Validation
 
-Current creator/default-library checks are in [AI_CREATOR.md](AI_CREATOR.md) and [ICLOUD_LIBRARY.md](ICLOUD_LIBRARY.md). The evidence below records the original 30 September baseline; its folder-picker UI was replaced on 2 October.
+Current creator/default-library checks are in [AI_CREATOR.md](AI_CREATOR.md) and [ICLOUD_LIBRARY.md](ICLOUD_LIBRARY.md). The 2 October TestFlight player-crash investigation and covered-book regression are in [PLAYBACK_CRASH.md](PLAYBACK_CRASH.md). The evidence below records the original 30 September baseline; its folder-picker UI was replaced on 2 October.
 
 ## Baseline — 30 September 2026
 

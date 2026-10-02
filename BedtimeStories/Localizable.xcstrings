@@ -7144,6 +7144,86 @@
           }
         }
       }
+    },
+    "Developer": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Developer"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Narzędzia deweloperskie"
+          }
+        }
+      }
+    },
+    "Developer Mode": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Developer Mode"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tryb deweloperski"
+          }
+        }
+      }
+    },
+    "Open Logs": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Logs"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otwórz logi"
+          }
+        }
+      }
+    },
+    "Logs": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logs"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logi"
+          }
+        }
+      }
+    },
+    "Shake your device to open the logs. Logs stay on this device.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shake your device to open the logs. Logs stay on this device."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Potrząśnij urządzeniem, aby otworzyć logi. Logi pozostają na tym urządzeniu."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

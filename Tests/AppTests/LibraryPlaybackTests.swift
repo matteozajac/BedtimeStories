@@ -1,9 +1,72 @@
 import Foundation
+import MediaPlayer
+import MZAppFoundation
 import Testing
+import UIKit
 @testable import BedtimeStories
 
 @Suite(.serialized) @MainActor
 struct LibraryPlaybackTests {
+    @Test func missingRecordingLogsTheUnderlyingFailureOnce() async throws {
+        let workspace = try fixtureWorkspace()
+        defer { try? FileManager.default.removeItem(at: workspace) }
+        let root = workspace.appendingPathComponent("Library")
+        let book = try makeBook(root: root, title: "Private family story", recordings: [1])
+        try FileManager.default.removeItem(at: book.folder.appendingPathComponent("audio/01.wav"))
+        let sink = RecordingLogger()
+        let player = StoryPlayer(logger: sink)
+        defer { player.stop() }
+        let defaults = try #require(UserDefaults(suiteName: UUID().uuidString))
+        player.play(book: book, chapter: nil, repository: LibraryRepository(cacheRoot: workspace.appendingPathComponent("Cache")),
+                    root: root, progress: LocalProgress(namespace: "failure", defaults: defaults))
+        try await wait { !player.loading && player.error != nil }
+        let failures = sink.entries.filter { $0.level == .error }
+        #expect(failures.count == 1)
+        let failure = try #require(failures.first)
+        #expect(failure.error?.causes.isEmpty == false)
+        #expect(failure.source.file.hasSuffix("StoryPlayer.swift"))
+        #expect(!String(describing: failure).contains(book.manifest.title))
+        #expect(!String(describing: failure).contains(workspace.path))
+    }
+
+    @Test func coverArtworkCanBeRequestedOffMainActor() async throws {
+        let workspace = try fixtureWorkspace()
+        defer { try? FileManager.default.removeItem(at: workspace) }
+        let root = workspace.appendingPathComponent("Library")
+        var book = try makeBook(root: root, title: "Covered audio", recordings: [30])
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        let image = UIGraphicsImageRenderer(size: CGSize(width: 32, height: 48), format: format).image { context in
+            UIColor.blue.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 32, height: 48))
+        }
+        let data = try #require(image.pngData())
+        try data.write(to: book.folder.appendingPathComponent("cover.png"))
+        book.manifest.cover = "cover.png"
+        let repository = LibraryRepository(cacheRoot: workspace.appendingPathComponent("Cache"))
+        let defaults = try #require(UserDefaults(suiteName: UUID().uuidString))
+        let progress = LocalProgress(namespace: "artwork", defaults: defaults)
+        let player = StoryPlayer()
+        defer { player.stop() }
+        player.play(book: book, chapter: nil, repository: repository, root: root, progress: progress)
+        try await wait {
+            MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPMediaItemPropertyArtwork] is MPMediaItemArtwork
+        }
+        #expect(player.error == nil)
+        // MediaPlayer requests artwork on its own queue, as in the Vision Pro crash.
+        let sizes = try await Task.detached { try Self.requestNowPlayingArtwork() }.value
+        #expect(sizes == [image.size, image.size])
+        #expect(progress.playback(book.id) != nil)
+    }
+
+    nonisolated private static func requestNowPlayingArtwork() throws -> [CGSize] {
+        #expect(!Thread.isMainThread)
+        let artwork = try #require(MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPMediaItemPropertyArtwork] as? MPMediaItemArtwork)
+        return try [CGSize(width: 16, height: 24), CGSize(width: 32, height: 48)].map { requested in
+            try #require(artwork.image(at: requested)).size
+        }
+    }
+
     @Test func indexingOfflineCacheImportAndReplacement() async throws {
         let workspace = try fixtureWorkspace()
         defer { try? FileManager.default.removeItem(at: workspace) }

@@ -1,5 +1,46 @@
 # Internal TestFlight
 
+## 1.0 (9) — 2 October 2026
+
+The MZAppFoundation 0.3.1 logging integration and playback artwork crash fix are
+processed and available to **Internal Testers**. Exact readback confirms `VALID`,
+`INTERNAL_ONLY`, `IN_BETA_TESTING`, complete effective group access, and English
+What to Test notes matching the uploaded text.
+
+- Build/upload ID: `fd7a31d7-7573-44fb-941f-f3f0a7adb08f`.
+- App ID: `6818278413`; bundle: `com.matteozajac.bedtimestories`; team: `4TCJLR98Y5`.
+- Group: `20328e88-9f9c-4c47-be78-c33a809d1a71` (**Internal Testers**, explicit and all-build access).
+- Minimum OS: iOS / iPadOS 27.0; compatible Mac/Vision minimums also read back as 27.0.
+- Configuration: **Internal**, optimized and without the invocation-only testability override.
+- IPA SHA-256: `ca785a582e51ef1e7b039cbacad4c05a8024c52519bde7f843c0e7be32369765`.
+- Release source fingerprint: `615876351a38bd828139155b1709e9f2e7e98cb244c71ee42cf23149af23d7e8`; all **123 release input hashes** matched through archive, export, upload and processing.
+- Signed archive and Internal-only export passed. The app's signature and embedded App Store profile grant Sign in with Apple, production App Attest, Private Cloud Compute and **Production** CloudDocuments access to the exact iCloud container. Profile UUID remains `5abe4610-98c2-404b-89ee-2d87f303e113`, expiring 9 August 2027.
+- English test-note localization: `bafb7ffd-d02a-4776-bb58-67a52714ff9b`.
+
+Developer Mode defaults on in this Internal build unless explicitly disabled
+before. Shake opens Pulse; **Settings → Developer → Open Logs** is the fallback.
+Structured error logs preserve error identity, nested causes, caller information
+and reporting stacks while omitting story content, recordings, and paths. Remote
+analytics and diagnostics remain disabled. The MediaPlayer artwork and remote
+command callbacks now safely run on system background queues. Retest covered-book
+playback, including the iOS-compatible app on Vision Pro.
+
+Validation: **39 native tests in six suites passed in optimized Internal** on
+the iPhone simulator, including the artwork regression, PCC compilation gate,
+structured logging and UIKit shake callback. **8 Swift Testing core tests, 3
+snapshot XCTest tests and 6 Python authoring tests** passed. Local binary isolation
+passed, and two repeated setup applications produced no changes. See
+[diagnostics](../.mzappfoundation/README.md) and [playback regression](PLAYBACK_CRASH.md).
+
+Cloud narration remains disabled, with no Firebase client configuration bundled.
+Existing local/iCloud books, manual recording and Apple AI flows retain their
+existing requirements. Build availability does not establish installation or
+physical-device shake/playback behavior. Raw release receipts, signatures and
+the input fingerprint are in `.build/pti/1.0-9/`; they are disposable outputs and
+are excluded from Git.
+
+[Open TestFlight in App Store Connect](https://appstoreconnect.apple.com/apps/6818278413/testflight/ios).
+
 ## 1.0 (8) — 2 October 2026
 
 The parent-voice client and privacy implementation is processed and available to **Internal Testers**. Exact readback confirms `VALID`, `INTERNAL_ONLY`, `IN_BETA_TESTING`, complete effective group access, and saved English What to Test notes matching the upload (Apple trims the terminal newline).
