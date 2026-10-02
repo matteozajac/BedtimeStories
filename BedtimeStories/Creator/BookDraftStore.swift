@@ -135,6 +135,12 @@ actor BookDraftStore {
         } catch { try? files.removeItem(at: destination); throw error }
     }
 
+    func removeMedia(_ paths: [String], draftID: UUID) {
+        for path in paths {
+            if let url = try? mediaURL(path, draftID: draftID) { try? files.removeItem(at: url) }
+        }
+    }
+
     func stageBook(_ draft: BookDraft) throws -> LibraryBook {
         try draft.validateDraft()
         let manifest = draft.manifest

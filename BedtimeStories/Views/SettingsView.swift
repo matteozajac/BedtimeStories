@@ -38,6 +38,10 @@ struct SettingsView: View {
             } header: { Text("Creating Books") }
             .listRowBackground(Theme.surface)
             Section {
+                NavigationLink { YourVoicesView() } label: { row("Your Voices", systemImage: "person.wave.2.fill") }
+            } header: { Text("Narration") }
+            .listRowBackground(Theme.surface)
+            Section {
                 LabeledContent { Text(verbatim: "1.0") } label: { row("Version", systemImage: "info.circle.fill") }
             }
             .listRowBackground(Theme.surface)

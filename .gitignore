@@ -100,3 +100,19 @@ google-services.json
 # Python helpers
 __pycache__/
 *.pyc
+
+# Private backend credentials and generated build artifacts
+node_modules/
+backend/functions/lib/
+backend/worker/.venv/
+.env
+.env.*
+!.env.example
+.firebase/
+firebase-debug.log
+firestore-debug.log
+storage-debug.log
+ui-debug.log
+*.tfstate
+*.tfstate.*
+.terraform/

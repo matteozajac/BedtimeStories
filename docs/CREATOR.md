@@ -12,7 +12,11 @@ Existing full-book narration and chapter timestamps are preserved. **Record a Ne
 
 ## Recording behavior
 
-Microphone permission is requested when starting a recording. If permission is denied, the recorder offers Settings; writing and audio import remain available. Recording pauses when the app leaves the foreground, when the audio session is interrupted, or when an input route disconnects. Resume requires an explicit tap. A replacement take is copied and validated before it is attached to the draft. Recordings stay in the app/library folder and are not sent to an audio service.
+Microphone permission is requested when starting a recording. If permission is denied, the recorder offers Settings; writing and audio import remain available. Recording pauses when the app leaves the foreground, when the audio session is interrupted, or when an input route disconnects. Resume requires an explicit tap. A replacement take is copied and validated before it is attached to the draft. Manual book recordings stay in the app/library folder. Optional voice enrollment separately asks to upload reference/consent samples for Google voice creation and retain them until deletion.
+
+## Optional generated narration — 2 October 2026
+
+The implemented cloud feature is currently disabled while dedicated project provisioning and live device/provider checks remain pending. Once enabled, **Settings → Your Voices** enrolls an adult's own voice with separate retention acceptance, reference/consent takes and a listening/approval step. **Create Narration** in the editor selects that voice, book delivery style and paragraph overrides. Preview the opening, request the complete narration, then choose **Use Narration** to replace audio in the working draft. **Save** publishes the rendered audio through the existing library/portable format. A preview, changed text/settings, another account or an incomplete result cannot attach as a complete book. See [cloud narration](CLOUD_NARRATION.md) and its [validation receipt](CLOUD_NARRATION_VALIDATION.md).
 
 ## Validation — 1 October 2026
 

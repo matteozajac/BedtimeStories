@@ -1,0 +1,5 @@
+project_id      = "bedtime-stories-prod-mz"
+display_name    = "Always Near Stories"
+billing_account = "017113-E9FBF5-49BBC9"
+# Proposed dedicated production target; no resources have been applied.
+worker_image = null

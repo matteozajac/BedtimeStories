@@ -4,6 +4,7 @@ import UniformTypeIdentifiers
 
 struct BookEditorView: View {
     @Environment(LibraryModel.self) private var library
+    @Environment(CloudNarrationModel.self) private var cloud
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var phase
     @State private var editor: BookEditorModel
@@ -15,6 +16,7 @@ struct BookEditorView: View {
     @State private var importingFullAudio = false
     @State private var removingFullAudio = false
     @State private var preview = DraftAudioPreview()
+    @State private var creatingNarration = false
 
     init(draft: BookDraft, store: BookDraftStore) {
         _editor = State(initialValue: BookEditorModel(draft: draft, store: store))
@@ -57,6 +59,13 @@ struct BookEditorView: View {
                     .accessibilityIdentifier("book-estimated-reading-time")
             }
             .listRowBackground(Theme.surface)
+            if cloud.isConfigured, cloud.isEnabled {
+                Section {
+                    Button("Create Narration with Your Voice", systemImage: "waveform") { preview.stop(); creatingNarration = true }
+                        .disabled(editor.draft.wordCount == 0)
+                } header: { Text("Your Voice") }
+                .listRowBackground(Theme.surface)
+            }
             if let audio = editor.draft.audio {
                 Section {
                     Button(preview.playingPath == audio ? "Stop Preview" : "Play Narration", systemImage: preview.playingPath == audio ? "stop.fill" : "play.fill") {
@@ -144,6 +153,7 @@ struct BookEditorView: View {
         .sheet(isPresented: $recordingFullBook) {
             RecordingView(text: editor.draft.chapters.map(\.text).joined(separator: "\n\n")) { await editor.setFullAudio($0) }
         }
+        .sheet(isPresented: $creatingNarration) { NavigationStack { NarrationComposerView(editor: editor) } }
         .fileImporter(isPresented: $importingFullAudio, allowedContentTypes: [.audio]) { result in
             switch result {
             case .success(let url): Task { _ = await editor.setFullAudio(url) }

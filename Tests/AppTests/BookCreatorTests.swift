@@ -221,13 +221,143 @@ struct BookCreatorTests {
         #expect(editor.draft.manifest.audio == nil && editor.draft.manifest.orderedChapters[0].audio != nil)
     }
 
+    @Test func generatedNarrationAttachesEveryChapterAtomicallyAndPreservesExportFormat() async throws {
+        let root = workspace(); defer { try? FileManager.default.removeItem(at: root) }
+        let store = BookDraftStore(root: root.appendingPathComponent("Drafts"))
+        var draft = try await store.create(); draft.title = "Generated Narration"
+        draft.chapters[0].text = "A fox slept."
+        draft.chapters.append(DraftChapter(title: "Morning", text: "The sun rose."))
+        let recording = root.appendingPathComponent("voice.wav"); try wave().write(to: recording)
+        draft.audio = try await store.addAudio(recording, draftID: draft.id).path
+        draft.chapters[0].startTime = 0; draft.chapters[1].startTime = 0.5
+        try await store.save(draft)
+        let editor = BookEditorModel(draft: draft, store: store)
+        let outputs = Dictionary(uniqueKeysWithValues: draft.chapters.map { ($0.id, recording) })
+        #expect(await editor.setGeneratedAudio(outputs, expectedSnapshot: draft))
+        let restored = try await store.load(draft.id)
+        #expect(restored.audio == nil && restored.chapters.allSatisfy { $0.audio != nil && $0.startTime == nil })
+        #expect(restored.chapters.map(\.id) == draft.chapters.map(\.id))
+        let staged = try await store.stageBook(restored)
+        defer { try? FileManager.default.removeItem(at: staged.folder.deletingLastPathComponent()) }
+        let manifest = try BookManifest.load(from: staged.folder, requireAssets: true)
+        #expect(AudioTrack.tracks(for: manifest).count == 2)
+        #expect(manifest.assetPaths.allSatisfy { !$0.contains("Consent") && !$0.contains("Reference") })
+    }
+
+    @Test func failedGeneratedBatchAndStaleSnapshotKeepOriginalNarration() async throws {
+        let root = workspace(); defer { try? FileManager.default.removeItem(at: root) }
+        let store = BookDraftStore(root: root.appendingPathComponent("Drafts"))
+        var draft = try await store.create(); draft.title = "Preserve Me"
+        draft.chapters[0].text = "Good night."; draft.chapters.append(DraftChapter(text: "Sleep well."))
+        let recording = root.appendingPathComponent("voice.wav"); try wave().write(to: recording)
+        draft.audio = try await store.addAudio(recording, draftID: draft.id).path
+        try await store.save(draft)
+        let editor = BookEditorModel(draft: draft, store: store)
+        let invalid = root.appendingPathComponent("broken.wav"); try Data("invalid".utf8).write(to: invalid)
+        #expect(await editor.setGeneratedAudio([draft.chapters[0].id: recording, draft.chapters[1].id: invalid], expectedSnapshot: draft) == false)
+        #expect(editor.draft.hasSameContent(as: draft))
+        #expect(try await store.load(draft.id).hasSameContent(as: draft))
+        #expect(await editor.setGeneratedAudio([draft.chapters[0].id: recording], expectedSnapshot: draft) == false)
+        editor.draft.chapters[0].text = "A new ending."
+        #expect(await editor.setGeneratedAudio(Dictionary(uniqueKeysWithValues: draft.chapters.map { ($0.id, recording) }), expectedSnapshot: draft) == false)
+        #expect(editor.draft.audio == draft.audio && editor.draft.chapters[0].text == "A new ending.")
+    }
+
+    @Test func voiceEnrollmentConvertsBoundedAudioToPrivatePCM24kWave() async throws {
+        let root = workspace(); defer { try? FileManager.default.removeItem(at: root) }
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        let source = root.appendingPathComponent("sample.wav")
+        try wave(seconds: 10).write(to: source)
+        let prepared = try await VoiceEnrollmentAudio.shared.prepare(source, userID: "test-owner", consent: false)
+        defer { try? FileManager.default.removeItem(at: prepared) }
+        let bytes = try Data(contentsOf: prepared)
+        #expect(String(data: bytes.prefix(4), encoding: .utf8) == "RIFF")
+        #expect(bytes[24..<28] == Data([0xC0, 0x5D, 0, 0]))
+        #expect(bytes[22..<24] == Data([1, 0]) && bytes[34..<36] == Data([16, 0]))
+        #expect(bytes.count >= 479_000 && bytes.count <= 480_100)
+        #expect(Double(bytes.count - 44) / 48_000 >= 10)
+        #expect(prepared.path.contains("CloudVoiceEnrollment") && !prepared.path.contains("Books"))
+        try wave(seconds: 1).write(to: source)
+        await #expect(throws: BookError.self) { try await VoiceEnrollmentAudio.shared.prepare(source, userID: "test-owner", consent: false) }
+        try wave(seconds: 31).write(to: source)
+        await #expect(throws: BookError.self) { try await VoiceEnrollmentAudio.shared.prepare(source, userID: "test-owner", consent: false) }
+    }
+
+    @Test func unresolvedNarrationRequestRetriesArePrivateAndIdempotent() throws {
+        let owner = "ReceiptOwner-\(UUID().uuidString)"
+        let otherOwner = "ReceiptOwner-\(UUID().uuidString)"
+        defer {
+            NarrationRequestReceipt.removePrivateData(uid: owner)
+            NarrationRequestReceipt.removePrivateData(uid: otherOwner)
+        }
+        let draftID = UUID()
+        let hash = String(repeating: "a", count: 64)
+        func request(_ uid: String? = nil, voice: String = "voice-one", preview: Bool = false) throws -> String {
+            try NarrationRequestReceipt.requestID(uid: uid ?? owner, draftID: draftID, snapshotHash: hash, voiceID: voice, preview: preview)
+        }
+        let original = try request()
+        #expect(UUID(uuidString: original) != nil)
+        #expect(try request() == original)
+        let other = try request(otherOwner)
+        #expect(other != original)
+        #expect(try request(voice: "voice-two") != original)
+        #expect(try request(preview: true) != original)
+        NarrationRequestReceipt.confirm(uid: otherOwner, requestID: original)
+        #expect(try request(otherOwner) == other)
+        NarrationRequestReceipt.confirm(uid: owner, requestID: original)
+        let confirmedReplacement = try request()
+        #expect(confirmedReplacement != original && UUID(uuidString: confirmedReplacement) != nil)
+        NarrationRequestReceipt.removePrivateData(uid: owner)
+        #expect(try request() != confirmedReplacement)
+        #expect(try request(otherOwner) == other)
+    }
+
+    @Test func accountSwitchAndCancellationCannotAttachGeneratedNarration() async throws {
+        let root = workspace(); defer { try? FileManager.default.removeItem(at: root) }
+        let store = BookDraftStore(root: root.appendingPathComponent("Drafts"))
+        var draft = try await store.create(); draft.title = "Private Narration"
+        draft.chapters[0].text = "A fox sleeps."
+        draft.chapters.append(DraftChapter(text: "Morning comes."))
+        let recording = root.appendingPathComponent("voice.wav"); try wave().write(to: recording)
+        draft.audio = try await store.addAudio(recording, draftID: draft.id).path
+        try await store.save(draft)
+        let previousAudio = try await store.mediaURL(try #require(draft.audio), draftID: draft.id)
+        let mediaDirectory = previousAudio.deletingLastPathComponent()
+        let previousFiles = Set(try FileManager.default.contentsOfDirectory(atPath: mediaDirectory.path))
+        let editor = BookEditorModel(draft: draft, store: store)
+        let outputs = Dictionary(uniqueKeysWithValues: draft.chapters.map { ($0.id, recording) })
+        var currentAccount = "owner-A"
+        var accountSwitch: Task<Void, Never>?
+        var observedAccountChange = false
+        let authorization: @MainActor () -> Bool = {
+            if accountSwitch == nil {
+                // The switch runs as soon as audio preparation yields the main actor.
+                accountSwitch = Task { @MainActor in currentAccount = "owner-B" }
+            }
+            if currentAccount != "owner-A" { observedAccountChange = true }
+            return currentAccount == "owner-A"
+        }
+        #expect(await editor.setGeneratedAudio(outputs, expectedSnapshot: draft, authorized: authorization) == false)
+        await accountSwitch?.value
+        #expect(observedAccountChange)
+        #expect(editor.draft.hasSameContent(as: draft))
+        #expect(try await store.load(draft.id).hasSameContent(as: draft))
+        #expect(Set(try FileManager.default.contentsOfDirectory(atPath: mediaDirectory.path)) == previousFiles)
+        #expect(await editor.setGeneratedAudio(outputs, expectedSnapshot: draft, authorized: { false }) == false)
+        let cancelled = Task { await editor.setGeneratedAudio(outputs, expectedSnapshot: draft) }
+        cancelled.cancel()
+        #expect(await cancelled.value == false)
+        #expect(try await store.load(draft.id).hasSameContent(as: draft))
+        #expect(Set(try FileManager.default.contentsOfDirectory(atPath: mediaDirectory.path)) == previousFiles)
+    }
+
     private func workspace() -> URL { URL.temporaryDirectory.appendingPathComponent("CreatorTest-\(UUID().uuidString)") }
-    private func wave() -> Data {
+    private func wave(seconds: Int = 1) -> Data {
         var data = Data()
         func put(_ value: UInt32, bytes: Int = 4) { for index in 0..<bytes { data.append(UInt8((value >> (index * 8)) & 255)) } }
-        data.append(Data("RIFF".utf8)); put(16_036); data.append(Data("WAVEfmt ".utf8))
+        data.append(Data("RIFF".utf8)); put(UInt32(16_000 * seconds + 36)); data.append(Data("WAVEfmt ".utf8))
         put(16); put(1, bytes: 2); put(1, bytes: 2); put(8_000); put(16_000); put(2, bytes: 2); put(16, bytes: 2)
-        data.append(Data("data".utf8)); put(16_000); data.append(Data(count: 16_000))
+        data.append(Data("data".utf8)); put(UInt32(16_000 * seconds)); data.append(Data(count: 16_000 * seconds))
         return data
     }
 }

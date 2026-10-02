@@ -161,6 +161,62 @@ final class BookEditorModel {
         }
     }
 
+    /// A generated book becomes one draft change only after every chapter is playable.
+    func setGeneratedAudio(_ urls: [UUID: URL], expectedSnapshot: BookDraft,
+                           authorized: @MainActor () -> Bool = { true }) async -> Bool {
+        guard !working, !closing, authorized(), draft.hasSameContent(as: expectedSnapshot) else {
+            message = String(localized: "This book changed after narration was created. Create a new narration for the current text.")
+            return false
+        }
+        let chapterIDs = Set(draft.chapters.filter { !NarrationSnapshot.paragraphs(in: $0).isEmpty }.map(\.id))
+        guard !chapterIDs.isEmpty, Set(urls.keys) == chapterIDs else {
+            message = String(localized: "Some chapters are missing. Your saved narration is unchanged.")
+            return false
+        }
+        working = true
+        defer { working = false }
+        let previous = draft
+        let pending = autosave
+        pending?.cancel()
+        await pending?.value
+        var copied: [UUID: (path: String, duration: Double)] = [:]
+        do {
+            for chapter in previous.chapters where chapterIDs.contains(chapter.id) {
+                try Task.checkCancellation()
+                guard authorized(), !closing, draft.hasSameContent(as: previous), let url = urls[chapter.id] else {
+                    throw CancellationError()
+                }
+                copied[chapter.id] = try await store.addAudio(url, draftID: draft.id)
+            }
+            guard authorized(), !closing, draft.hasSameContent(as: previous) else { throw CancellationError() }
+            var replacement = previous
+            replacement.audio = nil; replacement.audioDuration = nil
+            for index in replacement.chapters.indices {
+                replacement.chapters[index].audio = copied[replacement.chapters[index].id]?.path
+                replacement.chapters[index].audioDuration = copied[replacement.chapters[index].id]?.duration
+                replacement.chapters[index].startTime = nil
+            }
+            replacement.modifiedAt = Date()
+            try await store.save(replacement)
+            // Disk publication is atomic. An account change during it cannot attach
+            // the result to another person's editor.
+            guard authorized(), !closing, draft.hasSameContent(as: previous) else {
+                var restored = previous; restored.modifiedAt = Date()
+                try await store.save(restored)
+                throw CancellationError()
+            }
+            draft = replacement
+            autosave?.cancel(); saved = true
+            return true
+        } catch {
+            await store.removeMedia(copied.values.map(\.path), draftID: previous.id)
+            if !(error is CancellationError) {
+                message = String(localized: "Narration could not be added. Your previous recordings and text are still saved. Try again.")
+            }
+            return false
+        }
+    }
+
     func save(to library: LibraryModel, asCopy: Bool = false) async -> Bool {
         guard !working, !closing, !draft.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return false }
         working = true

@@ -9,6 +9,7 @@
 <key>CFBundleShortVersionString</key><string>$(MARKETING_VERSION)</string>
 <key>CFBundleVersion</key><string>$(CURRENT_PROJECT_VERSION)</string>
 <key>ITSAppUsesNonExemptEncryption</key><false/>
+<key>CloudNarrationEnabled</key><false/>
 <key>NSMicrophoneUsageDescription</key><string>Record your voice to narrate the books you create for your family.</string>
 <key>UILaunchScreen</key><dict/>
 <key>UIApplicationSceneManifest</key><dict><key>UIApplicationSupportsMultipleScenes</key><false/></dict>

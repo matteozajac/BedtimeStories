@@ -1,5 +1,26 @@
 # Internal TestFlight
 
+## 1.0 (8) — 2 October 2026
+
+The parent-voice client and privacy implementation is processed and available to **Internal Testers**. Exact readback confirms `VALID`, `INTERNAL_ONLY`, `IN_BETA_TESTING`, complete effective group access, and saved English What to Test notes matching the upload (Apple trims the terminal newline).
+
+- Build/upload ID: `0b69f792-f2ac-4c37-b3d9-f5dd83cfdc73`.
+- App ID: `6818278413`; bundle: `com.matteozajac.bedtimestories`; team: `4TCJLR98Y5`.
+- Group: `20328e88-9f9c-4c47-be78-c33a809d1a71` (**Internal Testers**, explicit and all-build access).
+- Minimum OS: iOS / iPadOS 27.0.
+- IPA SHA-256: `200b6dfdfe44cd199035cd1c90f2f5c35269d4f6b543d03c8f5bc04a8731fa35`.
+- Release source fingerprint: `4f4dbbbc67839f25d0dee011e15f8d578a5863e401a918362fed1f9d9e29c860`; all **113 release input hashes** matched before/after archive, export, upload and processing.
+- Signed archive and Internal-only export passed. Exported app identity, device families, signature/certificate and profile were verified. The signature grants Sign in with Apple, production App Attest, Private Cloud Compute and **Production** CloudDocuments access to `iCloud.com.matteozajac.bedtimestories`.
+- Refreshed automatic App Store profile: **iOS Team Store Provisioning Profile: com.matteozajac.bedtimestories**, UUID `5abe4610-98c2-404b-89ee-2d87f303e113`, profile expiry 9 August 2027. The reused Apple Distribution certificate expires 5 March 2027.
+
+**Cloud narration remains disabled** in this binary, and no Firebase client configuration is bundled. Settings → Your Voices explains availability; enrollment and generation cannot begin. Dedicated Google project creation was rejected because the account project quota is full. The backend, encryption, owner isolation, deletion/recovery and Gemini 3.8 worker implementation are included in source, with deployment and live provider/device validation still pending. Existing local/iCloud book creation, manual narration, reading, playback, sharing and Apple AI features remain available under their existing requirements.
+
+Validation: **32 native tests in 4 suites passed in Release**, with no failures/skips, including account switching/cancellation during audio attachment, recording duration limits and private request-retry receipts. Implementation checks also passed: **3 narration snapshot XCTest tests + 8 Swift Testing core tests**, **6 Python authoring tests**, **6 Functions unit tests**, **12 Firestore/Storage isolation scenarios**, **44 worker tests** and **6 infrastructure helper tests**. Terraform schema/format validation, dependency audits and source hygiene passed. See the [cloud narration receipt](CLOUD_NARRATION_VALIDATION.md).
+
+Both existing testers remain `INSTALLED` and report build 1.0 (7), so installation of build 8 is not established. Physical-device microphone, Apple/App Attest authentication, generated voice likeness/emotion, deployed A/B denial and cloud deletion checks remain pending. No tester membership changes or external/App Review submission were made.
+
+[Open TestFlight in App Store Connect](https://appstoreconnect.apple.com/apps/6818278413/testflight/ios).
+
 ## 1.0 (7) — 2 October 2026
 
 The editing, reading-duration, and Image Playground update is processed and available to **Internal Testers**. Exact readback confirms `VALID`, `INTERNAL_ONLY`, `IN_BETA_TESTING`, complete effective group access, and English What to Test notes matching the upload.

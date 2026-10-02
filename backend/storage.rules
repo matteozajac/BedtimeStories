@@ -1,0 +1,22 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function owner(uid) {
+      return request.auth != null && request.auth.uid == uid
+        && request.auth.token.firebase.sign_in_provider == 'apple.com';
+    }
+    function active(uid) {
+      return !firestore.exists(/databases/(default)/documents/privateAccounts/$(uid))
+        || firestore.get(/databases/(default)/documents/privateAccounts/$(uid)).data.state == 'active';
+    }
+    match /users/{uid}/jobs/{jobId}/{chapterFile} {
+      allow get: if owner(uid) && active(uid)
+        && chapterFile.matches('^[A-Za-z0-9_-]+[.]m4a$')
+        && firestore.get(/databases/(default)/documents/users/$(uid)/jobs/$(jobId)).data.state == 'ready'
+        && firestore.get(/databases/(default)/documents/users/$(uid)/jobs/$(jobId)).data.expiresAt > request.time;
+      allow list, write: if false;
+    }
+    // Original voice/consent recordings and encrypted provider IDs are backend-only.
+    match /{path=**} { allow read, write: if false; }
+  }
+}

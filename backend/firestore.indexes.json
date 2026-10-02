@@ -1,0 +1,14 @@
+{
+  "indexes": [
+    { "collectionGroup": "jobs", "queryScope": "COLLECTION", "fields": [ { "fieldPath": "voiceProfileId", "order": "ASCENDING" }, { "fieldPath": "state", "order": "ASCENDING" } ] },
+    { "collectionGroup": "jobs", "queryScope": "COLLECTION", "fields": [ { "fieldPath": "preview", "order": "ASCENDING" }, { "fieldPath": "state", "order": "ASCENDING" } ] }
+  ],
+  "fieldOverrides": [
+    { "collectionGroup": "voices", "fieldPath": "dispatchPending", "indexes": [ { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" } ] },
+    { "collectionGroup": "jobs", "fieldPath": "dispatchPending", "indexes": [ { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" } ] },
+    { "collectionGroup": "jobs", "fieldPath": "expiresAt", "indexes": [ { "order": "ASCENDING", "queryScope": "COLLECTION" }, { "order": "DESCENDING", "queryScope": "COLLECTION" }, { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" } ] },
+    { "collectionGroup": "enrollments", "fieldPath": "expiresAt", "indexes": [ { "order": "ASCENDING", "queryScope": "COLLECTION" }, { "order": "DESCENDING", "queryScope": "COLLECTION" }, { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" } ] },
+    { "collectionGroup": "jobs", "fieldPath": "chapters", "indexes": [] },
+    { "collectionGroup": "voices", "fieldPath": "providerVoice", "indexes": [] }
+  ]
+}

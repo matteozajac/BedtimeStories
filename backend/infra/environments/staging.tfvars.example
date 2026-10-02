@@ -1,0 +1,5 @@
+project_id      = "bedtime-stories-staging-mz"
+display_name    = "Always Near Stories Staging"
+billing_account = "017113-E9FBF5-49BBC9"
+# Quota blocked creation on 2026-10-02. This is a proposed target, not an existing project.
+worker_image = null

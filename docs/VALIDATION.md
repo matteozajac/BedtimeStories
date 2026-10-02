@@ -53,3 +53,5 @@ For UI checks, install the Debug app on a disposable iOS 27 simulator, then run 
 5. Check larger Dynamic Type, VoiceOver, rotation, iPad multitasking, and Reduce Transparency/Motion on hardware.
 
 Reading resumes at the chapter level; it does not save paragraph or scroll offsets. `.bedtimestory` imports use the documented stored ZIP32 profile: arbitrary compressed/encrypted/ZIP64 archives are rejected. iCloud sharing is managed through Files rather than an in-app account or invitation system.
+
+The optional parent voice implementation has a separate [2 October cloud narration receipt](CLOUD_NARRATION_VALIDATION.md) covering native/backend tests, signed entitlements, deployment blockers and outstanding physical-device/provider gates. Ordinary book-library sharing continues through Files.

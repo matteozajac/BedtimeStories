@@ -5220,6 +5220,1930 @@
           }
         }
       }
+    },
+    "Voice Narration Is Coming": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voice Narration Is Coming"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Narracja twoim głosem już wkrótce"
+          }
+        }
+      }
+    },
+    "Keep writing stories and recording them yourself. Creating a reusable voice will be available here when it is ready.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep writing stories and recording them yourself. Creating a reusable voice will be available here when it is ready."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Możesz już pisać bajki i nagrywać je samodzielnie. Gdy nowa funkcja będzie gotowa, zapiszesz tutaj swój głos do odczytywania kolejnych historii."
+          }
+        }
+      }
+    },
+    "Sign in to keep your voice and generated narration private and use them across your devices.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in to keep your voice and generated narration private and use them across your devices."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zaloguj się, aby bezpiecznie przechowywać swój głos i utworzoną narrację oraz korzystać z nich na swoich urządzeniach."
+          }
+        }
+      }
+    },
+    "Your Private Voice": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your Private Voice"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Twój prywatny głos"
+          }
+        }
+      }
+    },
+    "Your iCloud book library continues to use your Apple Account. Signing in here gives you access to your private saved voices.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your iCloud book library continues to use your Apple Account. Signing in here gives you access to your private saved voices."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biblioteka w iCloud nadal jest powiązana z twoim kontem Apple. Logowanie tutaj daje dostęp do twoich prywatnych, zapisanych głosów."
+          }
+        }
+      }
+    },
+    "Your Voices": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your Voices"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Twoje głosy"
+          }
+        }
+      }
+    },
+    "Add Your Voice": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Your Voice"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodaj swój głos"
+          }
+        }
+      }
+    },
+    "Preparing your voice…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparing your voice…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przygotowujemy twój głos…"
+          }
+        }
+      }
+    },
+    "This voice could not be prepared. Delete it and record a new sample.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This voice could not be prepared. Delete it and record a new sample."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się przygotować tego głosu. Usuń go i nagraj nową próbkę."
+          }
+        }
+      }
+    },
+    "Preview Voice": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preview Voice"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posłuchaj głosu"
+          }
+        }
+      }
+    },
+    "Listen to a preview, then choose whether to keep this voice.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listen to a preview, then choose whether to keep this voice."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posłuchaj próbki i zdecyduj, czy chcesz zachować ten głos."
+          }
+        }
+      }
+    },
+    "Use This Voice": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use This Voice"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zachowaj ten głos"
+          }
+        }
+      }
+    },
+    "Delete Voice": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Voice"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuń głos"
+          }
+        }
+      }
+    },
+    "Save your voice once, then use it to narrate your stories.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save your voice once, then use it to narrate your stories."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zapisz swój głos raz, a potem używaj go do czytania kolejnych opowieści."
+          }
+        }
+      }
+    },
+    "Record only your own voice. Your original samples stay private and are never included when you share a book.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record only your own voice. Your original samples stay private and are never included when you share a book."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagrywaj wyłącznie swój głos. Twoje oryginalne próbki pozostają prywatne i nigdy nie są dołączane do udostępnianej książki."
+          }
+        }
+      }
+    },
+    "Creating your voice preview…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Creating your voice preview…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przygotowujemy próbkę głosu…"
+          }
+        }
+      }
+    },
+    "Sign Out": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign Out"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wyloguj się"
+          }
+        }
+      }
+    },
+    "Confirm with Apple": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirm with Apple"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Potwierdź przez Apple"
+          }
+        }
+      }
+    },
+    "Confirm with Apple before deleting your voice account.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirm with Apple before deleting your voice account."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przed usunięciem konta głosowego potwierdź swoją tożsamość przez Apple."
+          }
+        }
+      }
+    },
+    "Confirm with Apple before deleting your voice or account.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirm with Apple before deleting your voice or account."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przed usunięciem głosu lub konta potwierdź swoją tożsamość przez Apple."
+          }
+        }
+      }
+    },
+    "Delete Voice Account": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Voice Account"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuń konto głosowe"
+          }
+        }
+      }
+    },
+    "Books you have already saved in your library remain available after signing out.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Books you have already saved in your library remain available after signing out."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Książki zapisane w bibliotece pozostaną dostępne po wylogowaniu."
+          }
+        }
+      }
+    },
+    "Delete this voice?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this voice?"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usunąć ten głos?"
+          }
+        }
+      }
+    },
+    "Its samples and reusable voice will be removed. Narration already saved in your books remains.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Its samples and reusable voice will be removed. Narration already saved in your books remains."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuniemy ten głos i jego próbki. Narracja zapisana już w twoich książkach pozostanie dostępna."
+          }
+        }
+      }
+    },
+    "Delete your voice account?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete your voice account?"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usunąć konto głosowe?"
+          }
+        }
+      }
+    },
+    "Your saved voices, recordings, and cloud narration will be removed. Books already saved to your library remain.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your saved voices, recordings, and cloud narration will be removed. Books already saved to your library remain."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuniemy twoje zapisane głosy, próbki i narrację przechowywaną w chmurze. Książki zapisane w bibliotece pozostaną dostępne."
+          }
+        }
+      }
+    },
+    "Ready": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ready"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gotowy"
+          }
+        }
+      }
+    },
+    "Preparing": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparing"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przygotowanie"
+          }
+        }
+      }
+    },
+    "Review Your Voice": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review Your Voice"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprawdź swój głos"
+          }
+        }
+      }
+    },
+    "Deleting": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deleting"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuwanie"
+          }
+        }
+      }
+    },
+    "Unavailable": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unavailable"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niedostępny"
+          }
+        }
+      }
+    },
+    "This preview could not be created. Try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This preview could not be created. Try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się przygotować próbki. Spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "Voice name": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voice name"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nazwa głosu"
+          }
+        }
+      }
+    },
+    "English": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "English"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Angielski"
+          }
+        }
+      }
+    },
+    "Polish": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Polish"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Polski"
+          }
+        }
+      }
+    },
+    "I am recording my own voice": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I am recording my own voice"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagrywam swój własny głos"
+          }
+        }
+      }
+    },
+    "Use a quiet room and your normal speaking voice. You will record a voice sample and a separate consent statement.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use a quiet room and your normal speaking voice. You will record a voice sample and a separate consent statement."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wybierz ciche miejsce i mów swoim zwykłym głosem. Nagraj próbkę głosu, a następnie osobno oświadczenie o zgodzie."
+          }
+        }
+      }
+    },
+    "Speak naturally for 10–30 seconds. Keep the microphone at a comfortable distance and avoid music or other voices.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speak naturally for 10–30 seconds. Keep the microphone at a comfortable distance and avoid music or other voices."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mów naturalnie przez 10–30 sekund. Trzymaj mikrofon w wygodnej odległości. W tle nie powinno być muzyki ani innych głosów."
+          }
+        }
+      }
+    },
+    "Record Voice Sample": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record Voice Sample"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagraj próbkę głosu"
+          }
+        }
+      }
+    },
+    "Record Voice Sample Again": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record Voice Sample Again"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagraj próbkę jeszcze raz"
+          }
+        }
+      }
+    },
+    "Voice sample ready": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voice sample ready"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Próbka głosu jest gotowa"
+          }
+        }
+      }
+    },
+    "1. Voice Sample": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1. Voice Sample"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1. Próbka głosu"
+          }
+        }
+      }
+    },
+    "Record Consent Statement": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record Consent Statement"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagraj oświadczenie o zgodzie"
+          }
+        }
+      }
+    },
+    "Record Consent Again": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record Consent Again"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagraj zgodę jeszcze raz"
+          }
+        }
+      }
+    },
+    "Consent recording ready": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consent recording ready"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagranie zgody jest gotowe"
+          }
+        }
+      }
+    },
+    "2. Your Consent": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2. Your Consent"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2. Twoja zgoda"
+          }
+        }
+      }
+    },
+    "Read this statement exactly as shown. Record it separately from your voice sample.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read this statement exactly as shown. Record it separately from your voice sample."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przeczytaj oświadczenie dokładnie w podanym brzmieniu. Nagraj je osobno od próbki głosu."
+          }
+        }
+      }
+    },
+    "Create My Voice": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create My Voice"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przygotuj mój głos"
+          }
+        }
+      }
+    },
+    "Your recordings will be uploaded securely to create a reusable voice. You can delete your voice and its original samples from Your Voices.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your recordings will be uploaded securely to create a reusable voice. You can delete your voice and its original samples from Your Voices."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagrania zostaną przesłane bezpiecznie, aby przygotować głos do czytania kolejnych historii. Głos i jego oryginalne próbki możesz usunąć w sekcji Twoje głosy."
+          }
+        }
+      }
+    },
+    "Start Again": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start Again"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zacznij od nowa"
+          }
+        }
+      }
+    },
+    "Record the complete consent statement in 2–30 seconds.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record the complete consent statement in 2–30 seconds."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagraj całe oświadczenie o zgodzie w ciągu 2–30 sekund."
+          }
+        }
+      }
+    },
+    "Record 10–30 seconds of clear speech in a quiet room.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record 10–30 seconds of clear speech in a quiet room."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagraj 10–30 sekund wyraźnej mowy w cichym miejscu."
+          }
+        }
+      }
+    },
+    "This recording could not be prepared. Record another take.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This recording could not be prepared. Record another take."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się przygotować tego nagrania. Nagraj kolejną próbę."
+          }
+        }
+      }
+    },
+    "The recording is too long. Record a shorter take.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The recording is too long. Record a shorter take."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagranie jest za długie. Nagraj krótszą próbę."
+          }
+        }
+      }
+    },
+    "The preview could not be played. Try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The preview could not be played. Try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się odtworzyć próbki. Spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "Voice": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voice"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Głos"
+          }
+        }
+      }
+    },
+    "Choose Your Voice": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Your Voice"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wybierz swój głos"
+          }
+        }
+      }
+    },
+    "Manage Your Voices": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manage Your Voices"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zarządzaj głosami"
+          }
+        }
+      }
+    },
+    "Book Style": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Book Style"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sposób czytania"
+          }
+        }
+      }
+    },
+    "Choose a feeling for the whole book, then adjust individual paragraphs below. Your story’s words stay the same.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a feeling for the whole book, then adjust individual paragraphs below. Your story’s words stay the same."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wybierz sposób czytania całej książki, a poniżej dostosuj poszczególne akapity. Tekst opowieści pozostanie bez zmian."
+          }
+        }
+      }
+    },
+    "Paragraph Styles": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paragraph Styles"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sposób czytania akapitów"
+          }
+        }
+      }
+    },
+    "Untitled Chapter": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Untitled Chapter"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rozdział bez tytułu"
+          }
+        }
+      }
+    },
+    "Preview Opening": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preview Opening"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posłuchaj początku"
+          }
+        }
+      }
+    },
+    "Create Book Narration": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create Book Narration"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utwórz narrację książki"
+          }
+        }
+      }
+    },
+    "Creation continues when you close this screen. Listen and choose Use Narration before it changes your draft. Saving the book adds the audio to your library.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Creation continues when you close this screen. Listen and choose Use Narration before it changes your draft. Saving the book adds the audio to your library."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Narracja będzie tworzona także po zamknięciu tego ekranu. Posłuchaj jej i wybierz Użyj narracji, aby dodać ją do szkicu. Zapisanie książki doda nagranie do biblioteki."
+          }
+        }
+      }
+    },
+    "Recent Narration": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recent Narration"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ostatnie narracje"
+          }
+        }
+      }
+    },
+    "Preparing narration…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparing narration…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przygotowujemy narrację…"
+          }
+        }
+      }
+    },
+    "Create Narration": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create Narration"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utwórz narrację"
+          }
+        }
+      }
+    },
+    "Use this narration?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use this narration?"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Użyć tej narracji?"
+          }
+        }
+      }
+    },
+    "Use Narration": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use Narration"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Użyj narracji"
+          }
+        }
+      }
+    },
+    "This replaces the narration in your working draft. Your library book changes only when you save it.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This replaces the narration in your working draft. Your library book changes only when you save it."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta narracja zastąpi nagrania w edytowanym szkicu. Książka w bibliotece zmieni się dopiero po zapisaniu."
+          }
+        }
+      }
+    },
+    "Opening Preview": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opening Preview"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Próbka początku"
+          }
+        }
+      }
+    },
+    "Book Narration": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Book Narration"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Narracja książki"
+          }
+        }
+      }
+    },
+    "Waiting to create narration…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting to create narration…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oczekujemy na rozpoczęcie narracji…"
+          }
+        }
+      }
+    },
+    "Creating narration…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Creating narration…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tworzymy narrację…"
+          }
+        }
+      }
+    },
+    "Cancel Creation": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel Creation"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anuluj tworzenie"
+          }
+        }
+      }
+    },
+    "Listen to Narration": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listen to Narration"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posłuchaj narracji"
+          }
+        }
+      }
+    },
+    "The text or narration settings have changed. Create a new narration to match them.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The text or narration settings have changed. Create a new narration to match them."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tekst lub ustawienia czytania uległy zmianie. Utwórz nową narrację, aby do nich pasowała."
+          }
+        }
+      }
+    },
+    "This narration has expired. Create it again to continue.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This narration has expired. Create it again to continue."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta narracja nie jest już dostępna. Utwórz ją ponownie, aby kontynuować."
+          }
+        }
+      }
+    },
+    "Creation cancelled. Your book is unchanged.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Creation cancelled. Your book is unchanged."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tworzenie anulowane. Twoja książka pozostała bez zmian."
+          }
+        }
+      }
+    },
+    "Narration could not be completed. Your book is unchanged; try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Narration could not be completed. Your book is unchanged; try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się ukończyć narracji. Twoja książka pozostała bez zmian. Spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "Narration settings could not be saved on this device. Keep this screen open and try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Narration settings could not be saved on this device. Keep this screen open and try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się zapisać ustawień narracji na urządzeniu. Nie zamykaj tego ekranu i spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "The preview is unavailable.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The preview is unavailable."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Próbka jest niedostępna."
+          }
+        }
+      }
+    },
+    "Use Book Style": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use Book Style"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jak w całej książce"
+          }
+        }
+      }
+    },
+    "Book style: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Book style: %@"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sposób czytania: %@"
+          }
+        }
+      }
+    },
+    "Style for paragraph %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Style for paragraph %lld"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sposób czytania akapitu %lld"
+          }
+        }
+      }
+    },
+    "Natural": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Natural"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Naturalnie"
+          }
+        }
+      }
+    },
+    "Gentle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gentle"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Łagodnie"
+          }
+        }
+      }
+    },
+    "Curious": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Curious"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Z ciekawością"
+          }
+        }
+      }
+    },
+    "Excited": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excited"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Z entuzjazmem"
+          }
+        }
+      }
+    },
+    "Reassuring": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reassuring"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uspokajająco"
+          }
+        }
+      }
+    },
+    "Whispered": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whispered"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Szeptem"
+          }
+        }
+      }
+    },
+    "Voice generation is not available yet. You can still record and listen to your books.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voice generation is not available yet. You can still record and listen to your books."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tworzenie głosu nie jest jeszcze dostępne. Nadal możesz nagrywać i słuchać swoich książek."
+          }
+        }
+      }
+    },
+    "Sign in with Apple to use your private voices.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in with Apple to use your private voices."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zaloguj się przez Apple, aby korzystać ze swoich prywatnych głosów."
+          }
+        }
+      }
+    },
+    "Your account changed. Sign in again to continue.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your account changed. Sign in again to continue."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Konto zostało zmienione. Zaloguj się ponownie, aby kontynuować."
+          }
+        }
+      }
+    },
+    "Your narration could not be opened. Try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your narration could not be opened. Try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się otworzyć narracji. Spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "The audio could not be verified. Your previous narration is still saved.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The audio could not be verified. Your previous narration is still saved."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się sprawdzić nagrania. Twoja poprzednia narracja nadal jest zapisana."
+          }
+        }
+      }
+    },
+    "This narration has expired. Generate it again to continue.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This narration has expired. Generate it again to continue."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta narracja nie jest już dostępna. Utwórz ją ponownie, aby kontynuować."
+          }
+        }
+      }
+    },
+    "Choose a voice from your account to continue.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a voice from your account to continue."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wybierz głos zapisany na twoim koncie, aby kontynuować."
+          }
+        }
+      }
+    },
+    "Your narration limit has been reached. Try again tomorrow.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your narration limit has been reached. Try again tomorrow."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limit tworzenia narracji został wykorzystany. Spróbuj ponownie jutro."
+          }
+        }
+      }
+    },
+    "Voice generation could not connect. Your book is still saved. Try again shortly.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voice generation could not connect. Your book is still saved. Try again shortly."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się połączyć z usługą narracji. Twoja książka nadal jest zapisana. Spróbuj za chwilę."
+          }
+        }
+      }
+    },
+    "This private voice or narration is unavailable for your account.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This private voice or narration is unavailable for your account."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ten prywatny głos lub narracja są niedostępne na twoim koncie."
+          }
+        }
+      }
+    },
+    "The recording could not be accepted. Record a clear sample and read the consent statement exactly.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The recording could not be accepted. Record a clear sample and read the consent statement exactly."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się przyjąć nagrania. Nagraj wyraźną próbkę głosu i przeczytaj oświadczenie o zgodzie dokładnie w podanym brzmieniu."
+          }
+        }
+      }
+    },
+    "This book changed after narration was created. Create a new narration for the current text.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This book changed after narration was created. Create a new narration for the current text."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Książka zmieniła się po utworzeniu narracji. Przygotuj nową narrację do obecnego tekstu."
+          }
+        }
+      }
+    },
+    "Some chapters are missing. Your saved narration is unchanged.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Some chapters are missing. Your saved narration is unchanged."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brakuje nagrań niektórych rozdziałów. Twoja zapisana narracja pozostała bez zmian."
+          }
+        }
+      }
+    },
+    "Narration could not be added. Your previous recordings and text are still saved. Try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Narration could not be added. Your previous recordings and text are still saved. Try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się dodać narracji. Twoje poprzednie nagrania i tekst nadal są zapisane. Spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "Create Narration with Your Voice": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create Narration with Your Voice"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utwórz narrację swoim głosem"
+          }
+        }
+      }
+    },
+    "Sign-in could not start. Try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign-in could not start. Try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się rozpocząć logowania. Spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "Sign-in could not finish. Try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign-in could not finish. Try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się zakończyć logowania. Spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "Sign-out could not finish. Try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign-out could not finish. Try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się wylogować. Spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "Voice Preview": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voice Preview"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Próbka głosu"
+          }
+        }
+      }
+    },
+    "Your voices could not be loaded. Try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your voices could not be loaded. Try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się wczytać twoich głosów. Spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "Your narrations could not be loaded. Try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your narrations could not be loaded. Try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się wczytać twoich narracji. Spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "%lld paragraphs": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld paragraph"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld paragraphs"
+                }
+              }
+            }
+          }
+        },
+        "pl": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld akapit"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld akapity"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld akapitów"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld akapitu"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Keep my voice sample and consent recording until I delete my voice": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep my voice sample and consent recording until I delete my voice"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przechowuj próbkę mojego głosu i nagranie zgody do czasu usunięcia głosu"
+          }
+        }
+      }
+    },
+    "Keeping these recordings lets us recreate your voice if needed. You can delete them together with your voice at any time.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keeping these recordings lets us recreate your voice if needed. You can delete them together with your voice at any time."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dzięki tym nagraniom możemy w razie potrzeby odtworzyć zapisany głos. Możesz je usunąć w dowolnej chwili razem z głosem."
+          }
+        }
+      }
+    },
+    "To prepare your voice and narrate stories, your recordings and story text are sent to Google. Processing may take place outside Europe.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To prepare your voice and narrate stories, your recordings and story text are sent to Google. Processing may take place outside Europe."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aby przygotować twój głos i narrację, przesyłamy nagrania oraz tekst opowieści do Google. Przetwarzanie może odbywać się poza Europą."
+          }
+        }
+      }
+    },
+    "I am an adult recording my own voice": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I am an adult recording my own voice"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jestem osobą dorosłą i nagrywam swój własny głos"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
