@@ -25,22 +25,38 @@ struct BookEditorView: View {
         let hasCover = editor.draft.cover != nil
         Form {
             Section("Book Details") {
-                TextField("Book title", text: $editor.draft.title).accessibilityIdentifier("draft-title")
-                TextField("Author (optional)", text: $editor.draft.author).textContentType(.name)
-                TextField("About this story (optional)", text: $editor.draft.summary, axis: .vertical).lineLimit(3...6)
-                DraftImageView(path: editor.draft.cover, draftID: editor.draft.id, store: editor.store)
+                HStack(alignment: .top, spacing: 16) {
+                    DraftCoverView(draft: editor.draft, store: editor.store).frame(width: 92, height: 138)
+                    VStack(alignment: .leading, spacing: 14) {
+                        TextField("Book title", text: $editor.draft.title).storyFont(.title3, weight: .bold).foregroundStyle(Theme.ink)
+                            .accessibilityIdentifier("draft-title")
+                        Divider()
+                        TextField("Author (optional)", text: $editor.draft.author).textContentType(.name)
+                    }
+                    .padding(.top, 6)
+                }
+                .padding(.vertical, 6)
+                TextField("About this story (optional)", text: $editor.draft.summary, axis: .vertical).lineLimit(3...6).storyFont(.body)
+            }
+            .listRowBackground(Theme.surface)
+            Section("Cover") {
+                if hasCover { DraftImageView(path: editor.draft.cover, draftID: editor.draft.id, store: editor.store) }
                 PhotosPicker(selection: $photo, matching: .images) {
                     Label(hasCover ? "Change Cover Photo" : "Add Cover Photo", systemImage: "photo")
                 }.disabled(loadingPhoto || editor.working)
                 BookIllustrationButton(editor: editor)
                 if editor.draft.cover != nil { Button("Remove Cover", role: .destructive) { editor.draft.cover = nil } }
             }
+            .listRowBackground(Theme.surface)
             Section("Reading Time") {
                 LabeledContent("Words", value: editor.draft.wordCount.formatted())
                 Stepper("Reading pace: \(editor.readingPace) words/minute", value: $editor.readingPace, in: 80...180, step: 10)
-                Text("About \(StoryReadingLength.minutes(words: editor.draft.wordCount, wordsPerMinute: editor.readingPace).formatted(.number.precision(.fractionLength(1)))) minutes for the whole book.")
+                Label {
+                    Text("About \(StoryReadingLength.minutes(words: editor.draft.wordCount, wordsPerMinute: editor.readingPace).formatted(.number.precision(.fractionLength(1)))) minutes for the whole book.")
+                } icon: { Image(systemName: "clock").foregroundStyle(Theme.glow) }
                     .accessibilityIdentifier("book-estimated-reading-time")
             }
+            .listRowBackground(Theme.surface)
             if let audio = editor.draft.audio {
                 Section {
                     Button(preview.playingPath == audio ? "Stop Preview" : "Play Narration", systemImage: preview.playingPath == audio ? "stop.fill" : "play.fill") {
@@ -55,20 +71,25 @@ struct BookEditorView: View {
                 } header: { Text("Full-book Narration") } footer: {
                     Text("Remove the full-book recording to record individual chapters. Replacing it or changing chapter order clears its chapter timestamps.")
                 }
+                .listRowBackground(Theme.surface)
             }
             Section {
                 ForEach(editor.draft.chapters.enumerated(), id: \.element.id) { number, chapter in
                     HStack {
                       NavigationLink(value: chapter.id) {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text(chapter.title.isEmpty ? String(localized: "Chapter \(number + 1)") : chapter.title).font(.headline)
-                            HStack {
-                                if !chapter.text.isEmpty { Label("Text", systemImage: "text.alignleft") }
-                                if chapter.image != nil { Label("Picture", systemImage: "photo") }
-                                if chapter.audio != nil { Label("Narration", systemImage: "waveform") }
-                                if chapter.text.isEmpty && chapter.image == nil && chapter.audio == nil { Text("Ready for your story") }
-                            }.font(.caption).foregroundStyle(.secondary)
-                        }.padding(.vertical, 4)
+                        HStack(spacing: 14) {
+                            ChapterNumber(number: number + 1)
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(chapter.title.isEmpty ? String(localized: "Chapter \(number + 1)") : chapter.title)
+                                    .storyFont(.headline, weight: .semibold).foregroundStyle(Theme.ink)
+                                HStack(spacing: 10) {
+                                    if !chapter.text.isEmpty { Label("Text", systemImage: "text.alignleft") }
+                                    if chapter.image != nil { Label("Picture", systemImage: "photo") }
+                                    if chapter.audio != nil { Label("Narration", systemImage: "waveform") }
+                                    if chapter.text.isEmpty && chapter.image == nil && chapter.audio == nil { Text("Ready for your story") }
+                                }.font(.caption).foregroundStyle(.secondary).labelStyle(CompactLabelStyle())
+                            }
+                        }.padding(.vertical, 6)
                       }.accessibilityIdentifier("draft-chapter-\(number + 1)")
                       Menu {
                           Button("Move Earlier", systemImage: "arrow.up") { editor.moveChapters(from: [number], to: number - 1) }.disabled(number == 0)
@@ -79,13 +100,19 @@ struct BookEditorView: View {
                 }
                 .onDelete(perform: editor.deleteChapters)
                 .onMove(perform: editor.moveChapters)
-                Button("Add Chapter", systemImage: "plus", action: editor.addChapter).accessibilityIdentifier("add-draft-chapter")
+                Button("Add Chapter", systemImage: "plus.circle.fill", action: editor.addChapter).font(.body.weight(.semibold)).accessibilityIdentifier("add-draft-chapter")
             } header: { Text("Chapters") } footer: { Text("Open a chapter to write, add a picture, or record narration. Chapter Options lets you reorder or remove chapters.") }
+            .listRowBackground(Theme.surface)
             Section {
-                Text(editor.isEditingBook ? "Save updates this book in your library. Discard leaves the library version unchanged." : "Save adds this book to your library to read, listen, and share with your family.")
+                Label {
+                    Text(editor.isEditingBook ? "Save updates this book in your library. Discard leaves the library version unchanged." : "Save adds this book to your library to read, listen, and share with your family.")
+                        .font(.subheadline).foregroundStyle(.secondary)
+                } icon: { Image(systemName: "books.vertical.fill").foregroundStyle(Theme.glow) }
             }
-            if editor.working || loadingPhoto { ProgressView("Saving…") }
+            .listRowBackground(Theme.surface)
+            if editor.working || loadingPhoto { ProgressView("Saving…").listRowBackground(Theme.surface) }
         }
+        .storyFormStyle()
         .scrollDismissesKeyboard(.interactively)
         .disabled(editor.working || loadingPhoto)
         .navigationTitle(editor.isEditingBook ? "Edit Book" : "Create Book").navigationBarTitleDisplayMode(.inline)

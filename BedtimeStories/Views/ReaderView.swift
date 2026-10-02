@@ -16,39 +16,64 @@ struct ReaderView: View {
     private var index: Int { chapters.firstIndex { $0.id == chapter?.id } ?? 0 }
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                if loading { ProgressView("Opening chapter…").frame(maxWidth: .infinity) }
+            VStack(spacing: 0) {
+                if loading { ProgressView("Opening chapter…").frame(maxWidth: .infinity).padding(.vertical, 48) }
                 if let chapter {
-                    Text(chapter.title ?? book.manifest.title).font(.largeTitle.bold()).fontDesign(.serif)
-                    if let illustration { Image(uiImage: illustration).resizable().scaledToFit().clipShape(.rect(cornerRadius: 12)).accessibilityLabel("Chapter illustration") }
+                    VStack(spacing: 14) {
+                        if chapters.count > 1 { Eyebrow(Text("Chapter \(index + 1) of \(chapters.count)")) }
+                        Text(chapter.title ?? book.manifest.title)
+                            .storyFont(.largeTitle, weight: .bold).foregroundStyle(Theme.ink)
+                            .multilineTextAlignment(.center)
+                            .accessibilityAddTraits(.isHeader)
+                        StoryOrnament()
+                    }
+                    .frame(maxWidth: .infinity).padding(.top, 12).padding(.bottom, 32)
+                    if let illustration {
+                        Image(uiImage: illustration).resizable().scaledToFit()
+                            .clipShape(.rect(cornerRadius: 20))
+                            .shadow(color: Theme.shadow, radius: 18, y: 8)
+                            .padding(.bottom, 32)
+                            .accessibilityLabel("Chapter illustration")
+                    }
                     if let content { StoryTextView(content: content, size: size, markdown: chapter.text?.hasSuffix(".md") == true, chapterTitle: chapter.title) }
                     if let error {
-                        Text(error).foregroundStyle(.secondary)
-                        Button("Try Again") { Task { await loadChapter() } }
+                        VStack(spacing: 12) {
+                            Text(error).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                            Button("Try Again") { Task { await loadChapter() } }.buttonStyle(.storySoft)
+                        }
+                        .frame(maxWidth: .infinity).storyCard()
                     }
-                    HStack {
-                        Button("Previous", systemImage: "chevron.left") { chapterID = chapters[index - 1].id }.disabled(index == 0)
-                        Spacer()
-                        Button("Next", systemImage: "chevron.right") { chapterID = chapters[index + 1].id }.disabled(index + 1 >= chapters.count)
-                    }.padding(.vertical).frame(minHeight: 44)
+                    if !loading { chapterEnd }
                 }
-            }.padding(28).frame(maxWidth: 740).frame(maxWidth: .infinity)
+            }
+            .padding(.horizontal, 28).padding(.bottom, 40)
+            .frame(maxWidth: 680).frame(maxWidth: .infinity)
         }
         .id(chapter?.id)
+        .background { StoryBackground(style: .reading) }
         .navigationTitle(book.manifest.title).navigationBarTitleDisplayMode(.inline)
         .preferredColorScheme(appearance == "light" ? .light : appearance == "dark" ? .dark : nil)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    ControlGroup {
-                        Button("Smaller Text", systemImage: "textformat.size.smaller") { size = max(16, size - 2) }
-                        Button("Larger Text", systemImage: "textformat.size.larger") { size = min(36, size + 2) }
+                    Section("Text Size") {
+                        ControlGroup {
+                            Button("Smaller Text", systemImage: "textformat.size.smaller") { size = max(16, size - 2) }
+                            Button("Larger Text", systemImage: "textformat.size.larger") { size = min(36, size + 2) }
+                        }
                     }
                     Picker("Appearance", selection: $appearance) {
-                        Text("System").tag("system"); Text("Light").tag("light"); Text("Dark").tag("dark")
+                        Label("System", systemImage: "circle.lefthalf.filled").tag("system")
+                        Label("Light", systemImage: "sun.max").tag("light")
+                        Label("Dark", systemImage: "moon").tag("dark")
                     }
-                    ForEach(chapters) { chapter in
-                        Button(chapter.title ?? book.manifest.title) { chapterID = chapter.id }
+                    Section("Chapters") {
+                        ForEach(chapters) { item in
+                            Button { chapterID = item.id } label: {
+                                if item.id == chapter?.id { Label(item.title ?? book.manifest.title, systemImage: "checkmark") }
+                                else { Text(item.title ?? book.manifest.title) }
+                            }
+                        }
                     }
                 } label: { Image(systemName: "textformat").frame(minWidth: 44, minHeight: 44) }
                 .accessibilityLabel("Reading options")
@@ -57,6 +82,45 @@ struct ReaderView: View {
         .task(id: chapterID) { await loadChapter() }
         .onAppear { if chapterID == nil { chapterID = startingChapter ?? library.progress.readingChapter(book.id) ?? chapters.first?.id } }
     }
+
+    @ViewBuilder private var chapterEnd: some View {
+        VStack(spacing: 20) {
+            if index + 1 < chapters.count {
+                let next = chapters[index + 1]
+                Button { chapterID = next.id } label: {
+                    HStack(spacing: 16) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Eyebrow("Next Chapter")
+                            Text(next.title ?? book.manifest.title).storyFont(.title3, weight: .semibold).foregroundStyle(Theme.ink)
+                                .multilineTextAlignment(.leading)
+                        }
+                        Spacer(minLength: 0)
+                        Image(systemName: "arrow.right")
+                            .font(.title3.weight(.bold)).foregroundStyle(Theme.onAccent)
+                            .frame(width: 52, height: 52).background(Theme.accent, in: .circle)
+                            .accessibilityHidden(true)
+                    }
+                    .storyCard(padding: 20)
+                    .contentShape(.rect)
+                }
+                .buttonStyle(.pressable)
+                .accessibilityElement(children: .combine)
+            } else {
+                VStack(spacing: 8) {
+                    MoonIllustration(size: 52)
+                    Text("The End").storyFont(.title, weight: .bold).foregroundStyle(Theme.ink)
+                    Text("Sweet dreams.").storyFont(.title3).italic().foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+            }
+            if index > 0 {
+                Button("Previous", systemImage: "chevron.left") { chapterID = chapters[index - 1].id }
+                    .font(.subheadline.weight(.semibold)).frame(minHeight: 44)
+            }
+        }
+        .padding(.top, 48)
+    }
+
     private func loadChapter() async {
         guard let chapter else { loading = false; return }
         content = nil; illustration = nil; error = nil; loading = true

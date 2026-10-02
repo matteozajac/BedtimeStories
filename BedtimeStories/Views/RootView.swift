@@ -18,7 +18,7 @@ struct RootView: View {
                 } detail: {
                     NavigationStack {
                         if let book = library.selectedBook { BookDetailView(book: book).id(book.id) }
-                        else { ContentUnavailableView("Choose a book", systemImage: "books.vertical", description: Text("Your next bedtime story is waiting in the library.")) }
+                        else { ChooseBookView() }
                     }
                 }
             } else {
@@ -29,18 +29,30 @@ struct RootView: View {
             }
         }
         .safeAreaInset(edge: .bottom) {
-            if library.player.book != nil && library.root != nil { MiniPlayerView().padding(.horizontal).padding(.bottom, 8) }
+            VStack {
+                if library.player.book != nil && library.root != nil {
+                    MiniPlayerView().padding(.horizontal).padding(.bottom, 8)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
+            .animation(.spring(duration: 0.45), value: library.player.book?.id)
         }
         .overlay(alignment: .top) {
-            if let activity = library.activity {
-                HStack {
-                    ProgressView()
-                    Text(activity).font(.subheadline)
-                    Button("Cancel", action: library.cancelOperation)
+            VStack {
+                if let activity = library.activity {
+                    HStack(spacing: 12) {
+                        ProgressView()
+                        Text(activity).font(.subheadline.weight(.medium))
+                        Button("Cancel", action: library.cancelOperation).font(.subheadline.weight(.semibold))
+                    }
+                    .padding(.horizontal, 18).padding(.vertical, 12)
+                    .glassEffect(.regular, in: .capsule)
+                    .padding()
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .accessibilityElement(children: .contain)
                 }
-                .padding().background(.regularMaterial, in: .capsule).padding()
-                .accessibilityElement(children: .contain)
             }
+            .animation(.spring(duration: 0.4), value: library.activity)
         }
         .sheet(isPresented: $library.showingSettings) { NavigationStack { SettingsView() } }
         .sheet(isPresented: $library.showingCreator) { BookCreatorView() }
@@ -68,5 +80,23 @@ struct RootView: View {
             if phase == .active { Task { await library.start() } }
         }
         .onOpenURL { library.importBook($0) }
+    }
+}
+
+/// The iPad detail pane before a book is chosen.
+private struct ChooseBookView: View {
+    var body: some View {
+        VStack(spacing: 18) {
+            ZStack {
+                Circle().fill(Theme.glow.opacity(0.18)).frame(width: 150, height: 150).blur(radius: 20)
+                Image(systemName: "moon.stars.fill").font(.system(size: 64)).foregroundStyle(Theme.glow).symbolRenderingMode(.hierarchical)
+            }
+            .accessibilityHidden(true)
+            Text("Choose a book").storyFont(.title, weight: .bold).foregroundStyle(Theme.ink)
+            Text("Your next bedtime story is waiting in the library.").font(.title3).foregroundStyle(.secondary).multilineTextAlignment(.center)
+        }
+        .padding(40)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background { StoryBackground() }
     }
 }

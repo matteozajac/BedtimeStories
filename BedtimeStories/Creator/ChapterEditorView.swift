@@ -18,22 +18,37 @@ struct ChapterEditorView: View {
                 let chapter = editor.draft.chapters[index]
                 Form {
                     Section("Chapter Details") {
-                        TextField("Chapter title (optional)", text: $editor.draft.chapters[index].title)
+                        TextField("Chapter title (optional)", text: $editor.draft.chapters[index].title).storyFont(.title3, weight: .semibold)
                         TextEditor(text: $editor.draft.chapters[index].text)
-                            .frame(minHeight: 220).accessibilityLabel("Chapter text").accessibilityIdentifier("draft-chapter-text")
+                            .storyFont(.body).lineSpacing(6).foregroundStyle(Theme.ink)
+                            .scrollContentBackground(.hidden)
+                            .frame(minHeight: 260).accessibilityLabel("Chapter text").accessibilityIdentifier("draft-chapter-text")
                     }
+                    .listRowBackground(Theme.surface)
                     Section("Picture") {
                         DraftImageView(path: chapter.image, draftID: editor.draft.id, store: editor.store)
                         PhotosPicker(selection: $photo, matching: .images) { Label(chapter.image == nil ? "Add Chapter Photo" : "Change Chapter Photo", systemImage: "photo") }
                         BookIllustrationButton(editor: editor, chapterID: chapterID)
                         if chapter.image != nil { Button("Remove Picture", role: .destructive) { editor.draft.chapters[index].image = nil } }
                     }
+                    .listRowBackground(Theme.surface)
                     Section {
                         if let path = chapter.audio {
-                            Label(Duration.seconds(chapter.audioDuration ?? 0).formatted(.time(pattern: .minuteSecond)), systemImage: "waveform")
-                            Button(preview.playingPath == path ? "Stop Preview" : "Play Narration", systemImage: preview.playingPath == path ? "stop.fill" : "play.fill") {
-                                preview.toggle(path: path, draftID: editor.draft.id, store: editor.store)
-                            }.disabled(preview.loading)
+                            HStack(spacing: 14) {
+                                Button(preview.playingPath == path ? "Stop Preview" : "Play Narration", systemImage: preview.playingPath == path ? "stop.fill" : "play.fill") {
+                                    preview.toggle(path: path, draftID: editor.draft.id, store: editor.store)
+                                }
+                                .labelStyle(.iconOnly).font(.body.weight(.bold)).foregroundStyle(Theme.onAccent)
+                                .frame(width: 44, height: 44).background(Theme.accent, in: .circle)
+                                .buttonStyle(.pressable).disabled(preview.loading)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(preview.playingPath == path ? "Stop Preview" : "Play Narration").font(.body.weight(.semibold))
+                                    Label(Duration.seconds(chapter.audioDuration ?? 0).formatted(.time(pattern: .minuteSecond)), systemImage: "waveform")
+                                        .font(.subheadline).foregroundStyle(.secondary).labelStyle(CompactLabelStyle())
+                                }
+                                .accessibilityHidden(true)
+                            }
+                            .padding(.vertical, 4)
                         }
                         Button(chapter.audio == nil ? "Record Narration" : "Record a New Take", systemImage: "mic.fill") {
                             preview.stop(); recording = true
@@ -49,8 +64,9 @@ struct ChapterEditorView: View {
                                 }
                         }
                     } header: { Text("Your Voice") } footer: { Text("Record a chapter at a time. Review each take before keeping it. Imported audio can be M4A, MP3, or WAV.") }
-                    if editor.working || loadingPhoto { ProgressView("Saving…") }
-                }.scrollDismissesKeyboard(.interactively).disabled(editor.working || loadingPhoto)
+                    .listRowBackground(Theme.surface)
+                    if editor.working || loadingPhoto { ProgressView("Saving…").listRowBackground(Theme.surface) }
+                }.storyFormStyle().scrollDismissesKeyboard(.interactively).disabled(editor.working || loadingPhoto)
                 .sheet(isPresented: $recording) {
                     RecordingView(text: chapter.text) { url in await editor.setAudio(url, chapterID: chapterID) }
                 }

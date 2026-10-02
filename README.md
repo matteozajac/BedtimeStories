@@ -18,6 +18,6 @@ python3 -m unittest discover -s Tests/Authoring -v
 xcodebuild -project BedtimeStories.xcodeproj -scheme BedtimeStories -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
 ```
 
-Open `BedtimeStories.xcodeproj` with Xcode 27. The UI uses a book grid, an adaptive iPad detail pane, a floating Liquid Glass mini player, and a full-screen audio player, without tabs. The root Swift package is a dependency-free host test harness for the same core sources compiled by the app.
+Open `BedtimeStories.xcodeproj` with Xcode 27. The UI uses a book grid, an adaptive iPad detail pane, a floating Liquid Glass mini player, and a full-screen audio player, without tabs. Its storybook look (warm paper by day, a calm night sky by night, serif story text, rounded app chrome and illustrated placeholder covers) lives in `BedtimeStories/Design`. The root Swift package is a dependency-free host test harness for the same core sources compiled by the app.
 
 For device checks and evidence boundaries, see [validation](docs/VALIDATION.md).

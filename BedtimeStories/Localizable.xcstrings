@@ -97,6 +97,22 @@
         }
       }
     },
+    "About this story": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About this story"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O tej opowieści"
+          }
+        }
+      }
+    },
     "About this story (optional)": {
       "localizations": {
         "en": {
@@ -577,6 +593,22 @@
         }
       }
     },
+    "Chapter %lld of %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chapter %1$lld of %2$lld"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rozdział %1$lld z %2$lld"
+          }
+        }
+      }
+    },
     "Chapter Details": {
       "localizations": {
         "en": {
@@ -785,6 +817,22 @@
         }
       }
     },
+    "Cover": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cover"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Okładka"
+          }
+        }
+      }
+    },
     "Create Book": {
       "localizations": {
         "en": {
@@ -941,6 +989,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Usunąć ten szkic?"
+          }
+        }
+      }
+    },
+    "Describe a story and Apple Intelligence writes it for you.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Describe a story and Apple Intelligence writes it for you."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opisz pomysł, a Apple Intelligence napisze z niego opowieść."
           }
         }
       }
@@ -1181,6 +1245,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "Przewiń o 15 sekund"
+          }
+        }
+      }
+    },
+    "Good afternoon": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good afternoon"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Miłego popołudnia"
+          }
+        }
+      }
+    },
+    "Good evening": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good evening"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dobry wieczór"
+          }
+        }
+      }
+    },
+    "Good morning": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good morning"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dzień dobry"
           }
         }
       }
@@ -1437,6 +1549,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dalej"
+          }
+        }
+      }
+    },
+    "Next Chapter": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next Chapter"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Następny rozdział"
           }
         }
       }
@@ -2481,6 +2609,22 @@
         }
       }
     },
+    "Sweet dreams.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet dreams."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Słodkich snów."
+          }
+        }
+      }
+    },
     "System": {
       "localizations": {
         "en": {
@@ -2513,6 +2657,22 @@
         }
       }
     },
+    "Text Size": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text Size"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rozmiar tekstu"
+          }
+        }
+      }
+    },
     "Text, pictures, and recordings can be added to this book’s folder whenever you’re ready.": {
       "localizations": {
         "en": {
@@ -2525,6 +2685,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tekst, ilustracje i nagrania możesz dodać do folderu tej książki w dowolnej chwili."
+          }
+        }
+      }
+    },
+    "The End": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The End"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koniec"
           }
         }
       }
@@ -2685,6 +2861,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ta książka jest już w bibliotece. Zastąpienie jej zaktualizuje tekst i pliki multimedialne. Postęp czytania i słuchania pozostanie na tym urządzeniu."
+          }
+        }
+      }
+    },
+    "Time for sweet dreams": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time for sweet dreams"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Czas na słodkie sny"
           }
         }
       }
@@ -2861,6 +3053,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Napisz opowieść, dodaj zdjęcia i nagraj ją własnym głosem. Szkice są zapisane na tym urządzeniu, dopóki nie dodasz ich do biblioteki."
+          }
+        }
+      }
+    },
+    "Write it yourself, add pictures, and record your voice.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Write it yourself, add pictures, and record your voice."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Napisz własną opowieść, dodaj ilustracje i nagraj swój głos."
           }
         }
       }

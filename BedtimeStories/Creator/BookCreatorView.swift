@@ -13,34 +13,50 @@ struct BookCreatorView: View {
         NavigationStack(path: $path) {
             List {
                 Section {
-                    NavigationLink(value: BookCreatorRoute.storyIdea) {
-                        Label("Create from an Idea", systemImage: "sparkles")
+                    CreatorOption(title: "Create from an Idea", subtitle: "Describe a story and Apple Intelligence writes it for you.", systemImage: "sparkles", magical: true) {
+                        path.append(BookCreatorRoute.storyIdea)
                     }
-                        .accessibilityIdentifier("create-book-from-idea")
-                    Button("Create a Book", systemImage: "square.and.pencil") {
+                    .accessibilityIdentifier("create-book-from-idea")
+                    CreatorOption(title: "Create a Book", subtitle: "Write it yourself, add pictures, and record your voice.", systemImage: "square.and.pencil") {
                         Task {
                             do { let draft = try await store.create(); path.append(draft) }
                             catch { message = String(localized: "A draft could not be created. Free some space on this device and try again.") }
                         }
-                    }.accessibilityIdentifier("new-book-draft")
+                    }
+                    .accessibilityIdentifier("new-book-draft")
                 } footer: {
                     Text("Write a story, add pictures, and record it in your own voice. Your work is kept on this device; Save adds the book to your library.")
                 }
+                .listRowInsets(EdgeInsets(top: 6, leading: 0, bottom: 6, trailing: 0))
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
                 Section("Your Drafts") {
                     if loading { ProgressView("Opening drafts…") }
-                    else if drafts.isEmpty { Text("Your next story starts here.").foregroundStyle(.secondary) }
+                    else if drafts.isEmpty {
+                        Label { Text("Your next story starts here.").foregroundStyle(.secondary) } icon: { Image(systemName: "moon.stars").foregroundStyle(Theme.glow) }
+                    }
                     ForEach(drafts) { draft in
                         NavigationLink(value: draft) {
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text(draft.title.isEmpty ? String(localized: "Untitled Book") : draft.title).font(.headline)
-                                if draft.source != nil { Text("Editing a library book").font(.caption).foregroundStyle(.secondary) }
-                                Text(draft.modifiedAt, format: .dateTime.day().month().hour().minute()).font(.caption).foregroundStyle(.secondary)
-                            }.padding(.vertical, 4)
+                            HStack(spacing: 14) {
+                                DraftCoverView(draft: draft, store: store).frame(width: 46, height: 69)
+                                VStack(alignment: .leading, spacing: 5) {
+                                    Text(draft.title.isEmpty ? String(localized: "Untitled Book") : draft.title)
+                                        .storyFont(.headline, weight: .semibold).foregroundStyle(Theme.ink).lineLimit(2)
+                                    if draft.source != nil {
+                                        Label("Editing a library book", systemImage: "pencil").font(.caption.weight(.medium)).foregroundStyle(Theme.accent)
+                                            .labelStyle(CompactLabelStyle())
+                                    }
+                                    Text(draft.modifiedAt, format: .dateTime.day().month().hour().minute()).font(.caption).foregroundStyle(.secondary)
+                                }
+                            }
+                            .padding(.vertical, 6)
                         }
                         .swipeActions { Button("Delete", role: .destructive) { deleting = draft } }
                     }
                 }
+                .listRowBackground(Theme.surface)
             }
+            .storyFormStyle()
             .navigationTitle("Book Creator")
             .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Close") { dismiss() } } }
             .navigationDestination(for: BookDraft.self) { BookEditorView(draft: $0, store: store) }
@@ -69,5 +85,50 @@ struct BookCreatorView: View {
         do { drafts = try await store.list() }
         catch { message = String(localized: "Your drafts could not be opened. Try again.") }
         loading = false
+    }
+}
+
+/// A large tappable card for one way to start a book. The magical variant is a small night sky.
+private struct CreatorOption: View {
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
+    let systemImage: String
+    var magical = false
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 16) {
+                Image(systemName: systemImage)
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(magical ? Color(hex: 0xF5C77E) : Theme.accent)
+                    .symbolEffect(.breathe, isActive: magical)
+                    .frame(width: 56, height: 56)
+                    .background(magical ? Color.white.opacity(0.12) : Theme.accentSoft, in: .rect(cornerRadius: 18))
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title).storyFont(.title3, weight: .semibold).foregroundStyle(magical ? Theme.moonlight : Theme.ink)
+                    Text(subtitle).font(.subheadline).foregroundStyle(magical ? Theme.moonlight.opacity(0.75) : .secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                Image(systemName: "chevron.right").font(.footnote.weight(.bold))
+                    .foregroundStyle(magical ? Theme.moonlight.opacity(0.6) : Color.secondary)
+            }
+            .padding(18)
+            .background {
+                if magical {
+                    ZStack {
+                        LinearGradient(colors: [Color(hex: 0x3A3478), Theme.nightBottom], startPoint: .topLeading, endPoint: .bottomTrailing)
+                        Starfield(seed: 0x1DEA, color: Theme.moonlight, intensity: 0.8)
+                    }
+                    .clipShape(.rect(cornerRadius: 24))
+                } else {
+                    RoundedRectangle(cornerRadius: 24).fill(Theme.surface)
+                        .overlay(RoundedRectangle(cornerRadius: 24).strokeBorder(Theme.surfaceStroke))
+                }
+            }
+            .contentShape(.rect(cornerRadius: 24))
+        }
+        .buttonStyle(.pressable)
     }
 }
