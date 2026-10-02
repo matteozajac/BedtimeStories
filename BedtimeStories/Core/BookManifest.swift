@@ -9,6 +9,8 @@ public struct BookManifest: Codable, Identifiable, Hashable, Sendable {
     public var cover: String?
     public var audio: String?
     public var chapters: [BookChapter]?
+    public var readingWordsPerMinute: Int?
+    public var illustrationGuide: String?
 
     public init(id: UUID = UUID(), title: String, author: String? = nil, description: String? = nil, cover: String? = nil, audio: String? = nil, chapters: [BookChapter] = []) {
         formatVersion = 1; self.id = id; self.title = title; self.author = author

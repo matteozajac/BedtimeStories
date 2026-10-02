@@ -25,6 +25,7 @@ struct ChapterEditorView: View {
                     Section("Picture") {
                         DraftImageView(path: chapter.image, draftID: editor.draft.id, store: editor.store)
                         PhotosPicker(selection: $photo, matching: .images) { Label(chapter.image == nil ? "Add Chapter Photo" : "Change Chapter Photo", systemImage: "photo") }
+                        BookIllustrationButton(editor: editor, chapterID: chapterID)
                         if chapter.image != nil { Button("Remove Picture", role: .destructive) { editor.draft.chapters[index].image = nil } }
                     }
                     Section {
@@ -36,8 +37,9 @@ struct ChapterEditorView: View {
                         }
                         Button(chapter.audio == nil ? "Record Narration" : "Record a New Take", systemImage: "mic.fill") {
                             preview.stop(); recording = true
-                        }.accessibilityIdentifier("record-narration")
-                        Button("Import Audio", systemImage: "square.and.arrow.down") { preview.stop(); importAudio = true }
+                        }.disabled(editor.draft.audio != nil).accessibilityIdentifier("record-narration")
+                        Button("Import Audio", systemImage: "square.and.arrow.down") { preview.stop(); importAudio = true }.disabled(editor.draft.audio != nil)
+                        if editor.draft.audio != nil { Text("Remove the full-book narration in Book Details before recording individual chapters.").font(.footnote).foregroundStyle(.secondary) }
                         if chapter.audio != nil {
                             Button("Remove Narration", role: .destructive) { removeAudio = true }
                                 .confirmationDialog("Remove this chapter’s narration?", isPresented: $removeAudio, titleVisibility: .visible) {

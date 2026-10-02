@@ -6,6 +6,10 @@ When iCloud is unavailable, the app creates **Books** in its local Documents dir
 
 The public-container Info.plist metadata names **Always Near Stories**. iCloud Drive/Files appearance depends on the user’s system settings, a signed build with updated version, and actual container content. `NSMetadataQuery` discovers remote `book.json` files even when they are not downloaded; scans and reads coordinate file access and initiate placeholder downloads. [Apple’s document synchronization guide](https://developer.apple.com/documentation/uikit/synchronizing-documents-in-the-icloud-environment).
 
+## Editing synchronized books
+
+Use **Edit Book** to open a device-local working copy. The published folder changes only on **Save**. A coordinated SHA-256 comparison rejects replacement if the current local source changed, or iCloud exposes an unresolved file-version conflict. **Save as a New Book** preserves both versions. Account/root changes also block an old editing copy from replacing another account’s book. This protects against conflicts already delivered to this device; it is not a distributed lock or a guarantee against remote changes that have not arrived. Check simultaneous edits and offline reconnect on actual same-account devices.
+
 ## Existing libraries
 
 A previous security-scoped folder bookmark is used once to copy valid books into the default library. Original folders/books are never deleted. Matching content is skipped; a changed book with the same identity becomes a separate **Recovered copy** rather than overwriting either version. Hidden migration receipts prevent duplicate copies or resurrecting a deliberately deleted unchanged copy on relaunch. Unavailable files leave migration pending with **Retry Library Setup** in Settings. The source stays safe; other available books can still appear.

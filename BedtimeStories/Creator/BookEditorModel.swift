@@ -7,7 +7,7 @@ import UIKit
 final class BookEditorModel {
     var draft: BookDraft {
         didSet {
-            if oldValue.title != draft.title || oldValue.author != draft.author || oldValue.summary != draft.summary || oldValue.cover != draft.cover || oldValue.chapters != draft.chapters {
+            if !oldValue.hasSameContent(as: draft) {
                 changed()
             }
         }
@@ -15,11 +15,29 @@ final class BookEditorModel {
     var message: String?
     private(set) var working = false
     private(set) var saved = true
+    var conflict = false
+    private var baseline: BookDraft
+    private var baselineAvailable = true
     let store: BookDraftStore
     @ObservationIgnored private var autosave: Task<Void, Never>?
     @ObservationIgnored private var closing = false
 
-    init(draft: BookDraft, store: BookDraftStore) { self.draft = draft; self.store = store }
+    init(draft: BookDraft, store: BookDraftStore) { self.draft = draft; baseline = draft; self.store = store }
+
+    var hasChanges: Bool { (isEditingBook && !baselineAvailable) || !draft.hasSameContent(as: baseline) }
+    var isEditingBook: Bool { draft.source != nil }
+    var readingPace: Int {
+        get { draft.readingWordsPerMinute ?? StoryReadingLength.defaultWordsPerMinute }
+        set { draft.readingWordsPerMinute = newValue }
+    }
+
+    func loadBaseline() async {
+        guard isEditingBook else { return }
+        do {
+            if let original = try await store.baseline(draft.id) { baseline = original }
+            else { baselineAvailable = false }
+        } catch { baselineAvailable = false; message = String(localized: "The original editing copy could not be opened. Your library book is unchanged.") }
+    }
 
     func changed() {
         guard !closing else { return }
@@ -40,7 +58,10 @@ final class BookEditorModel {
     }
 
     func persist() async throws {
-        autosave?.cancel()
+        guard !closing else { return }
+        let pending = autosave
+        pending?.cancel()
+        await pending?.value
         saved = false
         draft.modifiedAt = Date()
         let snapshot = draft
@@ -48,21 +69,36 @@ final class BookEditorModel {
         if draft == snapshot { saved = true }
     }
 
-    func close() async -> Bool {
+    func discardAndClose() async -> Bool {
         guard !working else { return false }
         working = true
         defer { working = false }
         closing = true
-        do { try await persist(); return true }
+        autosave?.cancel()
+        await autosave?.value
+        do {
+            if isEditingBook || baseline.isEmpty { try await store.remove(draft.id) }
+            else {
+                var original = baseline; original.modifiedAt = Date()
+                try await store.save(original)
+            }
+            return true
+        }
         catch { closing = false; message = String(localized: "Your draft could not be saved. Keep the editor open and try again."); return false }
     }
 
-    func addChapter() { draft.chapters.append(DraftChapter()) }
-    func deleteChapters(at offsets: IndexSet) { draft.chapters.remove(atOffsets: offsets) }
-    func moveChapters(from offsets: IndexSet, to index: Int) { draft.chapters.move(fromOffsets: offsets, toOffset: index) }
+    func addChapter() { clearChapterTimes(); draft.chapters.append(DraftChapter()) }
+    func deleteChapters(at offsets: IndexSet) { clearChapterTimes(); draft.chapters.remove(atOffsets: offsets) }
+    func moveChapters(from offsets: IndexSet, to index: Int) { clearChapterTimes(); draft.chapters.move(fromOffsets: offsets, toOffset: index) }
+
+    func removeFullNarration() { draft.audio = nil; draft.audioDuration = nil; clearChapterTimes() }
+
+    private func clearChapterTimes() {
+        for index in draft.chapters.indices { draft.chapters[index].startTime = nil }
+    }
 
     func setImage(_ data: Data, chapterID: UUID? = nil) async {
-        guard !working else { return }
+        guard !working, !closing else { return }
         working = true
         defer { working = false }
         do {
@@ -80,7 +116,11 @@ final class BookEditorModel {
     }
 
     func setAudio(_ url: URL, chapterID: UUID) async -> Bool {
-        guard !working else { return false }
+        guard !working, !closing else { return false }
+        guard draft.audio == nil else {
+            message = String(localized: "Remove the full-book narration before adding chapter recordings.")
+            return false
+        }
         working = true
         defer { working = false }
         let previous = draft.chapters.first { $0.id == chapterID }
@@ -101,20 +141,49 @@ final class BookEditorModel {
         }
     }
 
-    func publish(to library: LibraryModel) async {
-        guard !working, !draft.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+    func setFullAudio(_ url: URL) async -> Bool {
+        guard !working, !closing else { return false }
         working = true
         defer { working = false }
+        let previous = draft
+        do {
+            let audio = try await store.addAudio(url, draftID: draft.id)
+            draft.audio = audio.path; draft.audioDuration = audio.duration
+            for index in draft.chapters.indices {
+                draft.chapters[index].audio = nil; draft.chapters[index].audioDuration = nil; draft.chapters[index].startTime = nil
+            }
+            try await persist()
+            return true
+        } catch {
+            draft = previous
+            message = String(localized: "The recording could not be added. Your previous narration is still saved. Try again.")
+            return false
+        }
+    }
+
+    func save(to library: LibraryModel, asCopy: Bool = false) async -> Bool {
+        guard !working, !closing, !draft.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return false }
+        working = true
+        defer { working = false }
+        conflict = false
         do {
             try await persist()
-            let book = try await store.stageBook(draft)
-            do { try await library.addCreatedBook(book) }
+            var publication = draft
+            if asCopy { publication.source = nil }
+            let book = try await store.stageBook(publication)
+            do { try await library.saveBook(book, source: publication.source) }
             catch { await library.repository.discardImport(book); throw error }
             closing = true
             autosave?.cancel()
             try? await store.remove(draft.id)
-            library.showingCreator = false
-        } catch { message = String(localized: "The book could not be added to your library. Your draft is safe. Check the folder in Files, then try again.") }
+            return true
+        } catch BookError.editConflict {
+            conflict = true
+            return false
+        } catch {
+            message = String(localized: "The book could not be saved to your library. Your edits are safe on this device. Check iCloud Drive and available storage, then try again.")
+            return false
+        }
     }
 
     isolated deinit { autosave?.cancel() }

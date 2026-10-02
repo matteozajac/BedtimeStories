@@ -22,7 +22,7 @@ A library folder contains immediate child book folders. Each book has `book.json
 }
 ```
 
-Structural fields `formatVersion`, `id`, and `title` are required; titles must be nonblank. UUIDs remain stable across intentional edits. All content and other metadata are optional, including the chapter list. A minimal book contains only those three fields. Optional `description` and `author` are strings.
+Structural fields `formatVersion`, `id`, and `title` are required; titles must be nonblank. UUIDs remain stable across intentional edits. All content and other metadata are optional, including the chapter list. A minimal book contains only those three fields. Optional `description` and `author` are strings. Optional `readingWordsPerMinute` records the preferred reading pace (the app offers 80–180, default 120); optional `illustrationGuide` stores shared character appearance and visual style for cover/chapter prompts. Older files omit these fields, and the format version remains 1. Local draft checkout fingerprints and account identifiers are never exported.
 
 Chapters are ordered by the array, never by filename. Each needs a unique UUID. `title`, `text`, `image`, `audio`, and `startTime` are optional. Text is a UTF-8 `.txt` or `.md` file. Images use `.jpg`, `.jpeg`, `.png`, or `.heic`. Audio uses `.m4a`, `.mp3`, or `.wav`. File extensions are case-insensitive; referenced paths are case-sensitive and must resolve exactly.
 

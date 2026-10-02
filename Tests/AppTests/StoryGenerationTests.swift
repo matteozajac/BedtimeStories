@@ -58,10 +58,10 @@ struct StoryGenerationTests {
         var duplicate = valid; duplicate.chapters[1] = duplicate.chapters[0]; invalidBooks.append(duplicate)
         var noTitle = valid; noTitle.title = " \n "; invalidBooks.append(noTitle)
         for invalid in invalidBooks {
-            #expect(throws: StoryGenerationFailure.self) { try StoryOutputValidator.validate(invalid, chapterCount: 2) }
+            #expect(throws: StoryGenerationFailure.self) { try StoryOutputValidator.validate(invalid, request: request()) }
         }
         var padded = valid; padded.title = " \u{FEFF}The Fox and the Star \n"
-        #expect(try StoryOutputValidator.validate(padded, chapterCount: 2).title == "The Fox and the Star")
+        #expect(try StoryOutputValidator.validate(padded, request: request()).title == "The Fox and the Star")
     }
 
     @Test func repeatedInvalidResponseNeverSavesAnEmptyOrPartialBook() async throws {
@@ -74,6 +74,21 @@ struct StoryGenerationTests {
         #expect(generator.modes.count == 2)
         #expect(model.message == StoryGenerationFailure.invalidResponse.errorDescription)
         #expect(try await model.store.list().isEmpty)
+    }
+
+    @Test func durationRetryIncludesMeasuredLengthAndKeepsWholeBrief() async throws {
+        let root = workspace()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let generator = TestGenerator(); generator.tooLongOnce = true
+        let model = StoryGenerationModel(store: BookDraftStore(root: root), generator: generator)
+        let original = request()
+        await model.generate(original, mode: .onDevice)
+        #expect(model.completed && generator.requests.count == 2)
+        let retry = try #require(generator.requests.last)
+        #expect(retry.description == original.description && retry.targetWords == original.targetWords)
+        #expect(retry.previousWordCount == 2 * StoryReadingLength.wordCount(TestGenerator.validBook.chapters.map(\.text).joined(separator: " ")))
+        #expect(try retry.prompt.contains("rejected as too long"))
+        #expect(try await model.store.list().count == 1)
     }
 
     @Test func refusalAndCloudQuotaDoNotRetryAndPreservePreviousDrafts() async throws {
@@ -144,8 +159,37 @@ struct StoryGenerationTests {
         #endif
     }
 
+    @Test func twentyMinuteTargetAppliesToTotalWordsAcrossAnyChapterCount() throws {
+        let requested = StoryGenerationRequest(description: "A fox goes home.", language: .english, readerAge: .preschool, readingMinutes: 20, wordsPerMinute: 120)
+        #expect(requested.targetWords == 2_400)
+        let short = StoryGenerationRequest(description: "A fox goes home.", language: .english, readerAge: .preschool, readingMinutes: 2, wordsPerMinute: 120)
+        #expect(short.maximumChapters == 2)
+        _ = try GeneratedStoryBook.schema(for: short)
+        _ = try GeneratedStoryBook.schema(for: requested)
+        #expect(throws: StoryGenerationFailure.self) { try requested.validate(mode: .onDevice) }
+        try requested.validate(mode: .privateCloud)
+        let sentence = "The little fox walked home beneath the soft moonlight. "
+        let one = GeneratedStoryBook(title: "Home", summary: "A fox goes home.", chapters: [GeneratedBookChapter(title: "Homeward", text: String(repeating: sentence, count: 240))])
+        #expect(try StoryOutputValidator.validate(one, request: requested).chapters.count == 1)
+        let five = GeneratedStoryBook(title: "Home", summary: "A fox goes home.", chapters: (1...5).map { GeneratedBookChapter(title: "Part \($0)", text: "Scene \($0). " + String(repeating: sentence, count: 48)) })
+        #expect(try StoryOutputValidator.validate(five, request: requested).chapters.count == 5)
+        #expect(throws: StoryGenerationFailure.self) { try StoryOutputValidator.validate(TestGenerator.validBook, request: requested) }
+        #expect(try requested.prompt.contains("entire book") && requested.prompt.contains("2400"))
+    }
+
+    @Test func illustrationContextUsesSharedAppearanceAndCurrentChapter() {
+        var draft = BookDraft(); draft.title = "Milo"; draft.summary = "A fox meets an owl."
+        draft.illustrationGuide = "Milo is a little red fox wearing a blue scarf."
+        draft.chapters[0].text = "Milo meets an owl beside a stream."
+        draft.chapters.append(DraftChapter(title: "Home", text: "Milo rests beside the window."))
+        #expect(IllustrationPromptBuilder.sharedGuide(draft).contains("blue scarf"))
+        #expect(IllustrationPromptBuilder.context(draft, chapterID: draft.chapters[1].id).contains("window"))
+        #expect(!IllustrationPromptBuilder.context(draft, chapterID: draft.chapters[1].id).contains("stream"))
+        #expect(IllustrationPromptBuilder.style.contains("storybook"))
+    }
+
     private func request(description: String = "A fox follows a star home.") -> StoryGenerationRequest {
-        StoryGenerationRequest(description: description, language: .english, readerAge: .preschool, chapterCount: 2)
+        StoryGenerationRequest(description: description, language: .english, readerAge: .preschool, readingMinutes: 1, wordsPerMinute: 140)
     }
     private func workspace() -> URL {
         FileManager.default.temporaryDirectory.appendingPathComponent("StoryGenerationTests-\(UUID().uuidString)")
@@ -158,19 +202,22 @@ struct StoryGenerationTests {
             return GeneratedStoryBook(title: "The Fox and the Star", summary: "A fox follows a star home.", chapters: [GeneratedBookChapter(title: "The Star", text: opening), GeneratedBookChapter(title: "Home", text: ending)])
         }
         var modes: [StoryGenerationMode] = []
+        var requests: [StoryGenerationRequest] = []
         var unavailable: String?
         var failure: Error?
         var emptyOnce = false
+        var tooLongOnce = false
         var invalidAlways = false
         var pause = false
         private var started = false
         private var waiter: CheckedContinuation<Void, Never>?
         func unavailabilityReason(for mode: StoryGenerationMode, language: StoryLanguage) -> String? { unavailable }
         func book(for request: StoryGenerationRequest, mode: StoryGenerationMode) async throws -> GeneratedStoryBook {
-            modes.append(mode); started = true; waiter?.resume(); waiter = nil
+            modes.append(mode); requests.append(request); started = true; waiter?.resume(); waiter = nil
             if pause { try await Task.sleep(for: .seconds(30)) }
             if let failure { throw failure }
             var result = Self.validBook
+            if tooLongOnce { tooLongOnce = false; result.chapters = result.chapters.map { GeneratedBookChapter(title: $0.title, text: $0.text + " " + $0.text) } }
             if emptyOnce || invalidAlways { emptyOnce = false; result.chapters[0].text = " \n " }
             return result
         }

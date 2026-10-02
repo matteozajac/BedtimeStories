@@ -23,6 +23,45 @@ actor BookDraftStore {
         return draft
     }
 
+    func createEditingDraft(_ checkout: BookEditCheckout) throws -> BookDraft {
+        let book = checkout.book
+        var draft = BookDraft()
+        draft.source = checkout.source
+        draft.title = book.manifest.title; draft.author = book.manifest.author ?? ""
+        draft.summary = book.manifest.description ?? ""
+        draft.cover = book.manifest.cover; draft.audio = book.manifest.audio
+        draft.readingWordsPerMinute = book.manifest.readingWordsPerMinute
+        draft.illustrationGuide = book.manifest.illustrationGuide
+        draft.chapters = try book.manifest.orderedChapters.map { chapter in
+            var value = DraftChapter(id: chapter.id, title: chapter.title ?? "")
+            if let path = chapter.text {
+                let url = try SafeBookPath.resolve(path, inside: book.folder)
+                guard (try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0) <= 5_000_000 else { throw BookError.invalid("Chapter text is too large to display.") }
+                value.text = try String(contentsOf: url, encoding: .utf8)
+            }
+            value.image = chapter.image; value.audio = chapter.audio; value.startTime = chapter.startTime
+            return value
+        }
+        do {
+            let destination = folder(draft.id)
+            try files.createDirectory(at: destination, withIntermediateDirectories: true)
+            for path in Set(draft.mediaPaths) {
+                let target = try SafeBookPath.resolve(path, inside: destination)
+                try files.createDirectory(at: target.deletingLastPathComponent(), withIntermediateDirectories: true)
+                try files.copyItem(at: SafeBookPath.resolve(path, inside: book.folder), to: target)
+            }
+            try save(draft)
+            try JSONEncoder().encode(draft).write(to: destination.appendingPathComponent("baseline.json"), options: .atomic)
+            return draft
+        } catch { try? files.removeItem(at: folder(draft.id)); throw error }
+    }
+
+    func baseline(_ id: UUID) throws -> BookDraft? {
+        let url = folder(id).appendingPathComponent("baseline.json")
+        guard files.fileExists(atPath: url.path) else { return nil }
+        return try JSONDecoder().decode(BookDraft.self, from: Data(contentsOf: url))
+    }
+
     func load(_ id: UUID) throws -> BookDraft {
         let data = try Data(contentsOf: folder(id).appendingPathComponent("draft.json"))
         let draft = try JSONDecoder().decode(BookDraft.self, from: data)
@@ -32,6 +71,7 @@ actor BookDraftStore {
     }
 
     func save(_ draft: BookDraft) throws {
+        try Task.checkCancellation()
         try draft.validateDraft()
         let location = folder(draft.id)
         // Ignore a delayed autosave that arrived after a newer explicit save.

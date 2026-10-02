@@ -4,6 +4,7 @@ struct BookDetailView: View {
     @Environment(LibraryModel.self) private var library
     let book: LibraryBook
     var body: some View {
+        let book = library.books.first(where: { $0.id == self.book.id }) ?? self.book
         ScrollView {
             VStack(spacing: 24) {
                 BookCoverView(book: book).aspectRatio(2.0 / 3.0, contentMode: .fit).frame(maxWidth: 220)

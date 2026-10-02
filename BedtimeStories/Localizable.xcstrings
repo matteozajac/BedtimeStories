@@ -4192,6 +4192,826 @@
           }
         }
       }
+    },
+    "About %@ minutes for the whole book.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %@ minutes for the whole book."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cała książka zajmie około %@ min czytania."
+          }
+        }
+      }
+    },
+    "About %lld words for the whole book. Apple Intelligence chooses the chapter count; you can change it in the editor.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %lld words for the whole book. Apple Intelligence chooses the chapter count; you can change it in the editor."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Około %lld słów w całej książce. Apple Intelligence dobierze liczbę rozdziałów. Możesz ją zmienić w edytorze."
+          }
+        }
+      }
+    },
+    "Apple Intelligence creates the title and chapter text. Review the story before sharing it with a child, then add pictures and narration.": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Intelligence tworzy tytuł i treść rozdziałów. Przeczytaj opowieść, zanim udostępnisz ją dziecku, a następnie dodaj ilustracje i nagrania."
+          }
+        }
+      }
+    },
+    "Book Changed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Book Changed"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Książka została zmieniona"
+          }
+        }
+      }
+    },
+    "Changes from this editing session will be discarded. Your library book stays unchanged.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changes from this editing session will be discarded. Your library book stays unchanged."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zmiany wprowadzone podczas tej edycji zostaną odrzucone. Książka w bibliotece pozostanie bez zmian."
+          }
+        }
+      }
+    },
+    "Changes kept on this device": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changes kept on this device"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zmiany zachowane na tym urządzeniu"
+          }
+        }
+      }
+    },
+    "Chapter Options": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chapter Options"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcje rozdziału"
+          }
+        }
+      }
+    },
+    "Checking the story’s length and completeness…": {
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprawdzanie długości i kompletności opowieści…"
+          }
+        }
+      }
+    },
+    "Choose 1–30 minutes and a reading pace of 80–180 words per minute.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose 1–30 minutes and a reading pace of 80–180 words per minute."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wybierz czas od 1 do 30 minut i tempo od 80 do 180 słów na minutę."
+          }
+        }
+      }
+    },
+    "Close": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zamknij"
+          }
+        }
+      }
+    },
+    "Delete": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuń"
+          }
+        }
+      }
+    },
+    "Discard": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discard"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odrzuć"
+          }
+        }
+      }
+    },
+    "Discard Changes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discard Changes"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odrzuć zmiany"
+          }
+        }
+      }
+    },
+    "Discard your changes?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discard your changes?"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odrzucić zmiany?"
+          }
+        }
+      }
+    },
+    "Edit Book": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit Book"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edytuj książkę"
+          }
+        }
+      }
+    },
+    "Editing a library book": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editing a library book"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edycja książki z biblioteki"
+          }
+        }
+      }
+    },
+    "Full-book Narration": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full-book Narration"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagranie całej książki"
+          }
+        }
+      }
+    },
+    "Generate Chapter Picture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Generate Chapter Picture"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wygeneruj ilustrację rozdziału"
+          }
+        }
+      }
+    },
+    "Generate Cover Picture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Generate Cover Picture"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wygeneruj okładkę"
+          }
+        }
+      }
+    },
+    "Image Playground is unavailable on this device. You can still add your own photos.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image Playground is unavailable on this device. You can still add your own photos."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image Playground jest niedostępne na tym urządzeniu. Możesz dodać własne zdjęcia."
+          }
+        }
+      }
+    },
+    "Image Playground starts with this story and a shared illustration style. Review the picture before keeping it.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image Playground starts with this story and a shared illustration style. Review the picture before keeping it."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image Playground wykorzysta treść opowieści i wspólny styl ilustracji. Obejrzyj obraz przed jego dodaniem."
+          }
+        }
+      }
+    },
+    "Keep Editing": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep Editing"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontynuuj edycję"
+          }
+        }
+      }
+    },
+    "Move Earlier": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move Earlier"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przenieś wcześniej"
+          }
+        }
+      }
+    },
+    "Move Later": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move Later"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przenieś później"
+          }
+        }
+      }
+    },
+    "Open a chapter to write, add a picture, or record narration. Chapter Options lets you reorder or remove chapters.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open a chapter to write, add a picture, or record narration. Chapter Options lets you reorder or remove chapters."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otwórz rozdział, aby dopisać tekst, dodać ilustrację lub nagrać narrację. W opcjach rozdziału możesz zmienić kolejność lub go usunąć."
+          }
+        }
+      }
+    },
+    "Opening book for editing…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opening book for editing…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otwieram książkę do edycji…"
+          }
+        }
+      }
+    },
+    "Preparing picture idea…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparing picture idea…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przygotowuję pomysł na ilustrację…"
+          }
+        }
+      }
+    },
+    "Reading Time": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading Time"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Czas czytania"
+          }
+        }
+      }
+    },
+    "Reading pace: %lld words/minute": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading pace: %lld words/minute"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tempo czytania: %lld słów/min"
+          }
+        }
+      }
+    },
+    "Reading time: %lld minutes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading time: %lld minutes"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Czas czytania: %lld min"
+          }
+        }
+      }
+    },
+    "Remove Chapter": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove Chapter"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuń rozdział"
+          }
+        }
+      }
+    },
+    "Remove the full-book narration before adding chapter recordings.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove the full-book narration before adding chapter recordings."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuń nagranie całej książki, zanim dodasz nagrania poszczególnych rozdziałów."
+          }
+        }
+      }
+    },
+    "Remove the full-book narration in Book Details before recording individual chapters.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove the full-book narration in Book Details before recording individual chapters."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aby nagrać poszczególne rozdziały, usuń nagranie całej książki w szczegółach książki."
+          }
+        }
+      }
+    },
+    "Remove the full-book narration?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove the full-book narration?"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usunąć nagranie całej książki?"
+          }
+        }
+      }
+    },
+    "Remove the full-book recording to record individual chapters. Replacing it or changing chapter order clears its chapter timestamps.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove the full-book recording to record individual chapters. Replacing it or changing chapter order clears its chapter timestamps."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuń nagranie całej książki, aby nagrać poszczególne rozdziały. Wymiana nagrania lub zmiana kolejności rozdziałów usuwa ich znaczniki czasu."
+          }
+        }
+      }
+    },
+    "Remove this chapter?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove this chapter?"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usunąć ten rozdział?"
+          }
+        }
+      }
+    },
+    "Save": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zapisz"
+          }
+        }
+      }
+    },
+    "Save adds this book to your library to read, listen, and share with your family.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save adds this book to your library to read, listen, and share with your family."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zapisz książkę w bibliotece, aby ją czytać, słuchać i udostępniać rodzinie."
+          }
+        }
+      }
+    },
+    "Save as a New Book": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save as a New Book"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zapisz jako nową książkę"
+          }
+        }
+      }
+    },
+    "Save updates this book in your library. Discard leaves the library version unchanged.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save updates this book in your library. Discard leaves the library version unchanged."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zapisz aktualizuje książkę w bibliotece. Odrzuć pozostawia wersję z biblioteki bez zmian."
+          }
+        }
+      }
+    },
+    "Saved chapters: %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved chapters: %lld"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zapisane rozdziały: %lld"
+          }
+        }
+      }
+    },
+    "The book could not be opened for saving.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The book could not be opened for saving."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się otworzyć książki do zapisu."
+          }
+        }
+      }
+    },
+    "The book could not be saved to your library. Your edits are safe on this device. Check iCloud Drive and available storage, then try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The book could not be saved to your library. Your edits are safe on this device. Check iCloud Drive and available storage, then try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się zapisać książki w bibliotece. Twoje zmiany są bezpieczne na tym urządzeniu. Sprawdź iCloud Drive i wolne miejsce, a potem spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "The generated picture could not be saved. Try creating it again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The generated picture could not be saved. Try creating it again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się zapisać wygenerowanej ilustracji. Spróbuj wygenerować ją ponownie."
+          }
+        }
+      }
+    },
+    "The original editing copy could not be opened. Your library book is unchanged.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The original editing copy could not be opened. Your library book is unchanged."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się otworzyć oryginalnej kopii do edycji. Książka w bibliotece pozostaje bez zmian."
+          }
+        }
+      }
+    },
+    "The story could not be completed. Try again with a shorter reading time or a simpler idea.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The story could not be completed. Try again with a shorter reading time or a simpler idea."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się ukończyć opowieści. Spróbuj wybrać krótszy czas czytania lub prostszy pomysł."
+          }
+        }
+      }
+    },
+    "The story did not match your reading time. Try again, or choose a shorter duration.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The story did not match your reading time. Try again, or choose a shorter duration."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Długość opowieści nie pasuje do wybranego czasu czytania. Spróbuj ponownie lub wybierz krótszy czas."
+          }
+        }
+      }
+    },
+    "The story was incomplete. Try a simpler description or a shorter reading time.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The story was incomplete. Try a simpler description or a shorter reading time."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opowieść była niekompletna. Spróbuj prostszego opisu lub krótszego czasu czytania."
+          }
+        }
+      }
+    },
+    "This book changed after you opened it. Your edits are safe on this device. Save them as a new book, or close and reopen the latest library version.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This book changed after you opened it. Your edits are safe on this device. Save them as a new book, or close and reopen the latest library version."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Książka zmieniła się od czasu jej otwarcia. Twoje zmiany są bezpieczne na tym urządzeniu. Zapisz je jako nową książkę albo zamknij edytor i otwórz aktualną wersję z biblioteki."
+          }
+        }
+      }
+    },
+    "This reading time is too long for the on-device model to create a complete book at once. Choose Private Cloud Compute or reduce the duration or reading pace.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This reading time is too long for the on-device model to create a complete book at once. Choose Private Cloud Compute or reduce the duration or reading pace."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przy tym czasie czytania model na urządzeniu nie zmieści całej książki w jednej odpowiedzi. Wybierz Private Cloud Compute albo zmniejsz czas lub tempo czytania."
+          }
+        }
+      }
+    },
+    "Words": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Words"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Słowa"
+          }
+        }
+      }
+    },
+    "Write a story, add pictures, and record it in your own voice. Your work is kept on this device; Save adds the book to your library.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Write a story, add pictures, and record it in your own voice. Your work is kept on this device; Save adds the book to your library."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Napisz opowieść, dodaj ilustracje i nagraj ją własnym głosem. Twoja praca jest zachowywana na tym urządzeniu. Zapisz dodaje książkę do biblioteki."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

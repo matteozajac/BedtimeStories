@@ -44,6 +44,9 @@ struct RootView: View {
         }
         .sheet(isPresented: $library.showingSettings) { NavigationStack { SettingsView() } }
         .sheet(isPresented: $library.showingCreator) { BookCreatorView() }
+        .sheet(item: $library.editingDraft) { draft in
+            NavigationStack { BookEditorView(draft: draft, store: .shared) }
+        }
         .fullScreenCover(isPresented: $library.showingPlayer) { NowPlayingView() }
         .sheet(item: $library.importCandidate) { candidate in
             ImportReviewView(book: candidate).interactiveDismissDisabled()

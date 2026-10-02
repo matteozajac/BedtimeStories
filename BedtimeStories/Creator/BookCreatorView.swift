@@ -24,7 +24,7 @@ struct BookCreatorView: View {
                         }
                     }.accessibilityIdentifier("new-book-draft")
                 } footer: {
-                    Text("Write a story, add pictures, and record it in your own voice. Drafts are saved on this device until you add them to your library.")
+                    Text("Write a story, add pictures, and record it in your own voice. Your work is kept on this device; Save adds the book to your library.")
                 }
                 Section("Your Drafts") {
                     if loading { ProgressView("Opening drafts…") }
@@ -33,6 +33,7 @@ struct BookCreatorView: View {
                         NavigationLink(value: draft) {
                             VStack(alignment: .leading, spacing: 6) {
                                 Text(draft.title.isEmpty ? String(localized: "Untitled Book") : draft.title).font(.headline)
+                                if draft.source != nil { Text("Editing a library book").font(.caption).foregroundStyle(.secondary) }
                                 Text(draft.modifiedAt, format: .dateTime.day().month().hour().minute()).font(.caption).foregroundStyle(.secondary)
                             }.padding(.vertical, 4)
                         }
@@ -41,7 +42,7 @@ struct BookCreatorView: View {
                 }
             }
             .navigationTitle("Book Creator")
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Close") { dismiss() } } }
             .navigationDestination(for: BookDraft.self) { BookEditorView(draft: $0, store: store) }
             .navigationDestination(for: BookCreatorRoute.self) { _ in
                 StoryIdeaView(store: store) { draft in

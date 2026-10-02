@@ -1,5 +1,27 @@
 # Internal TestFlight
 
+## 1.0 (7) — 2 October 2026
+
+The editing, reading-duration, and Image Playground update is processed and available to **Internal Testers**. Exact readback confirms `VALID`, `INTERNAL_ONLY`, `IN_BETA_TESTING`, complete effective group access, and English What to Test notes matching the upload.
+
+- Build/upload ID: `31c4c04d-fd19-4de3-8f03-58a6e679478e`.
+- App ID: `6818278413`; bundle: `com.matteozajac.bedtimestories`; team: `4TCJLR98Y5`.
+- Group: `20328e88-9f9c-4c47-be78-c33a809d1a71` (**Internal Testers**, explicit and all-build access).
+- Minimum OS: iOS / iPadOS 27.0.
+- IPA SHA-256: `41d46cf7440cfdc556fec86af9d4ea6344c4f18fc1a9412d310e4949bfd1d0c2`.
+- Release source fingerprint: `8372647f1e3a8e30bf9f9a58566c9e87ddc0d7a8d80a1ae57e669b7c93f536f1`; all **83 release input hashes** matched through archive, export, upload and processing.
+- Signed archive, optimized PCC compilation flag, Internal-only export, app identity, signature, certificate, profile, and device families were verified. The signature and embedded profile grant PCC and Production CloudDocuments access to the exact iCloud container. Profile UUID remains `3af35bdd-ce98-4c8a-bd6a-03cf35d8aaa7` (expires 5 March 2027).
+
+**Edit Book** opens a complete local working copy of an existing book with stable book/chapter identities. Save coordinates replacement after checking a content fingerprint; conflicts preserve edits and offer Save as a New Book. Pinned books receive a complete updated offline copy in the same save transaction. Text, images, recordings, chapter addition/reordering/removal, full-book narration and existing timestamps are supported. Save publishes/closes; Discard confirms session rollback; Close appears when unchanged.
+
+AI creation now uses whole-book reading minutes and words/minute. A duration-specific schema chooses a sensible chapter-count range, and total prose is checked against 80–120% of the target. Invalid output receives one fresh complete-book retry with measured length guidance. On-device creation supports up to 600 target words; longer books, including 20 minutes at 120 words/minute, require explicitly selecting PCC. Image Playground receives prepared scene prompts, shared appearance/style, and optional cover references; the person reviews and accepts images before saving the book.
+
+Validation: **27 native tests passed in Release on iPhone and Debug on iPad**, including an offline edit readback after deleting the source folder. **8 Swift core tests** and **6 Python authoring tests** passed. Real local-model checks produced complete two- and five-minute books in one response each (217 and 549 words at 120 words/minute). English iPhone UI verified edits, discard, chapter addition, save and reopen; Polish iPad UI verified the 20-minute/2400-word controls. [Detailed validation](AI_CREATOR.md).
+
+The user reported successful PCC creation with build 6. Physical 20-minute PCC generation, Image Playground image acceptance, real microphone quality and simultaneous iCloud edits on two devices remain hardware checks for this version. Both existing testers remain `INSTALLED`; their reported builds are iPhone 1.0 (6) and Vision Pro 1.0 (4), so installation of build 7 is not yet established. No membership changes or external/App Review submission were made.
+
+[Open TestFlight in App Store Connect](https://appstoreconnect.apple.com/apps/6818278413/testflight/ios).
+
 ## 1.0 (6) — 2 October 2026
 
 The PCC-enabled signed build is processed and available to **Internal Testers**. Exact-build readback confirms `VALID`, `INTERNAL_ONLY`, `IN_BETA_TESTING`, complete effective group access, and saved English What to Test notes matching the upload.

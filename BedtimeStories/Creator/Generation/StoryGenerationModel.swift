@@ -7,7 +7,6 @@ final class StoryGenerationModel {
     private(set) var working = false
     private(set) var draft: BookDraft?
     private(set) var completedChapterCount = 0
-    private(set) var plannedChapterCount = 0
     private(set) var retrying = false
     private(set) var saving = false
     private(set) var message: String?
@@ -29,7 +28,6 @@ final class StoryGenerationModel {
         working = true
         draft = nil
         completedChapterCount = 0
-        plannedChapterCount = request.chapterCount
         message = nil
         completed = false
         retrying = false
@@ -37,18 +35,20 @@ final class StoryGenerationModel {
         defer { working = false; saving = false }
 
         do {
-            try request.validate()
+            try request.validate(mode: mode)
             if let reason = generator.unavailabilityReason(for: mode, language: request.language) {
                 throw StoryGenerationFailure.unavailable(reason)
             }
             var result: GeneratedStoryBook?
+            var attemptRequest = request
             for attempt in 0..<2 {
                 try Task.checkCancellation()
                 retrying = attempt > 0
                 do {
-                    let generated = try await generator.book(for: request, mode: mode)
+                    let generated = try await generator.book(for: attemptRequest, mode: mode)
                     try Task.checkCancellation()
-                    result = try StoryOutputValidator.validate(generated, chapterCount: request.chapterCount)
+                    attemptRequest.previousWordCount = generated.chapters.reduce(0) { $0 + StoryReadingLength.wordCount($1.text) }
+                    result = try StoryOutputValidator.validate(generated, request: request)
                     break
                 } catch {
                     guard !Task.isCancelled, attempt == 0, Self.canRetry(error) else { throw error }
@@ -59,6 +59,8 @@ final class StoryGenerationModel {
             var snapshot = BookDraft()
             snapshot.title = book.title
             snapshot.summary = book.summary
+            snapshot.readingWordsPerMinute = request.wordsPerMinute
+            snapshot.illustrationGuide = book.illustrationGuide.isEmpty ? nil : book.illustrationGuide
             snapshot.chapters = book.chapters.map {
                 var chapter = DraftChapter(title: $0.title)
                 chapter.text = $0.text
@@ -81,6 +83,7 @@ final class StoryGenerationModel {
 
     private static func canRetry(_ error: Error) -> Bool {
         if case StoryGenerationFailure.invalidResponse = error { return true }
+        if case StoryGenerationFailure.durationMismatch = error { return true }
         if error is DecodingError { return true }
         if error is GeneratedContent.ParsingError { return true }
         return false
@@ -113,6 +116,6 @@ final class StoryGenerationModel {
         case is SystemLanguageModel.Error: failure = .generationFailed
         default: failure = .generationFailed
         }
-        return failure.errorDescription ?? String(localized: "The story could not be completed. Try again with fewer chapters or a simpler idea.")
+        return failure.errorDescription ?? String(localized: "The story could not be completed. Try again with a shorter reading time or a simpler idea.")
     }
 }

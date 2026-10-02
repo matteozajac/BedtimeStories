@@ -6,6 +6,11 @@ public struct BookDraft: Codable, Identifiable, Hashable, Sendable {
     public var author = ""
     public var summary = ""
     public var cover: String?
+    public var audio: String?
+    public var audioDuration: Double?
+    public var source: BookEditSource?
+    public var readingWordsPerMinute: Int?
+    public var illustrationGuide: String?
     public var chapters: [DraftChapter]
     public var modifiedAt: Date
 
@@ -14,16 +19,31 @@ public struct BookDraft: Codable, Identifiable, Hashable, Sendable {
     }
 
     public var manifest: BookManifest {
-        BookManifest(id: id, title: title.trimmingCharacters(in: .whitespacesAndNewlines),
+        var result = BookManifest(id: source?.bookID ?? id, title: title.trimmingCharacters(in: .whitespacesAndNewlines),
             author: Self.optional(author), description: Self.optional(summary), cover: cover,
+            audio: audio,
             chapters: chapters.map { chapter in
                 BookChapter(id: chapter.id, title: Self.optional(chapter.title),
                     text: Self.optional(chapter.text) == nil ? nil : "text/\(chapter.id.uuidString).md",
-                    image: chapter.image, audio: chapter.audio)
+                    image: chapter.image, audio: chapter.audio, startTime: chapter.startTime)
             })
+        result.readingWordsPerMinute = readingWordsPerMinute
+        result.illustrationGuide = illustrationGuide
+        return result
     }
 
-    public var mediaPaths: [String] { ([cover] + chapters.flatMap { [$0.image, $0.audio] }).compactMap { $0 } }
+    public var mediaPaths: [String] { ([cover, audio] + chapters.flatMap { [$0.image, $0.audio] }).compactMap { $0 } }
+    public var wordCount: Int { chapters.reduce(0) { $0 + StoryReadingLength.wordCount($1.text) } }
+
+    public func hasSameContent(as other: BookDraft) -> Bool {
+        var a = self; var b = other
+        a.modifiedAt = .distantPast; b.modifiedAt = .distantPast
+        return a == b
+    }
+
+    public var isEmpty: Bool {
+        title.isEmpty && author.isEmpty && summary.isEmpty && mediaPaths.isEmpty && chapters.allSatisfy { $0.title.isEmpty && $0.text.isEmpty }
+    }
 
     public func validateDraft() throws {
         guard chapters.count <= 9_999, Set(chapters.map(\.id)).count == chapters.count else {

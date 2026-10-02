@@ -5,7 +5,8 @@ struct StoryIdeaView: View {
     @AppStorage("bookCreatorStoryIdea") private var description = ""
     @State private var language = StoryLanguage.preferred
     @State private var readerAge = StoryReaderAge.preschool
-    @State private var chapterCount = 3
+    @AppStorage("bookCreatorReadingMinutes") private var readingMinutes = 5
+    @AppStorage("bookCreatorReadingPace") private var wordsPerMinute = StoryReadingLength.defaultWordsPerMinute
     @State private var mode = StoryGenerationMode.onDevice
     @State private var generationID: UUID?
     @State private var model: StoryGenerationModel
@@ -41,8 +42,11 @@ struct StoryIdeaView: View {
                 Picker("Reader Age", selection: $readerAge) {
                     ForEach(StoryReaderAge.allCases) { age in Text(age.rawValue).tag(age) }
                 }
-                Stepper("Chapters: \(chapterCount)", value: $chapterCount, in: 1...4)
-                Text("Each chapter is a short bedtime read. You can make changes in the editor.")
+                Stepper("Reading time: \(readingMinutes) minutes", value: $readingMinutes, in: 1...30)
+                    .accessibilityIdentifier("story-reading-minutes")
+                Stepper("Reading pace: \(wordsPerMinute) words/minute", value: $wordsPerMinute, in: 80...180, step: 10)
+                    .accessibilityIdentifier("story-reading-pace")
+                Text("About \(readingMinutes * wordsPerMinute) words for the whole book. Apple Intelligence chooses the chapter count; you can change it in the editor.")
                     .font(.footnote).foregroundStyle(.secondary)
             }
             .disabled(model.working)
@@ -57,13 +61,14 @@ struct StoryIdeaView: View {
                     Label("Your description and story context are sent to Apple's Private Cloud Compute to create the book. An internet connection is required.", systemImage: "cloud")
                 }
                 if let availability { Text(availability).foregroundStyle(.secondary) }
+                if let durationWarning { Text(durationWarning).foregroundStyle(.secondary).accessibilityIdentifier("story-duration-warning") }
                 Button("Check Availability", systemImage: "arrow.clockwise") { refreshAvailability() }
             } header: { Text("Processing") }
             .disabled(model.working)
 
             if model.working {
                 Section {
-                    ProgressView(model.saving ? "Saving the complete story…" : model.retrying ? "Completing missing story text…" : "Writing your complete story…")
+                    ProgressView(model.saving ? "Saving the complete story…" : model.retrying ? "Checking the story’s length and completeness…" : "Writing your complete story…")
                     Button("Stop Creating", role: .cancel) { generationID = nil }
                         .accessibilityIdentifier("stop-story-generation")
                 } footer: { Text("The entire book is written together and checked before it is saved to Your Drafts.") }
@@ -72,7 +77,7 @@ struct StoryIdeaView: View {
                     Section {
                         Text(message).accessibilityIdentifier("story-generation-message")
                         if let draft = model.draft {
-                            Text("Saved chapters: \(model.completedChapterCount) of \(model.plannedChapterCount)")
+                            Text("Saved chapters: \(model.completedChapterCount)")
                                 .font(.footnote).foregroundStyle(.secondary)
                             Button("Open Saved Draft", systemImage: "doc.text") { openDraft(draft) }
                         }
@@ -83,10 +88,10 @@ struct StoryIdeaView: View {
                         editingDescription = false
                         generationID = UUID()
                     }
-                    .disabled(availability != nil || description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || description.count > StoryGenerationRequest.maximumDescriptionLength)
+                    .disabled(availability != nil || durationWarning != nil || description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || description.count > StoryGenerationRequest.maximumDescriptionLength)
                     .accessibilityIdentifier("generate-story-draft")
                 } footer: {
-                    Text("Apple Intelligence creates the title and chapter text. Review the story before sharing it with a child, then add your own pictures and narration.")
+                    Text("Apple Intelligence creates the title and chapter text. Review the story before sharing it with a child, then add pictures and narration.")
                 }
             }
         }
@@ -102,7 +107,7 @@ struct StoryIdeaView: View {
         }
         .task(id: generationID) {
             guard generationID != nil else { return }
-            let request = StoryGenerationRequest(description: description.trimmingCharacters(in: .whitespacesAndNewlines), language: language, readerAge: readerAge, chapterCount: chapterCount)
+            let request = StoryGenerationRequest(description: description.trimmingCharacters(in: .whitespacesAndNewlines), language: language, readerAge: readerAge, readingMinutes: readingMinutes, wordsPerMinute: wordsPerMinute)
             await model.generate(request, mode: mode)
             if model.completed, !Task.isCancelled, let draft = model.draft { openDraft(draft) }
             refreshAvailability()
@@ -111,5 +116,10 @@ struct StoryIdeaView: View {
 
     private func refreshAvailability() {
         availability = model.unavailabilityReason(for: mode, language: language)
+    }
+
+    private var durationWarning: String? {
+        if !(1...30).contains(readingMinutes) || !(80...180).contains(wordsPerMinute) { return StoryGenerationFailure.invalidDuration.errorDescription }
+        return mode == .onDevice && readingMinutes * wordsPerMinute > StoryGenerationRequest.localWordLimit ? StoryGenerationFailure.localDurationTooLong.errorDescription : nil
     }
 }

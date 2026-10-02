@@ -23,6 +23,7 @@ final class LibraryModel {
     var showingImportPicker = false
     var showingPlayer = false
     var showingCreator = false
+    var editingDraft: BookDraft?
     var search = ""
     private(set) var repository: LibraryRepository
     private(set) var progress: LocalProgress
@@ -245,11 +246,36 @@ final class LibraryModel {
         showingCreator = true
     }
 
+    func editBook(_ book: LibraryBook) {
+        perform("Opening book for editing…") { [self] in
+            guard let root else { throw BookError.unavailable("Your library is still opening. Try again in a moment.") }
+            let token = session; let account = location?.account
+            if player.book?.id == book.id { player.stop() }
+            let checkout = try await repository.checkout(book, root: root)
+            do {
+                guard token == session else { throw BookError.editConflict }
+                let source = BookEditSource(bookID: checkout.source.bookID, libraryRoot: checkout.source.libraryRoot, fingerprint: checkout.source.fingerprint, libraryAccount: account)
+                let draft = try await BookDraftStore.shared.createEditingDraft(BookEditCheckout(book: checkout.book, source: source))
+                guard token == session else { throw BookError.editConflict }
+                editingDraft = draft
+                await repository.discardImport(checkout.book)
+            } catch { await repository.discardImport(checkout.book); throw error }
+        }
+    }
+
     func addCreatedBook(_ book: LibraryBook) async throws {
+        try await saveBook(book, source: nil)
+    }
+
+    func saveBook(_ book: LibraryBook, source: BookEditSource?) async throws {
         guard let root, activity == nil, !preparingLibrary else { throw BookError.unavailable("Your library is still opening. Try again in a moment.") }
+        if let account = source?.libraryAccount, account != location?.account { throw BookError.editConflict }
         activity = String(localized: "Saving book…")
         do {
-            try await repository.commitImport(book, root: root, replacing: false)
+            if let source {
+                if player.book?.id == book.id { player.stop() }
+                try await repository.commitEdit(book, source: source, root: root)
+            } else { try await repository.commitImport(book, root: root, replacing: false) }
         } catch { activity = nil; throw error }
         activity = nil
         await refresh()
