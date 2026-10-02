@@ -1,5 +1,25 @@
 # Internal TestFlight
 
+## 1.0 (6) — 2 October 2026
+
+The PCC-enabled signed build is processed and available to **Internal Testers**. Exact-build readback confirms `VALID`, `INTERNAL_ONLY`, `IN_BETA_TESTING`, complete effective group access, and saved English What to Test notes matching the upload.
+
+- Build/upload ID: `6a732e8e-4a49-4313-8bf8-f7fe560d5a00`.
+- App ID: `6818278413`; bundle: `com.matteozajac.bedtimestories`; team: `4TCJLR98Y5`.
+- Group: `20328e88-9f9c-4c47-be78-c33a809d1a71` (**Internal Testers**, explicit and all-build access).
+- Minimum OS: iOS / iPadOS 27.0.
+- Profile generated/downloaded in Safari: **Always Near Stories PCC App Store 2026-10-02**, UUID `3af35bdd-ce98-4c8a-bd6a-03cf35d8aaa7`, expires 5 March 2027. It reuses the installed personal Apple Distribution certificate.
+- IPA SHA-256: `c8aed0081fe162392e843e31d99e46cf8130d932ebea2835e1ea3f4063e2ceb5`.
+- Release source fingerprint: `41b7bd60b77e930ca7edcccb63e0d767ea38d46c3909ac2a2ee1ee20e7ad9ec6`; all **76 release input hashes** matched through archive, export, upload and processing.
+
+Apple's approved PCC capability was saved and read back on this App ID. Release now includes `BEDTIME_PRIVATE_CLOUD_COMPUTE` and the merged PCC/iCloud entitlements; Debug remains local-only. The exported signature and embedded App Store profile both grant Boolean `com.apple.developer.private-cloud-compute`, and the app retains **Production** CloudDocuments access to `iCloud.com.matteozajac.bedtimestories`. Bundle, version/build, team, distribution certificate, profile, minimum OS, device families, signature, and Internal-only export options were verified.
+
+The whole-book generator, output validation/retry, and automatic library from build 5 remain in place. **On This Device** remains selected by default; cloud generation requires explicit selection, eligible hardware, Apple Intelligence, internet, a supported language, and quota. The app-version PCC gate is now enabled in this Release build. Successful PCC inference, speed/quality, and physical iCloud behavior still require testing on an eligible iPhone/iPad.
+
+Validation: unsigned Release device compilation and the ordinary signed archive/export passed. All **20 native tests passed in Release and 20 in Debug** on the dedicated iPhone simulator, including both compilation-gate branches; Release tests used an invocation-only testability override. All **6 Python authoring tests** passed. The two existing tester records remain `INSTALLED`, which does not prove installation of build 6.
+
+[Open TestFlight in App Store Connect](https://appstoreconnect.apple.com/apps/6818278413/testflight/ios).
+
 ## 1.0 (5) — 2 October 2026
 
 The complete-book generator and automatic iCloud library are processed and available to **Internal Testers**. Exact-build readback confirms `VALID`, `INTERNAL_ONLY`, `IN_BETA_TESTING`, effective internal group access, and saved English What to Test notes matching the uploaded text.

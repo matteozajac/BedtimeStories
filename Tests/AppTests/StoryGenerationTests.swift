@@ -134,8 +134,10 @@ struct StoryGenerationTests {
         #expect(generator.modes.count == 1)
     }
 
-    @Test func defaultCloudBuildCannotSendRequests() {
-        #if !BEDTIME_PRIVATE_CLOUD_COMPUTE
+    @Test func buildConfigurationMatchesCloudGate() {
+        #if BEDTIME_PRIVATE_CLOUD_COMPUTE
+        #expect(FoundationStoryGenerator.cloudEnabled)
+        #else
         let generator = FoundationStoryGenerator()
         #expect(!FoundationStoryGenerator.cloudEnabled)
         #expect(generator.unavailabilityReason(for: .privateCloud, language: .english) != nil)
