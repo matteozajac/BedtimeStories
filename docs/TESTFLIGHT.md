@@ -1,5 +1,43 @@
 # Internal TestFlight
 
+## 1.0 (14) — 4 October 2026
+
+The narration-screen storybook redesign is processed and available to
+**Internal Testers**. Exact readback confirms
+**VALID / INTERNAL_ONLY / IN_BETA_TESTING**, complete effective group access
+and matching English What to Test notes.
+
+- Build/upload ID: `3da862b0-a7ee-40e1-a0ac-cb4df1585a6b`.
+- App ID: `6818278413`; bundle `com.matteozajac.bedtimestories`; team `4TCJLR98Y5`.
+- Group: `20328e88-9f9c-4c47-be78-c33a809d1a71` (**Internal Testers**, explicit and all-build access).
+- English notes: `77265d11-9b74-4298-89be-8bfe4c557275`.
+- Minimum iOS/iPadOS, compatible Mac and Vision OS: 27.0.
+- IPA SHA256: `49f3d195befe183ae16aae4d1bba437bf4140e8480ff55d0a1b33873f544c0e9`.
+- Release input fingerprint: `857acb83c62edfb7c696160b0789c92a6a44e3e2358f8b7b69ca97a0f29def4f`; 132 matching inputs,
+  including the ignored Firebase client configuration.
+- Signed Internal archive and Internal-only export passed strict signature,
+  identity, Foundation metadata, Firebase configuration and entitlement checks.
+
+Updated voice cards, recording steps, style chips, chapter rows, narration
+progress cards and account presentation use the app's storybook design. Small
+row actions use the shared compact button styles. English and Polish labels
+are included. Test voice enrollment and deletion, book/paragraph styles,
+preview, progress, cancellation and Use Narration; retest reading, playback,
+editing and sharing.
+
+Validation: **55 native app tests in optimized Internal, 9 core tests and 6
+Python authoring tests passed**. The full Local binary SDK isolation audit passed.
+All release inputs matched through archive, export, upload and distribution.
+The general strict TestFlight readiness check reports four missing beta-review
+contact fields; exact internal testing and group access are active. No external
+review was requested.
+
+The two existing tester records are INSTALLED; this does not establish
+installation of build 14. Physical microphone, App Attest, iCloud sync and real
+parent-voice quality remain device acceptance checks. Existing backend settings
+are retained. Raw receipts and artifacts remain in ignored `.build/pti/1.0-14/`.
+[Open TestFlight](https://appstoreconnect.apple.com/apps/6818278413/testflight/ios).
+
 ## 1.0 (13) — 3 October 2026
 
 MZAppFoundation 0.5.1, shared keyboard help, Command-D console access and the
