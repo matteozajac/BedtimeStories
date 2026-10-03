@@ -76,7 +76,11 @@ struct NarrationComposerView: View {
         .task(id: cloud.userID) { loadPreferences() }
         .onChange(of: preferences) { _, _ in savePreferences() }
         .onChange(of: cloud.userID) { _, _ in operation?.cancel(); preview.stop(); accepting = nil; owner = nil; preferences = NarrationDraftPreferences(); message = nil }
-        .onDisappear { operation?.cancel(); preview.stop() }
+        .onAppear { AppLog.debug("Narration composer opened", category: "cloud_narration", metadata: ["narratable_chapter_count": .integer(chapters.count)]) }
+        .onDisappear {
+            AppLog.trace("Narration composer closed", category: "cloud_narration", metadata: ["working": .bool(working)])
+            operation?.cancel(); preview.stop()
+        }
         .confirmationDialog("Use this narration?", isPresented: Binding(get: { accepting != nil }, set: { if !$0 { accepting = nil } }), titleVisibility: .visible) {
             Button("Use Narration") { if let job = accepting { accepting = nil; accept(job) } }
         } message: { Text("This replaces the narration in your working draft. Your library book changes only when you save it.") }
@@ -148,7 +152,11 @@ struct NarrationComposerView: View {
     }
 
     private func start(previewOnly: Bool) {
-        guard let owner, owner == cloud.userID else { return }
+        guard let owner, owner == cloud.userID else {
+            AppLog.warning("Narration submission requires the current signed-in account", category: "cloud_narration", metadata: ["preview": .bool(previewOnly)])
+            return
+        }
+        AppLog.debug(previewOnly ? "Book narration preview requested by user" : "Book narration creation requested by user", category: "cloud_narration", metadata: ["chapter_count": .integer(chapters.count), "default_style": .string(preferences.defaultStyle.rawValue)])
         operation?.cancel(); working = true; message = nil
         let draft = editor.draft; let styles = effectiveStyles
         operation = Task {
@@ -165,7 +173,11 @@ struct NarrationComposerView: View {
     }
 
     private func listen(_ job: NarrationJob) {
-        guard let owner, owner == cloud.userID else { return }
+        guard let owner, owner == cloud.userID else {
+            AppLog.warning("Narration listening requires the current signed-in account", category: "cloud_narration")
+            return
+        }
+        AppLog.debug("Generated narration listening requested", category: "cloud_narration", metadata: ["preview": .bool(job.preview), "output_count": .integer(job.outputs.count)])
         operation?.cancel(); working = true; message = nil
         operation = Task {
             defer { working = false }
@@ -183,7 +195,12 @@ struct NarrationComposerView: View {
     }
 
     private func accept(_ job: NarrationJob) {
-        guard let owner, owner == cloud.userID, !job.preview, job.snapshotHash == currentHash else { return }
+        let snapshotMatches = job.snapshotHash == currentHash
+        guard let owner, owner == cloud.userID, !job.preview, snapshotMatches else {
+            AppLog.warning("Generated narration attachment rejected because its draft or account changed", category: "cloud_narration", metadata: ["same_account": .bool(owner != nil && owner == cloud.userID), "preview": .bool(job.preview), "snapshot_matches": .bool(snapshotMatches)])
+            return
+        }
+        AppLog.debug("Generated narration attachment requested", category: "cloud_narration", metadata: ["output_count": .integer(job.outputs.count)])
         let snapshot = editor.draft
         let hash = currentHash
         operation?.cancel(); working = true; message = nil; preview.stop()
@@ -191,9 +208,17 @@ struct NarrationComposerView: View {
             defer { working = false }
             do {
                 let urls = try await cloud.download(job: job)
-                guard owner == cloud.userID, !Task.isCancelled, hash == currentHash else { return }
-                if await editor.setGeneratedAudio(urls, expectedSnapshot: snapshot, authorized: { owner == cloud.userID && !Task.isCancelled }) { dismiss() }
-                else { message = editor.message }
+                guard owner == cloud.userID, !Task.isCancelled, hash == currentHash else {
+                    AppLog.trace("Generated narration attachment discarded after draft or account changed", category: "cloud_narration", metadata: ["cancelled": .bool(Task.isCancelled), "snapshot_matches": .bool(hash == currentHash)])
+                    return
+                }
+                if await editor.setGeneratedAudio(urls, expectedSnapshot: snapshot, authorized: { owner == cloud.userID && !Task.isCancelled }) {
+                    AppLog.debug("Generated narration attached to working draft", category: "cloud_narration", metadata: ["attached_chapter_count": .integer(urls.count)])
+                    dismiss()
+                } else {
+                    AppLog.trace("Generated narration could not be attached to working draft", category: "cloud_narration")
+                    message = editor.message
+                }
             } catch is CancellationError { AppLog.trace("Narration attachment cancelled", category: "cloud_narration") }
             catch {
                 CloudNarrationDiagnostics.reportIfNeeded("Narration attachment failed", error: error)

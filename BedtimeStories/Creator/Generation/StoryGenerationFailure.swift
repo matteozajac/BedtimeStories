@@ -1,9 +1,31 @@
 import Foundation
+import MZAppFoundation
 
-enum StoryGenerationFailure: Error, LocalizedError {
+enum StoryGenerationFailure: Error, LocalizedError, LoggableError {
     case emptyDescription, descriptionTooLong, invalidResponse, unavailable(String), unsupportedLanguage
     case contextTooLong, refused, busy, cloudNetwork, cloudQuota, cloudUnavailable, generationFailed, saveFailed
     case invalidDuration, localDurationTooLong, durationMismatch
+
+    var logMessage: String {
+        switch self {
+        case .emptyDescription: "The story description is empty."
+        case .descriptionTooLong: "The story description exceeds the supported character limit."
+        case .invalidResponse: "The generated book failed title, summary, chapter count, uniqueness, or complete-prose validation."
+        case .unavailable: "The selected Apple language model is unavailable. See the availability reason and model fields."
+        case .unsupportedLanguage: "The selected Apple language model does not support the requested locale."
+        case .contextTooLong: "The Apple language model context size was exceeded."
+        case .refused: "The Apple language model refused the request or a guardrail rejected it."
+        case .busy: "The Apple language model is rate limited or busy."
+        case .cloudNetwork: "Private Cloud Compute could not establish a network connection."
+        case .cloudQuota: "Private Cloud Compute quota is exhausted."
+        case .cloudUnavailable: "The Private Cloud Compute service is unavailable."
+        case .generationFailed: "The Apple language model could not complete generation."
+        case .saveFailed: "The generated book could not be persisted to the draft store."
+        case .invalidDuration: "The requested reading time or reading pace is outside the supported range."
+        case .localDurationTooLong: "The requested story will not fit in the on-device model context."
+        case .durationMismatch: "The generated word count is outside the requested reading-time range."
+        }
+    }
 
     var errorDescription: String? {
         switch self {

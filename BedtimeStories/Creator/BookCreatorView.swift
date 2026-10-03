@@ -20,7 +20,12 @@ struct BookCreatorView: View {
                     CreatorOption(title: "Create a Book", subtitle: "Write it yourself, add pictures, and record your voice.", systemImage: "square.and.pencil") {
                         Task {
                             AppLog.trace("Draft creation started", category: "creator")
-                            do { let draft = try await store.create(); path.append(draft) }
+                            do {
+                                let draft = try await store.create()
+                                await store.flushDiagnosticLogs()
+                                AppLog.debug("Draft creation completed", category: "creator", metadata: ["draft_id": .string(draft.id.uuidString)])
+                                path.append(draft)
+                            }
                             catch is CancellationError { AppLog.trace("Draft creation cancelled", category: "creator") }
                             catch {
                                 AppLog.error("Draft creation failed", error: error, category: "creator")
@@ -76,9 +81,13 @@ struct BookCreatorView: View {
                 Button("Delete Draft", role: .destructive) {
                     guard let draft = deleting else { return }
                     Task {
-                        do { try await store.remove(draft.id); deleting = nil; await reload() }
+                        do {
+                            try await store.remove(draft.id)
+                            await store.flushDiagnosticLogs()
+                            deleting = nil; await reload()
+                        }
                         catch {
-                            AppLog.error("Draft deletion failed", error: error, category: "creator")
+                            AppLog.error("Draft deletion failed", error: error, category: "creator", metadata: ["draft_id": .string(draft.id.uuidString)])
                             message = String(localized: "The draft could not be deleted. Try again.")
                         }
                     }

@@ -1,5 +1,48 @@
 # Internal TestFlight
 
+## 1.0 (12) — 3 October 2026
+
+The whole-app logging audit and readable Pulse text export are processed and
+available to **Internal Testers**. Exact readback confirms
+**VALID / INTERNAL_ONLY / IN_BETA_TESTING**, complete effective group access and
+matching English What to Test notes.
+
+- Build/upload ID: `44c47474-955a-4883-b968-705f521cb0d7`.
+- App ID: `6818278413`; bundle `com.matteozajac.bedtimestories`; team `4TCJLR98Y5`.
+- Group: `20328e88-9f9c-4c47-be78-c33a809d1a71` (**Internal Testers**, explicit and all-build access).
+- English notes: `89bd9a0c-bf2e-4166-b69a-043e4b8cd119`.
+- Minimum iOS/iPadOS, compatible Mac and Vision OS: 27.0.
+- IPA SHA256: `2b9465c0fb3c449adcb29e8f850ac9fa45969bb7577a133e193512f102ad01f6`.
+- Release input fingerprint: `182977519eeb2aa3ec681aab1822f8a5fbfdd84107f2c02e0a9677d47fb072ad`; 131 matching inputs, including the ignored Firebase client configuration.
+- Signed Internal archive and Internal-only export passed strict signature,
+  identity, Firebase configuration, Foundation metadata and entitlement checks.
+
+Copied logs retain operation IDs, phase, asset kind/index, elapsed time, safe
+technical explanations, underlying causes, source/capture locations and bounded
+stacks. Book editing now traces checkout through iCloud downloads, file-provider
+coordination, copying, draft creation and publication. App actions, migrations,
+reader/playback, recording, model validation and cloud narration also have
+context. The local sink fixes the Foundation 0.5.0 synchronous Pulse metadata
+repair deadlock while preserving readable structured frames. Diagnostics issue
+codes and remote consent behavior remain unchanged.
+
+Validation: **55 native app tests and 9 core tests passed**, including observed
+console saves, plain-text persistence/privacy, checkout success/failure,
+underlying error evidence and Gemini code explanations. Local binary isolation,
+setup syntax/hooks and secret scans passed. A representative filesystem failure
+was inspected in Pulse message text and Info, with source and readable stacks.
+See [logging evidence](LOGGING.md).
+
+Test editing an iCloud book and copying any failure from Settings → Developer →
+Open Logs. Also retest importing/sharing, media attachments, reader/playback and
+voice/narration failures. The two existing tester records remain INSTALLED;
+this does not establish installation of build 12. Real iCloud/provider/device
+acceptance remains open. The existing backend logging deployment from build 11
+is retained; this release changes app logging.
+
+Raw release receipts are retained in ignored `.build/pti/1.0-12/`.
+[Open TestFlight](https://appstoreconnect.apple.com/apps/6818278413/testflight/ios).
+
 ## 1.0 (11) — 3 October 2026
 
 The MZAppFoundation 0.5.0 upgrade and expanded app/Gemini/connection logging are

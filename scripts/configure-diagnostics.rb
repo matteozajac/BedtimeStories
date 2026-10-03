@@ -16,7 +16,9 @@ firebase.requirement = { 'kind' => 'exactVersion', 'version' => '12.19.2' }
 bootstrap_path = File.join(root, '.mzappfoundation', 'Generated', 'MZBootstrap.swift')
 bootstrap = File.read(bootstrap_path)
 bootstrap = bootstrap.sub('var inventory = FoundationDiagnostics()', 'var inventory = AppFoundationDiagnostics.make()')
+bootstrap = bootstrap.gsub('LocalServices.make(', 'AppDiagnosticServices.make(')
 raise 'Generated bootstrap has no app-owned diagnostics hook' unless bootstrap.include?('var inventory = AppFoundationDiagnostics.make()')
+raise 'Generated bootstrap has no readable local logging hook' unless bootstrap.include?('AppDiagnosticServices.make(')
 File.write(bootstrap_path, bootstrap)
 
 local.file_system_synchronized_groups.clear

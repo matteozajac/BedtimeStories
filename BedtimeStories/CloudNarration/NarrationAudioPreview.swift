@@ -20,17 +20,23 @@ final class NarrationAudioPreview: NSObject, AVAudioPlayerDelegate {
         operation = Task { [weak self] in
             await previous?.value
             guard let self else { return }
+            var phase = "wait_for_audio_session_release"
             do {
                 await release?.value
                 try Task.checkCancellation()
+                phase = "audio_session_configuration"
                 let session = AVAudioSession.sharedInstance()
                 try session.setCategory(.playback, mode: .spokenAudio)
                 AppLog.trace("Narration preview audio session activation started", category: "cloud_narration", metadata: diagnostic.metadata)
+                phase = "audio_session_activation"
                 let activated = try await session.activate(options: [])
                 try Task.checkCancellation()
                 guard activated else { throw BookError.unavailable("Audio is unavailable.") }
+                phase = "audio_decoder_preparation"
                 let audio = try AVAudioPlayer(contentsOf: url)
+                AppLog.trace("Narration preview audio decoder prepared", category: "cloud_narration", metadata: diagnostic.metadata.merging(["duration_seconds": .double(audio.duration), "channel_count": .integer(audio.numberOfChannels)]) { _, new in new })
                 audio.delegate = self
+                phase = "start_audio_playback"
                 guard audio.play() else { throw BookError.unavailable("Audio is unavailable.") }
                 player = audio; playingURL = url
                 AppLog.debug("Narration audio preview playing", category: "cloud_narration", metadata: diagnostic.metadata)
@@ -38,7 +44,7 @@ final class NarrationAudioPreview: NSObject, AVAudioPlayerDelegate {
                 AppLog.trace("Narration audio preview cancelled", category: "cloud_narration", metadata: diagnostic.metadata)
                 releaseSession()
             } catch {
-                AppLog.error("Narration audio preview failed", error: error, category: "cloud_narration", metadata: diagnostic.metadata)
+                AppLog.error("Narration audio preview failed", error: error, category: "cloud_narration", metadata: diagnostic.metadata.merging(["phase": .string(phase)]) { _, new in new })
                 message = String(localized: "The preview could not be played. Try again."); releaseSession()
             }
             loading = false

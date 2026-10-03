@@ -70,6 +70,15 @@ struct BookDetailView: View {
                     .accessibilityLabel("Book actions")
             }
         }
+        .onAppear {
+            AppLog.debug("Book details opened", category: "navigation", metadata: [
+                "book_id": .string(book.id.uuidString), "chapter_count": .integer(chapters.count),
+                "has_audio": .bool(book.manifest.hasAudio), "has_reading": .bool(book.manifest.hasReading)
+            ])
+        }
+        .onDisappear {
+            AppLog.trace("Book details left", category: "navigation", metadata: ["book_id": .string(book.id.uuidString)])
+        }
     }
 
     @ViewBuilder private func actions(for book: LibraryBook) -> some View {

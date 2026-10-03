@@ -1,3 +1,4 @@
+import MZAppFoundation
 import PhotosUI
 import SwiftUI
 import UniformTypeIdentifiers
@@ -11,6 +12,13 @@ struct ChapterEditorView: View {
     @State private var loadingPhoto = false
     @State private var removeAudio = false
     @State private var preview = DraftAudioPreview()
+
+    private var diagnosticFields: [String: TelemetryValue] {
+        var values: [String: TelemetryValue] = ["draft_id": .string(editor.draft.id.uuidString)]
+        if let source = editor.draft.source { values["book_id"] = .string(source.bookID.uuidString) }
+        values["chapter_id"] = .string(chapterID.uuidString)
+        return values
+    }
 
     var body: some View {
         Group {
@@ -29,7 +37,7 @@ struct ChapterEditorView: View {
                         DraftImageView(path: chapter.image, draftID: editor.draft.id, store: editor.store)
                         PhotosPicker(selection: $photo, matching: .images) { Label(chapter.image == nil ? "Add Chapter Photo" : "Change Chapter Photo", systemImage: "photo") }
                         BookIllustrationButton(editor: editor, chapterID: chapterID)
-                        if chapter.image != nil { Button("Remove Picture", role: .destructive) { editor.draft.chapters[index].image = nil } }
+                        if chapter.image != nil { Button("Remove Picture", role: .destructive) { editor.draft.chapters[index].image = nil; AppLog.trace("Chapter picture removed", category: "creator", metadata: diagnosticFields) } }
                     }
                     .listRowBackground(Theme.surface)
                     Section {
@@ -60,6 +68,7 @@ struct ChapterEditorView: View {
                                 .confirmationDialog("Remove this chapter’s narration?", isPresented: $removeAudio, titleVisibility: .visible) {
                                     Button("Remove Narration", role: .destructive) {
                                         preview.stop(); editor.draft.chapters[index].audio = nil; editor.draft.chapters[index].audioDuration = nil
+                                        AppLog.trace("Chapter narration removed", category: "creator", metadata: diagnosticFields)
                                     }
                                 }
                         }
@@ -78,7 +87,7 @@ struct ChapterEditorView: View {
             switch result {
             case .success(let url): Task { _ = await editor.setAudio(url, chapterID: chapterID) }
             case .failure(let error):
-                AppLog.error("Chapter recording selection failed", error: error, category: "creator")
+                AppLog.error("Chapter recording selection failed", error: error, category: "creator", metadata: diagnosticFields)
                 editor.message = error.localizedDescription
             }
         }
@@ -86,14 +95,21 @@ struct ChapterEditorView: View {
             guard let photo else { return }
             loadingPhoto = true
             defer { loadingPhoto = false }
-            do { if let data = try await photo.loadTransferable(type: Data.self) { await editor.setImage(data, chapterID: chapterID) } }
-            catch is CancellationError { AppLog.trace("Chapter photo loading cancelled", category: "creator") }
+            AppLog.trace("Chapter photo transfer started", category: "creator", metadata: diagnosticFields)
+            do {
+                if let data = try await photo.loadTransferable(type: Data.self) {
+                    AppLog.trace("Chapter photo transfer completed", category: "creator", metadata: diagnosticFields.merging(["byte_count": .integer(data.count)]) { _, new in new })
+                    await editor.setImage(data, chapterID: chapterID)
+                } else { AppLog.warning("Chapter photo transfer returned no image data", category: "creator", metadata: diagnosticFields) }
+            }
+            catch is CancellationError { AppLog.trace("Chapter photo loading cancelled", category: "creator", metadata: diagnosticFields) }
             catch {
-                AppLog.error("Chapter photo loading failed", error: error, category: "creator")
+                AppLog.error("Chapter photo loading failed", error: error, category: "creator", metadata: diagnosticFields)
                 editor.message = String(localized: "The photo could not be opened. Try another photo.")
             }
         }
-        .onDisappear { preview.stop() }
+        .onAppear { AppLog.trace("Chapter editor opened", category: "creator", metadata: diagnosticFields) }
+        .onDisappear { preview.stop(); AppLog.trace("Chapter editor closed", category: "creator", metadata: diagnosticFields) }
         .alert("Unable to play", isPresented: Binding(get: { preview.message != nil }, set: { if !$0 { preview.message = nil } })) { } message: { Text(preview.message ?? "") }
     }
 }

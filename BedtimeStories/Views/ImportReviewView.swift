@@ -19,9 +19,17 @@ struct ImportReviewView: View {
                     Text(replacing ? "This book is already in your library. Replacing it updates its text and media. Your progress stays on this device." : "Add this book to your selected library folder. Everyone sharing the folder will be able to open it.")
                         .foregroundStyle(.secondary).multilineTextAlignment(.center)
                     VStack(spacing: 12) {
-                        Button(replacing ? "Replace Book" : "Add to Library", systemImage: replacing ? "arrow.triangle.2.circlepath" : "plus") { library.commitImport(replacing: replacing) }
+                        Button(replacing ? "Replace Book" : "Add to Library", systemImage: replacing ? "arrow.triangle.2.circlepath" : "plus") {
+                            AppLog.debug("Book import confirmation selected", category: "navigation", metadata: [
+                                "book_id": .string(book.id.uuidString), "replacing": .bool(replacing)
+                            ])
+                            library.commitImport(replacing: replacing)
+                        }
                             .buttonStyle(.storyProminent(fullWidth: true)).accessibilityIdentifier("confirm-import")
-                        Button("Cancel", action: library.cancelImport)
+                        Button("Cancel") {
+                            AppLog.trace("Book import review cancelled", category: "navigation", metadata: ["book_id": .string(book.id.uuidString)])
+                            library.cancelImport()
+                        }
                             .buttonStyle(.storySoft(fullWidth: true))
                     }
                 }

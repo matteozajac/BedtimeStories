@@ -20,7 +20,10 @@ struct FolderWelcomeView: View {
                 }
                 .storyCard()
                 VStack(spacing: 16) {
-                    Button { Task { await library.acceptDefaultLibrary() } } label: {
+                    Button {
+                        AppLog.debug("Default library setup accepted", category: "navigation")
+                        Task { await library.acceptDefaultLibrary() }
+                    } label: {
                         Label("Continue", systemImage: "arrow.right").labelStyle(TrailingIconLabelStyle())
                     }
                     .buttonStyle(.storyProminent(fullWidth: true))

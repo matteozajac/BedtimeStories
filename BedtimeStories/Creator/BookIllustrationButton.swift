@@ -1,5 +1,6 @@
 import CoreGraphics
 import ImagePlayground
+import MZAppFoundation
 import SwiftUI
 
 struct BookIllustrationButton: View {
@@ -11,6 +12,13 @@ struct BookIllustrationButton: View {
     @State private var presented = false
     @State private var concepts: [ImagePlaygroundConcept] = []
     @State private var sourceImage: Image?
+
+    private var diagnosticFields: [String: TelemetryValue] {
+        var values: [String: TelemetryValue] = ["draft_id": .string(editor.draft.id.uuidString), "chapter_artwork": .bool(chapterID != nil)]
+        if let chapterID { values["chapter_id"] = .string(chapterID.uuidString) }
+        if let preparationID { values["operation_id"] = .string(preparationID.uuidString) }
+        return values
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -25,16 +33,16 @@ struct BookIllustrationButton: View {
             guard preparationID != nil else { return }
             preparing = true
             defer { preparing = false }
-            AppLog.trace("Illustration preparation started", category: "creator", metadata: ["chapter_artwork": .bool(chapterID != nil)])
+            AppLog.trace("Illustration preparation started", category: "creator", metadata: diagnosticFields)
             let snapshot = editor.draft
             let scene: String?
             do { scene = try await IllustrationPromptBuilder.prepare(snapshot, chapterID: chapterID) }
             catch is CancellationError {
-                AppLog.trace("Illustration preparation cancelled", category: "creator")
+                AppLog.trace("Illustration preparation cancelled", category: "creator", metadata: diagnosticFields)
                 return
             }
             catch {
-                AppLog.warning("Illustration scene generation failed; using story context", error: error, category: "creator")
+                AppLog.warning("Illustration scene generation failed; using story context", error: error, category: "creator", metadata: diagnosticFields)
                 scene = nil
             }
             guard !Task.isCancelled else { return }
@@ -56,16 +64,16 @@ struct BookIllustrationButton: View {
             }
             guard !Task.isCancelled else { return }
             presented = true
-            AppLog.debug("Illustration preparation completed", category: "creator", metadata: ["has_generated_scene": .bool(scene != nil), "has_reference": .bool(sourceImage != nil)])
+            AppLog.debug("Illustration preparation completed", category: "creator", metadata: diagnosticFields.merging(["has_generated_scene": .bool(scene != nil), "has_reference": .bool(sourceImage != nil)]) { _, new in new })
         }
         .imagePlaygroundSheet(isPresented: $presented, concepts: concepts, sourceImage: sourceImage) { url in
             Task {
                 do {
                     let data = try await editor.store.imageData(at: url)
                     await editor.setImage(data, chapterID: chapterID)
-                } catch is CancellationError { AppLog.trace("Generated illustration loading cancelled", category: "creator") }
+                } catch is CancellationError { AppLog.trace("Generated illustration loading cancelled", category: "creator", metadata: diagnosticFields) }
                 catch {
-                    AppLog.error("Generated illustration loading failed", error: error, category: "creator")
+                    AppLog.error("Generated illustration loading failed", error: error, category: "creator", metadata: diagnosticFields)
                     editor.message = String(localized: "The generated picture could not be saved. Try creating it again.")
                 }
             }
@@ -79,11 +87,11 @@ struct BookIllustrationButton: View {
             let data = try await editor.store.imageData(at: url)
             let image = await ArtworkDecoder.thumbnail(data)
             guard !Task.isCancelled else { return nil }
-            if image == nil { AppLog.warning("Illustration reference could not be decoded", category: "creator") }
+            if image == nil { AppLog.warning("Illustration reference could not be decoded", category: "creator", metadata: diagnosticFields) }
             return image
         } catch is CancellationError { return nil }
         catch {
-            AppLog.warning("Illustration reference unavailable", error: error, category: "creator")
+            AppLog.warning("Illustration reference unavailable", error: error, category: "creator", metadata: diagnosticFields)
             return nil
         }
     }

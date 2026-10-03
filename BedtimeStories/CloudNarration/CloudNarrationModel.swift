@@ -263,7 +263,7 @@ final class CloudNarrationModel {
 
     func startNarration(draft: BookDraft, voiceID: String, styles: [UUID: [NarrationStyle]],
                         defaultStyle: NarrationStyle, preview: Bool) async throws -> String {
-        try await withOperation("start_narration", metadata: ["preview": .bool(preview), "chapter_count": .integer(draft.chapters.count)]) { operation in
+        try await withOperation("start_narration", metadata: ["preview": .bool(preview), "chapter_count": .integer(draft.chapters.count), "default_style": .string(defaultStyle.rawValue)]) { operation in
             let session = try currentSession()
             guard let voice = voices.first(where: { $0.id == voiceID }),
                   voice.status == "ready" || (preview && voice.status == "awaitingApproval") else {
@@ -407,7 +407,7 @@ final class CloudNarrationModel {
     private func call(_ name: String, payload: [String: Any], parent: CloudNarrationLogOperation) async throws -> [String: Any] {
         let operation = CloudNarrationLogOperation(name: name)
         let metadata = operation.metadata.merging(["parent_operation_id": .string(parent.id), "transport": .string("firebase_callable"), "attestation_required": .bool(true), "timeout_seconds": .integer(90)]) { _, new in new }
-        logger.trace("Cloud callable preparation started", category: "cloud_narration", metadata: metadata)
+        logger.trace("Cloud callable \(name) preparation started", category: "cloud_narration", metadata: metadata)
         let session = try currentSession()
         guard let functions else { throw CloudNarrationFailure.unavailable }
         let callable = functions.httpsCallable(name, options: HTTPSCallableOptions(requireLimitedUseAppCheckTokens: true))
@@ -416,12 +416,12 @@ final class CloudNarrationModel {
         do {
             // Reconstitute a disconnected JSON value before transferring it to the SDK's concurrent API.
             let json = try JSONSerialization.data(withJSONObject: payload)
-            logger.trace("Cloud callable dispatch started", category: "cloud_narration", metadata: metadata.merging(["payload_bytes": .integer(json.count)]) { _, new in new })
+            logger.trace("Cloud callable \(name) dispatch started", category: "cloud_narration", metadata: metadata.merging(["payload_bytes": .integer(json.count)]) { _, new in new })
             result = try await callable.call(JSONSerialization.jsonObject(with: json))
         }
         catch {
             let evidence = ErrorSnapshot(error)
-            logger.trace("Cloud callable dispatch failed", category: "cloud_narration", metadata: operation.metadata.merging(["parent_operation_id": .string(parent.id)]) { _, new in new })
+            logger.trace("Cloud callable \(name) dispatch failed", category: "cloud_narration", metadata: operation.metadata.merging(["parent_operation_id": .string(parent.id)]) { _, new in new })
             if ErrorSnapshot.isCancellation(error) || Task.isCancelled { throw CancellationError() }
             do { try validate(session) }
             catch {
@@ -442,7 +442,7 @@ final class CloudNarrationModel {
         }
         try validate(session)
         guard let data = result.data as? [String: Any] else { throw CloudNarrationFailure.invalidResponse }
-        logger.debug("Cloud callable completed", category: "cloud_narration", metadata: operation.metadata.merging(["parent_operation_id": .string(parent.id), "field_count": .integer(data.count)]) { _, new in new })
+        logger.debug("Cloud callable \(name) completed", category: "cloud_narration", metadata: operation.metadata.merging(["parent_operation_id": .string(parent.id), "field_count": .integer(data.count)]) { _, new in new })
         return data
     }
 
@@ -582,7 +582,7 @@ final class CloudNarrationModel {
                 "previous_state": .string(previous.flatMap { safeStates.contains($0) ? $0 : nil } ?? "unobserved")
             ]) { _, new in new }
             if voice.status == "failed" {
-                logger.error("Cloud voice worker reported failure", error: CloudNarrationBackendFailure(), category: "cloud_narration", metadata: metadata.merging(["backend_error_code": .string(safeFailureCode), "failure_evidence": .string("server_state")]) { _, new in new })
+                logger.error("Cloud voice worker reported failure", error: CloudNarrationBackendFailure(code: safeFailureCode), category: "cloud_narration", metadata: metadata.merging(["backend_error_code": .string(safeFailureCode), "failure_evidence": .string("server_state")]) { _, new in new })
             } else {
                 logger.debug("Cloud voice state changed", category: "cloud_narration", metadata: metadata)
             }
@@ -603,7 +603,7 @@ final class CloudNarrationModel {
                 "previous_state": .string(previous.flatMap { safeStates.contains($0) ? $0 : nil } ?? "unobserved")
             ]) { _, new in new }
             if job.state == "failed" {
-                logger.error("Cloud narration worker reported failure", error: CloudNarrationBackendFailure(), category: "cloud_narration", metadata: metadata.merging(["backend_error_code": .string(safeFailureCode), "failure_evidence": .string("server_state")]) { _, new in new })
+                logger.error("Cloud narration worker reported failure", error: CloudNarrationBackendFailure(code: safeFailureCode), category: "cloud_narration", metadata: metadata.merging(["backend_error_code": .string(safeFailureCode), "failure_evidence": .string("server_state")]) { _, new in new })
             } else if job.state == "cancelled" {
                 logger.trace("Cloud narration worker cancellation received", category: "cloud_narration", metadata: metadata)
             } else {
@@ -613,10 +613,10 @@ final class CloudNarrationModel {
     }
 
     private func decode<T: Decodable>(_ type: T.Type, data: [String: Any], operation: CloudNarrationLogOperation) throws -> T {
-        logger.trace("Cloud narration response decoding started", category: "cloud_narration", metadata: operation.metadata)
+        logger.trace("\(operation.label) response decoding started", category: "cloud_narration", metadata: operation.metadata)
         do {
             let decoded = try Self.decodeDocument(type, data: data)
-            logger.trace("Cloud narration response decoding completed", category: "cloud_narration", metadata: operation.metadata)
+            logger.trace("\(operation.label) response decoding completed", category: "cloud_narration", metadata: operation.metadata)
             return decoded
         }
         catch {
@@ -628,22 +628,22 @@ final class CloudNarrationModel {
                                   file: String = #fileID, function: String = #function, line: UInt = #line,
                                   body: (CloudNarrationLogOperation) async throws -> T) async throws -> T {
         let operation = CloudNarrationLogOperation(name: name)
-        logger.debug("Cloud narration operation started", category: "cloud_narration", metadata: operation.metadata.merging(metadata) { _, new in new }, file: file, function: function, line: line)
+        logger.debug("\(operation.label) started", category: "cloud_narration", metadata: operation.metadata.merging(metadata) { _, new in new }, file: file, function: function, line: line)
         do {
             let result = try await body(operation)
-            logger.debug("Cloud narration operation completed", category: "cloud_narration", metadata: operation.metadata.merging(metadata) { _, new in new }, file: file, function: function, line: line)
+            logger.debug("\(operation.label) completed", category: "cloud_narration", metadata: operation.metadata.merging(metadata) { _, new in new }, file: file, function: function, line: line)
             return result
         } catch {
             if ErrorSnapshot.isCancellation(error) || Task.isCancelled {
-                logger.trace("Cloud narration operation cancelled", category: "cloud_narration", metadata: operation.metadata.merging(metadata) { _, new in new }, file: file, function: function, line: line)
+                logger.trace("\(operation.label) cancelled", category: "cloud_narration", metadata: operation.metadata.merging(metadata) { _, new in new }, file: file, function: function, line: line)
                 throw CancellationError()
             }
             if error is CloudNarrationReportedFailure {
-                logger.trace("Cloud narration operation stopped after reported failure", category: "cloud_narration", metadata: operation.metadata.merging(metadata) { _, new in new }, file: file, function: function, line: line)
+                logger.trace("\(operation.label) stopped after reported failure", category: "cloud_narration", metadata: operation.metadata.merging(metadata) { _, new in new }, file: file, function: function, line: line)
                 throw error
             }
             let snapshot = ErrorSnapshot(error, file: file, function: function, line: line)
-            logger.log(LogEntry("Cloud narration operation failed", level: .error, category: "cloud_narration",
+            logger.log(LogEntry("\(operation.label) failed", level: .error, category: "cloud_narration",
                                 metadata: operation.metadata.merging(metadata) { _, new in new },
                                 error: snapshot, source: snapshot.source))
             throw CloudNarrationReportedFailure(presentation: error, underlyingLogError: snapshot)

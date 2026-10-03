@@ -52,19 +52,28 @@ struct LibraryGridView: View {
                 Menu {
                     Button("Book Creator", systemImage: "square.and.pencil", action: library.createBook)
                     Button("Import Book", systemImage: "square.and.arrow.down") { library.showingImportPicker = true }
-                    Button("Refresh", systemImage: "arrow.clockwise") { Task { await library.refresh() } }
+                    Button("Refresh", systemImage: "arrow.clockwise") {
+                        AppLog.debug("Library refresh selected", category: "navigation", metadata: ["source": .string("library_menu")])
+                        Task { await library.refresh() }
+                    }
                     Button("Settings", systemImage: "gearshape") { library.showingSettings = true }
                 } label: { Image(systemName: "ellipsis").frame(minWidth: 44, minHeight: 44) }
                 .accessibilityLabel("Library actions").accessibilityIdentifier("library-actions")
             }
         }
-        .refreshable { await library.refresh() }
+        .refreshable {
+            AppLog.debug("Library refresh selected", category: "navigation", metadata: ["source": .string("pull_to_refresh")])
+            await library.refresh()
+        }
     }
 
     @ViewBuilder private var notes: some View {
         if library.offline {
             NoteCard(systemImage: "icloud.slash", text: Text("Folder unavailable. Downloaded content remains available.")) {
-                Button("Retry Library Setup") { Task { await library.start() } }
+                Button("Retry Library Setup") {
+                    AppLog.debug("Library setup retry selected", category: "navigation", metadata: ["source": .string("offline_notice")])
+                    Task { await library.start() }
+                }
             }
         }
         if !library.cloudStorage {
@@ -72,7 +81,10 @@ struct LibraryGridView: View {
         }
         if let message = library.migrationMessage {
             NoteCard(systemImage: "arrow.triangle.2.circlepath", text: Text(message)) {
-                Button("Retry Library Setup") { Task { await library.start() } }
+                Button("Retry Library Setup") {
+                    AppLog.debug("Library setup retry selected", category: "navigation", metadata: ["source": .string("migration_notice")])
+                    Task { await library.start() }
+                }
             }
         }
         if !library.warnings.isEmpty {

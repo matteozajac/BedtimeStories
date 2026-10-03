@@ -20,7 +20,10 @@ struct SettingsView: View {
                 } label: { row("Storage", systemImage: library.cloudStorage ? "icloud.fill" : "iphone") }
                 LabeledContent { Text(verbatim: "Always Near Stories / Books") } label: { row("Folder", systemImage: "folder.fill") }
                 Text("The app uses its default library automatically. Open Files to manage its books and sharing.").font(.footnote).foregroundStyle(.secondary)
-                Button { Task { await library.start() } } label: { row("Retry Library Setup", systemImage: "arrow.clockwise", color: Theme.accent) }
+                Button {
+                    AppLog.debug("Library setup retry selected", category: "navigation", metadata: ["source": .string("settings")])
+                    Task { await library.start() }
+                } label: { row("Retry Library Setup", systemImage: "arrow.clockwise", color: Theme.accent) }
                     .disabled(library.activity != nil || library.preparingLibrary)
                 if let message = library.migrationMessage { Text(message).font(.footnote).foregroundStyle(.secondary) }
             } header: { Text("Library") } footer: {
@@ -29,7 +32,10 @@ struct SettingsView: View {
             .listRowBackground(Theme.surface)
             Section {
                 LabeledContent { Text(library.pinned.count, format: .number) } label: { row("Books Kept Offline", systemImage: "arrow.down.circle.fill") }
-                Button(action: library.clearCache) { row("Clear Temporary Downloads", systemImage: "trash.fill", color: Theme.accent) }.disabled(library.activity != nil)
+                Button {
+                    AppLog.debug("Clear Temporary Downloads selected", category: "navigation", metadata: ["kept_offline_count": .integer(library.pinned.count)])
+                    library.clearCache()
+                } label: { row("Clear Temporary Downloads", systemImage: "trash.fill", color: Theme.accent) }.disabled(library.activity != nil)
             } header: { Text("Downloads") } footer: { Text("Books kept offline and the active recording are preserved.") }
             .listRowBackground(Theme.surface)
             Section {

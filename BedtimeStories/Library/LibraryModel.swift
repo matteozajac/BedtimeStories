@@ -42,6 +42,7 @@ final class LibraryModel {
     @ObservationIgnored private var pendingImport: URL?
     @ObservationIgnored private var restoredPlayback = false
     @ObservationIgnored private var operationTask: Task<Void, Never>?
+    @ObservationIgnored private var currentOperation: BookOperationDiagnostics?
     @ObservationIgnored private var images: [String: UIImage] = [:]
     @ObservationIgnored private var session = UUID()
 
@@ -53,7 +54,7 @@ final class LibraryModel {
         self.storage = storage
         let namespace = defaults.string(forKey: "libraryNamespace") ?? UUID().uuidString
         defaults.set(namespace, forKey: "libraryNamespace")
-        progress = LocalProgress(namespace: namespace, defaults: defaults)
+        progress = LocalProgress(namespace: namespace, defaults: defaults, logger: logger)
         repository = LibraryRepository(cacheRoot: Self.cacheURL(namespace), logDestination: FeatureLogDestination(logger: logger))
     }
 
@@ -88,7 +89,7 @@ final class LibraryModel {
         preparingLibrary = true
         defer { preparingLibrary = false; if refreshPending { refreshPending = false; scheduleRefresh() } }
         do {
-            let next = try await storage.prepare()
+            let next = try await storage.prepare(logDestination: FeatureLogDestination(logger: logger))
             let changed = location != next
             if changed { activate(next) }
             if changed || migrationPending {
@@ -133,7 +134,7 @@ final class LibraryModel {
         namespaces[next.account] = namespace
         defaults.set(namespaces, forKey: "defaultLibraryNamespaces")
         repository = LibraryRepository(cacheRoot: Self.cacheURL(namespace), logDestination: FeatureLogDestination(logger: logger))
-        progress = LocalProgress(namespace: namespace, defaults: defaults)
+        progress = LocalProgress(namespace: namespace, defaults: defaults, logger: logger)
         books = []; images = [:]; selectedBook = nil; restoredPlayback = false; refreshing = false; warnings = []; offline = false; discoveredFolders = []
         observe(next.root)
         if next.isCloud {
@@ -141,7 +142,7 @@ final class LibraryModel {
             cloudObserver = CloudLibraryObserver(root: next.root, logger: logger) { [weak self] folders in
                 guard let self, self.session == token else { return }
                 self.discoveredFolders = folders
-                self.scheduleRefresh()
+                self.scheduleRefresh(trigger: "icloud_metadata")
             }
         }
     }
@@ -176,30 +177,30 @@ final class LibraryModel {
         }
     }
 
-    func image(_ path: String?, book: LibraryBook) async -> UIImage? {
+    func image(_ path: String?, book: LibraryBook, operationID: String = UUID().uuidString) async -> UIImage? {
         guard let path, let root else { return nil }
         let key = book.id.uuidString + path
         if let image = images[key] { return image }
         do {
-            let url = try await repository.asset(path, book: book, root: root)
+            let url = try await repository.asset(path, book: book, root: root, operationID: operationID)
             let data = try await repository.imageData(url)
             guard !Task.isCancelled else { return nil }
             let decoded = await ArtworkDecoder.thumbnail(data)
-            if decoded == nil { logger.warning("Book artwork could not be decoded", category: "library") }
+            if decoded == nil { logger.warning("Book artwork could not be decoded", category: "library", metadata: ["book_id": .string(book.id.uuidString), "asset_kind": .string("image")]) }
             let image = decoded.map { UIImage(cgImage: $0) }
             images[key] = image
             return image
         } catch is CancellationError { return nil }
         catch {
             logger.log(LogEntry("Book artwork unavailable", level: .warning, category: "library",
-                                error: ErrorSnapshot(error)))
+                                metadata: ["book_id": .string(book.id.uuidString), "asset_kind": .string("image")], error: ErrorSnapshot(error)))
             return nil
         }
     }
 
-    func text(_ path: String, book: LibraryBook) async throws -> String {
+    func text(_ path: String, book: LibraryBook, operationID: String = UUID().uuidString) async throws -> String {
         guard let root else { throw BookError.unavailable("Your library is still opening. Try again in a moment.") }
-        let url = try await repository.asset(path, book: book, root: root)
+        let url = try await repository.asset(path, book: book, root: root, operationID: operationID)
         return try await repository.textContents(url)
     }
 
@@ -210,24 +211,24 @@ final class LibraryModel {
     }
 
     func keepOffline(_ book: LibraryBook) {
-        perform("Downloading book…", phase: "keep_offline") { [self] in
+        perform("Downloading book…", phase: "keep_offline", bookID: book.id) { [self] operationID in
             guard let root else { return }
-            try await repository.keepOffline(book, root: root)
+            try await repository.keepOffline(book, root: root, operationID: operationID)
             pinned = await repository.pinnedIDs()
         }
     }
 
     func removeOffline(_ book: LibraryBook) {
-        perform("Updating downloads…", phase: "remove_offline") { [self] in
+        perform("Updating downloads…", phase: "remove_offline", bookID: book.id) { [self] _ in
             try await repository.removeOffline(book.id, protecting: player.book?.id)
             pinned = await repository.pinnedIDs()
         }
     }
 
     func share(_ book: LibraryBook) {
-        perform("Preparing book…", phase: "share") { [self] in
+        perform("Preparing book…", phase: "share", bookID: book.id) { [self] operationID in
             guard let root else { return }
-            shareURL = try await repository.share(book, root: root)
+            shareURL = try await repository.share(book, root: root, operationID: operationID)
         }
     }
 
@@ -236,8 +237,8 @@ final class LibraryModel {
             pendingImport = url
             return
         }
-        perform("Opening book…", phase: "stage_import") { [self] in
-            let staged = try await repository.stageImport(url)
+        perform("Opening book…", phase: "stage_import") { [self] operationID in
+            let staged = try await repository.stageImport(url, operationID: operationID)
             importCandidate = staged
         }
     }
@@ -245,12 +246,15 @@ final class LibraryModel {
     func commitImport(replacing: Bool) {
         guard let candidate = importCandidate else { return }
         importCandidate = nil
-        perform("Importing book…", phase: "commit_import") { [self] in
+        perform("Importing book…", phase: "commit_import", bookID: candidate.id) { [self] operationID in
             guard let root else { return }
             do {
-                try await repository.commitImport(candidate, root: root, replacing: replacing)
+                try await repository.commitImport(candidate, root: root, replacing: replacing, operationID: operationID)
                 if player.book?.id == candidate.id { player.stop() }
-            } catch BookError.duplicate { importCandidate = candidate }
+            } catch BookError.duplicate {
+                logger.trace("Book import requires replacement confirmation", category: "library", metadata: ["book_id": .string(candidate.id.uuidString), "operation_id": .string(operationID)])
+                importCandidate = candidate
+            }
             catch { await repository.discardImport(candidate); throw error }
         }
     }
@@ -261,27 +265,36 @@ final class LibraryModel {
     }
 
     func clearCache() {
-        perform("Clearing cache…", phase: "clear_cache") { [self] in try await repository.clearUnpinned(protecting: player.book?.id) }
+        perform("Clearing cache…", phase: "clear_cache") { [self] _ in try await repository.clearUnpinned(protecting: player.book?.id) }
     }
 
     func createBook() {
-        guard activity == nil, !preparingLibrary else { return }
+        guard activity == nil, !preparingLibrary else {
+            logger.trace("Book creator opening deferred while library is busy", category: "creator", metadata: ["preparing_library": .bool(preparingLibrary), "library_operation_active": .bool(activity != nil)])
+            return
+        }
+        logger.trace("Book creator opening requested", category: "creator")
         player.stop()
         showingCreator = true
     }
 
     func editBook(_ book: LibraryBook) {
-        perform("Opening book for editing…", phase: "edit") { [self] in
+        perform("Opening book for editing…", phase: "edit", bookID: book.id) { [self] operationID in
             guard let root else { throw BookError.unavailable("Your library is still opening. Try again in a moment.") }
             let token = session; let account = location?.account
             if player.book?.id == book.id { player.stop() }
-            let checkout = try await repository.checkout(book, root: root)
+            let operationRepo = repository
+            let checkout = try await operationRepo.checkout(book, root: root, operationID: operationID)
+            await operationRepo.flushDiagnosticLogs()
             do {
                 guard token == session else { throw BookError.editConflict }
                 let source = BookEditSource(bookID: checkout.source.bookID, libraryRoot: checkout.source.libraryRoot, fingerprint: checkout.source.fingerprint, libraryAccount: account)
-                let draft = try await BookDraftStore.shared.createEditingDraft(BookEditCheckout(book: checkout.book, source: source))
+                logger.trace("Book edit draft preparation started", category: "library", metadata: ["book_id": .string(book.id.uuidString), "operation_id": .string(operationID)])
+                let draft = try await BookDraftStore.shared.createEditingDraft(BookEditCheckout(book: checkout.book, source: source), operationID: operationID)
+                await BookDraftStore.shared.flushDiagnosticLogs()
                 guard token == session else { throw BookError.editConflict }
                 editingDraft = draft
+                logger.trace("Book editor ready", category: "creator", metadata: ["book_id": .string(book.id.uuidString), "draft_id": .string(draft.id.uuidString), "operation_id": .string(operationID), "chapter_count": .integer(draft.chapters.count)])
                 await repository.discardImport(checkout.book)
             } catch { await repository.discardImport(checkout.book); throw error }
         }
@@ -291,37 +304,70 @@ final class LibraryModel {
         try await saveBook(book, source: nil)
     }
 
-    func saveBook(_ book: LibraryBook, source: BookEditSource?) async throws {
+    func saveBook(_ book: LibraryBook, source: BookEditSource?, operationID: String = UUID().uuidString) async throws {
         guard let root, activity == nil, !preparingLibrary else { throw BookError.unavailable("Your library is still opening. Try again in a moment.") }
         if let account = source?.libraryAccount, account != location?.account { throw BookError.editConflict }
         activity = String(localized: "Saving book…")
+        let operationRepo = repository
+        var context = BookOperationDiagnostics(operationID: operationID, bookID: book.id, phase: source == nil ? "publish_new_book" : "publish_book_edit")
+        context.details["icloud"] = .bool(cloudStorage)
+        logger.trace("Library book save started", category: "library", metadata: context.metadata)
         do {
             if let source {
                 if player.book?.id == book.id { player.stop() }
-                try await repository.commitEdit(book, source: source, root: root)
-            } else { try await repository.commitImport(book, root: root, replacing: false) }
-        } catch { activity = nil; throw error }
+                try await operationRepo.commitEdit(book, source: source, root: root, operationID: operationID)
+            } else { try await operationRepo.commitImport(book, root: root, replacing: false, operationID: operationID) }
+        } catch {
+            let failure = BookOperationFailure.preserving(error, context: context)
+            await operationRepo.flushDiagnosticLogs()
+            logger.trace("Library book save interrupted", category: "library", metadata: context.metadata)
+            activity = nil; throw failure
+        }
+        await operationRepo.flushDiagnosticLogs()
         activity = nil
+        context.phase = "publish_library_refresh"
+        logger.trace("Library book save completed; refreshing catalog", category: "library", metadata: context.metadata)
         await refresh()
         selectedBook = books.first { $0.id == book.id }
+        context.details["book_visible_after_refresh"] = .bool(selectedBook != nil)
+        logger.trace("Library published book selection completed", category: "library", metadata: context.metadata)
     }
 
-    func cancelOperation() { operationTask?.cancel() }
+    func cancelOperation() {
+        if let currentOperation { logger.trace("Library operation cancellation requested", category: "library", metadata: currentOperation.metadata) }
+        operationTask?.cancel()
+    }
 
-    private func perform(_ label: String, phase: String, operation: @escaping @MainActor () async throws -> Void) {
-        guard activity == nil, !preparingLibrary else { return }
+    private func perform(_ label: String, phase: String, bookID: UUID? = nil,
+                         operation: @escaping @MainActor (String) async throws -> Void) {
+        guard activity == nil, !preparingLibrary else {
+            logger.trace("Library operation deferred while busy", category: "library", metadata: ["requested_phase": .string(phase), "preparing_library": .bool(preparingLibrary), "operation_active": .bool(activity != nil)])
+            return
+        }
+        var context = BookOperationDiagnostics(bookID: bookID, phase: phase)
+        context.details["icloud"] = .bool(cloudStorage)
+        let operationRepo = repository
+        currentOperation = context
         activity = NSLocalizedString(label, comment: "")
-        logger.trace("Library operation started", category: "library", metadata: ["phase": .string(phase)])
+        logger.trace("Library operation started", category: "library", metadata: context.metadata)
         operationTask = Task {
             do {
-                try await operation()
-                logger.log(LogEntry("Library operation completed", category: "library", metadata: ["phase": .string(phase)]))
+                try await operation(context.operationID)
+                await operationRepo.flushDiagnosticLogs()
+                logger.log(LogEntry("Library operation completed", category: "library", metadata: context.metadata))
             }
-            catch is CancellationError { logger.trace("Library operation cancelled", category: "library", metadata: ["phase": .string(phase)]) }
+            catch is CancellationError {
+                await operationRepo.flushDiagnosticLogs()
+                logger.trace("Library operation cancelled", category: "library", metadata: context.metadata)
+            }
             catch {
-                logger.error("Library operation failed", error: error, category: "library", metadata: ["phase": .string(phase)])
+                let failureEntry = context.failureEntry("Library operation failed", error: error, category: "library")
+                await operationRepo.flushDiagnosticLogs()
+                await BookDraftStore.shared.flushDiagnosticLogs()
+                logger.log(failureEntry)
                 message = error.localizedDescription
             }
+            if currentOperation?.operationID == context.operationID { currentOperation = nil }
             activity = nil
             await refresh()
         }
@@ -332,15 +378,16 @@ final class LibraryModel {
         let observer = FolderPresenter(url: folder) { [weak self] in
             Task { @MainActor [weak self] in
                 guard let self, self.session == token else { return }
-                self.scheduleRefresh()
+                self.scheduleRefresh(trigger: "file_presenter")
             }
         }
         presenter = observer
         NSFileCoordinator.addFilePresenter(observer)
     }
 
-    private func scheduleRefresh() {
+    private func scheduleRefresh(trigger: String = "library_change") {
         guard !preparingLibrary else { refreshPending = true; return }
+        if trigger != "library_change" { logger.trace("Library refresh scheduled from file provider change", category: "library", metadata: ["trigger": .string(trigger), "icloud": .bool(cloudStorage), "refresh_in_progress": .bool(refreshing), "operation_active": .bool(activity != nil)]) }
         debounce?.cancel()
         debounce = Task { [weak self] in
             do { try await Task.sleep(for: .milliseconds(500)) }

@@ -1,4 +1,5 @@
 import SwiftUI
+import MZAppFoundation
 
 struct ReaderView: View {
     @Environment(LibraryModel.self) private var library
@@ -39,7 +40,10 @@ struct ReaderView: View {
                     if let error {
                         VStack(spacing: 12) {
                             Text(error).foregroundStyle(.secondary).multilineTextAlignment(.center)
-                            Button("Try Again") { Task { await loadChapter() } }.buttonStyle(.storySoft)
+                            Button("Try Again") {
+                                AppLog.debug("Reader chapter reload requested", category: "reader", metadata: ["chapter_index": .integer(index)])
+                                Task { await loadChapter() }
+                            }.buttonStyle(.storySoft)
                         }
                         .frame(maxWidth: .infinity).storyCard()
                     }
@@ -69,7 +73,10 @@ struct ReaderView: View {
                     }
                     Section("Chapters") {
                         ForEach(chapters) { item in
-                            Button { chapterID = item.id } label: {
+                            Button {
+                                AppLog.debug("Reader chapter selected from menu", category: "reader", metadata: ["chapter_index": .integer(chapters.firstIndex { $0.id == item.id } ?? 0)])
+                                chapterID = item.id
+                            } label: {
                                 if item.id == chapter?.id { Label(item.title ?? book.manifest.title, systemImage: "checkmark") }
                                 else { Text(item.title ?? book.manifest.title) }
                             }
@@ -80,14 +87,23 @@ struct ReaderView: View {
             }
         }
         .task(id: chapterID) { await loadChapter() }
-        .onAppear { if chapterID == nil { chapterID = startingChapter ?? library.progress.readingChapter(book.id) ?? chapters.first?.id } }
+        .onAppear {
+            AppLog.debug("Book reader opened", category: "reader", metadata: ["readable_chapter_count": .integer(chapters.count), "has_requested_chapter": .bool(startingChapter != nil)])
+            if chapterID == nil { chapterID = startingChapter ?? library.progress.readingChapter(book.id) ?? chapters.first?.id }
+        }
+        .onDisappear { AppLog.trace("Book reader closed", category: "reader", metadata: ["chapter_index": .integer(index), "chapter_loading": .bool(loading)]) }
+        .onChange(of: size) { _, value in AppLog.debug("Reader text size changed", category: "reader", metadata: ["text_size": .double(value)]) }
+        .onChange(of: appearance) { _, value in AppLog.debug("Reader appearance changed", category: "reader", metadata: ["appearance": .string(["system", "light", "dark"].contains(value) ? value : "unknown")]) }
     }
 
     @ViewBuilder private var chapterEnd: some View {
         VStack(spacing: 20) {
             if index + 1 < chapters.count {
                 let next = chapters[index + 1]
-                Button { chapterID = next.id } label: {
+                Button {
+                    AppLog.debug("Reader next chapter requested", category: "reader", metadata: ["chapter_index": .integer(index + 1)])
+                    chapterID = next.id
+                } label: {
                     HStack(spacing: 16) {
                         VStack(alignment: .leading, spacing: 6) {
                             Eyebrow("Next Chapter")
@@ -114,7 +130,10 @@ struct ReaderView: View {
                 .frame(maxWidth: .infinity)
             }
             if index > 0 {
-                Button("Previous", systemImage: "chevron.left") { chapterID = chapters[index - 1].id }
+                Button("Previous", systemImage: "chevron.left") {
+                    AppLog.debug("Reader previous chapter requested", category: "reader", metadata: ["chapter_index": .integer(index - 1)])
+                    chapterID = chapters[index - 1].id
+                }
                     .font(.subheadline.weight(.semibold)).frame(minHeight: 44)
             }
         }
@@ -122,29 +141,58 @@ struct ReaderView: View {
     }
 
     private func loadChapter() async {
-        guard let chapter else { loading = false; return }
-        AppLog.trace("Chapter loading started", category: "reader", metadata: ["chapter_index": .integer(index)])
+        guard let chapter else {
+            AppLog.warning("Reader has no chapter with text or an illustration", category: "reader", metadata: ["manifest_chapter_count": .integer(book.manifest.orderedChapters.count)])
+            loading = false; return
+        }
+        let repository = library.repository
+        let startedAt = ProcessInfo.processInfo.systemUptime
+        let operationID = UUID().uuidString
+        let fields: [String: TelemetryValue] = ["diagnostic_operation_id": .string(operationID), "chapter_index": .integer(index),
+            "book_id": .string(book.id.uuidString), "chapter_id": .string(chapter.id.uuidString),
+            "has_text_asset": .bool(chapter.text != nil), "has_image_asset": .bool(chapter.image != nil)]
+        AppLog.trace("Reader chapter load started", category: "reader", metadata: fields)
         content = nil; illustration = nil; error = nil; loading = true
         library.progress.saveReading(chapter.id, bookID: book.id)
         var loadedImage: UIImage?
         var loadedText: String?
         var failure: String?
         if let image = chapter.image {
-            loadedImage = await library.image(image, book: book)
+            AppLog.trace("Reader chapter illustration load started", category: "reader", metadata: fields)
+            loadedImage = await library.image(image, book: book, operationID: operationID)
+            await repository.flushDiagnosticLogs()
+            AppLog.trace("Reader chapter illustration load completed", category: "reader", metadata: fields.merging(["available": .bool(loadedImage != nil)]) { _, new in new })
             if loadedImage == nil { failure = String(localized: "Chapter illustration is unavailable.") }
         }
         do {
-            if let text = chapter.text { loadedText = try await library.text(text, book: book) }
+            try Task.checkCancellation()
+            if let text = chapter.text {
+                AppLog.trace("Reader chapter text load started", category: "reader", metadata: fields)
+                loadedText = try await library.text(text, book: book, operationID: operationID)
+                await repository.flushDiagnosticLogs()
+                AppLog.trace("Reader chapter text load completed", category: "reader", metadata: fields)
+            }
         } catch is CancellationError {
-            AppLog.trace("Chapter loading cancelled", category: "reader")
+            await repository.flushDiagnosticLogs()
+            AppLog.trace("Reader chapter load cancelled", category: "reader", metadata: fields.merging(["duration_ms": .double(max(0, ProcessInfo.processInfo.systemUptime - startedAt) * 1_000)]) { _, new in new })
             return
         }
         catch {
-            AppLog.error("Chapter text loading failed", error: error, category: "reader", metadata: ["chapter_index": .integer(index)])
+            let snapshot = ErrorSnapshot(error)
             failure = error.localizedDescription
+            await repository.flushDiagnosticLogs()
+            AppLog.logger.log(LogEntry("Reader chapter text load failed", level: .error, category: "reader",
+                metadata: fields.merging(["duration_ms": .double(max(0, ProcessInfo.processInfo.systemUptime - startedAt) * 1_000)]) { _, new in new },
+                error: snapshot))
         }
-        guard !Task.isCancelled, self.chapter?.id == chapter.id else { return }
+        guard !Task.isCancelled, self.chapter?.id == chapter.id else {
+            AppLog.trace("Reader chapter load result discarded after navigation", category: "reader", metadata: fields.merging(["cancelled": .bool(Task.isCancelled)]) { _, new in new })
+            return
+        }
         illustration = loadedImage; content = loadedText; error = failure; loading = false
-        AppLog.debug("Chapter loading completed", category: "reader", metadata: ["has_text": .bool(loadedText != nil), "has_image": .bool(loadedImage != nil), "degraded": .bool(failure != nil)])
+        AppLog.debug("Reader chapter load completed", category: "reader", metadata: fields.merging([
+            "has_text": .bool(loadedText != nil), "has_image": .bool(loadedImage != nil), "degraded": .bool(failure != nil),
+            "duration_ms": .double(max(0, ProcessInfo.processInfo.systemUptime - startedAt) * 1_000)
+        ]) { _, new in new })
     }
 }

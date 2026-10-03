@@ -9,7 +9,10 @@ struct AppDeveloperSettings: View {
 
     var body: some View {
         Section {
-            Toggle("Developer Mode", isOn: Binding(get: { options.isEnabled }, set: options.setEnabled))
+            Toggle("Developer Mode", isOn: Binding(get: { options.isEnabled }, set: { enabled in
+                AppLog.info("Developer mode changed", category: "developer", metadata: ["enabled": .bool(enabled)])
+                options.setEnabled(enabled)
+            }))
                 .accessibilityIdentifier("developer.mode")
             FoundationSettingsLink(
                 services: services,

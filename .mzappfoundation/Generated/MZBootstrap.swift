@@ -27,14 +27,14 @@ import MZAppFoundationLocal
             developerLinkHost: "com.matteozajac.bedtimestories")
         let schema = TelemetrySchema(events: [:])
         #if MZ_LOCAL || targetEnvironment(simulator)
-        return LocalServices.make(configuration: configuration, schema: schema)
+        return AppDiagnosticServices.make(configuration: configuration, schema: schema)
         #else
         var inventory = AppFoundationDiagnostics.make()
         var purchases: any PurchaseProviding = UnavailablePurchases()
         var analytics: [any AnalyticsEngine] = []
         var diagnostics: [any DiagnosticsEngine] = []
         let remoteAllowed = RuntimeSafety.permitsRemote(environment: configuration.environment)
-        return LocalServices.make(configuration: configuration, schema: schema, purchases: purchases,
+        return AppDiagnosticServices.make(configuration: configuration, schema: schema, purchases: purchases,
             foundationDiagnostics: inventory, additionalAnalytics: analytics, additionalDiagnostics: diagnostics)
         #endif
     }

@@ -43,7 +43,10 @@ struct RootView: View {
                     HStack(spacing: 12) {
                         ProgressView()
                         Text(activity).font(.subheadline.weight(.medium))
-                        Button("Cancel", action: library.cancelOperation).font(.subheadline.weight(.semibold))
+                        Button("Cancel") {
+                            AppLog.debug("Library operation cancellation selected", category: "navigation")
+                            library.cancelOperation()
+                        }.font(.subheadline.weight(.semibold))
                     }
                     .padding(.horizontal, 18).padding(.vertical, 12)
                     .glassEffect(.regular, in: .capsule)
@@ -68,8 +71,17 @@ struct RootView: View {
         }
         .fileImporter(isPresented: $library.showingImportPicker, allowedContentTypes: [UTType(exportedAs: "com.matteozajac.bedtimestories.book"), .zip]) { result in
             switch result {
-            case .success(let url): library.importBook(url)
+            case .success(let url):
+                AppLog.debug("Book document selected", category: "navigation", metadata: [
+                    "source": .string("document_picker"), "file_type": .string(url.pathExtension.lowercased() == "zip" ? "zip" : "bedtimestory")
+                ])
+                library.importBook(url)
             case .failure(let error):
+                let failure = error as NSError
+                if failure.domain == NSCocoaErrorDomain && failure.code == NSUserCancelledError {
+                    AppLog.trace("Book document selection cancelled", category: "navigation")
+                    return
+                }
                 AppLog.error("Document selection failed", error: error, category: "library")
                 library.message = error.localizedDescription
             }
@@ -79,11 +91,49 @@ struct RootView: View {
         } message: { Text(library.message ?? "") }
         .task { await library.start() }
         .onChange(of: scenePhase) { _, phase in
+            let state: String
+            switch phase {
+            case .active: state = "active"
+            case .inactive: state = "inactive"
+            case .background: state = "background"
+            @unknown default: state = "unknown"
+            }
+            AppLog.debug("Application scene state changed", category: "app", metadata: ["state": .string(state)])
             if phase == .active { Task { await library.start() } }
+        }
+        .onChange(of: library.showingSettings) { _, presented in
+            AppLog.debug(presented ? "Settings opened" : "Settings closed", category: "navigation")
+        }
+        .onChange(of: library.showingCreator) { _, presented in
+            AppLog.debug(presented ? "Book creator opened" : "Book creator closed", category: "navigation")
+        }
+        .onChange(of: library.editingDraft?.id) { previous, current in
+            if let current {
+                AppLog.debug("Book editor presented", category: "navigation", metadata: ["draft_id": .string(current.uuidString)])
+            } else if let previous {
+                AppLog.debug("Book editor dismissed", category: "navigation", metadata: ["draft_id": .string(previous.uuidString)])
+            }
+        }
+        .onChange(of: library.showingPlayer) { _, presented in
+            AppLog.debug(presented ? "Now Playing opened" : "Now Playing closed", category: "navigation")
+        }
+        .onChange(of: library.showingImportPicker) { _, presented in
+            AppLog.trace(presented ? "Book document picker opened" : "Book document picker closed", category: "navigation")
+        }
+        .onChange(of: library.importCandidate?.id) { _, current in
+            if let current {
+                AppLog.debug("Book import review presented", category: "navigation", metadata: ["book_id": .string(current.uuidString)])
+            }
+        }
+        .onChange(of: library.message != nil) { _, presented in
+            AppLog.debug(presented ? "Library failure alert presented" : "Library failure alert dismissed", category: "navigation")
         }
         .onOpenURL { url in
             // Developer links belong to the foundation modifier; only file URLs are books.
-            if url.isFileURL { library.importBook(url) }
+            if url.isFileURL {
+                AppLog.debug("Book file opened externally", category: "navigation", metadata: ["source": .string("open_url")])
+                library.importBook(url)
+            }
         }
     }
 }

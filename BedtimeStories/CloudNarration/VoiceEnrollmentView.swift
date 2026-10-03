@@ -42,13 +42,19 @@ struct VoiceEnrollmentView: View {
             if let enrollment {
                 Section {
                     Text("Speak naturally for 10–30 seconds. Keep the microphone at a comfortable distance and avoid music or other voices.")
-                    Button(referenceURL == nil ? "Record Voice Sample" : "Record Voice Sample Again", systemImage: "mic") { recording = .reference }
+                    Button(referenceURL == nil ? "Record Voice Sample" : "Record Voice Sample Again", systemImage: "mic") {
+                        AppLog.debug("Voice reference recording requested", category: "cloud_narration", metadata: ["replacing_take": .bool(referenceURL != nil)])
+                        recording = .reference
+                    }
                     if referenceURL != nil { Label("Voice sample ready", systemImage: "checkmark.circle") }
                 } header: { Text("1. Voice Sample") }
                 Section {
                     Text(enrollment.consentStatement).textSelection(.enabled)
                         .accessibilityIdentifier("voice-consent-statement")
-                    Button(consentURL == nil ? "Record Consent Statement" : "Record Consent Again", systemImage: "mic") { recording = .consent }
+                    Button(consentURL == nil ? "Record Consent Statement" : "Record Consent Again", systemImage: "mic") {
+                        AppLog.debug("Voice consent recording requested", category: "cloud_narration", metadata: ["replacing_take": .bool(consentURL != nil)])
+                        recording = .consent
+                    }
                     if consentURL != nil { Label("Consent recording ready", systemImage: "checkmark.circle") }
                 } header: { Text("2. Your Consent") } footer: {
                     Text("Read this statement exactly as shown. Record it separately from your voice sample.")
@@ -66,14 +72,22 @@ struct VoiceEnrollmentView: View {
         }
         .storyFormStyle().disabled(working)
         .navigationTitle("Add Your Voice").navigationBarTitleDisplayMode(.inline)
-        .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(working) } }
+        .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") {
+            AppLog.debug("Voice enrollment dismissed by user", category: "cloud_narration")
+            dismiss()
+        }.disabled(working) } }
         .sheet(item: $recording) { take in
             RecordingView(text: take == .consent ? enrollment?.consentStatement ?? "" : referenceScript) { url in
                 await accept(url, take: take)
             }
         }
-        .onChange(of: cloud.userID) { _, _ in dismiss() }
+        .onAppear { AppLog.debug("Voice enrollment screen opened", category: "cloud_narration") }
+        .onChange(of: cloud.userID) { _, _ in
+            AppLog.trace("Voice enrollment dismissed after account state changed", category: "cloud_narration")
+            dismiss()
+        }
         .onDisappear {
+            AppLog.trace("Voice enrollment screen closed", category: "cloud_narration", metadata: ["working": .bool(working), "has_reference": .bool(referenceURL != nil), "has_consent": .bool(consentURL != nil)])
             operation?.cancel()
             let urls = [referenceURL, consentURL].compactMap { $0 }
             Task { await VoiceEnrollmentAudio.shared.remove(urls) }
@@ -87,10 +101,14 @@ struct VoiceEnrollmentView: View {
     }
 
     private func begin() {
+        AppLog.debug("Voice enrollment continue requested", category: "cloud_narration", metadata: ["language": .string(["en-US", "pl-PL"].contains(language) ? language : "unknown"), "retention_accepted": .bool(retentionAccepted)])
         operation?.cancel(); working = true; message = nil
         operation = Task {
             defer { working = false }
-            do { enrollment = try await cloud.beginEnrollment(name: name.trimmingCharacters(in: .whitespacesAndNewlines), language: language, retentionAccepted: retentionAccepted) }
+            do {
+                enrollment = try await cloud.beginEnrollment(name: name.trimmingCharacters(in: .whitespacesAndNewlines), language: language, retentionAccepted: retentionAccepted)
+                AppLog.debug("Voice enrollment screen ready for recordings", category: "cloud_narration")
+            }
             catch is CancellationError { AppLog.trace("Voice enrollment screen operation cancelled", category: "cloud_narration", metadata: ["operation": .string("begin_enrollment")]) }
             catch {
                 CloudNarrationDiagnostics.reportIfNeeded("Voice enrollment could not start", error: error)
@@ -100,30 +118,46 @@ struct VoiceEnrollmentView: View {
     }
 
     private func accept(_ url: URL, take: Take) async -> Bool {
-        guard let owner = cloud.userID else { return false }
+        guard let owner = cloud.userID else {
+            AppLog.warning("Voice recording acceptance rejected because no account is signed in", category: "cloud_narration", metadata: ["recording_kind": .string(take.rawValue)])
+            return false
+        }
+        AppLog.trace("Voice recording acceptance started", category: "cloud_narration", metadata: ["recording_kind": .string(take.rawValue)])
         do {
             let prepared = try await VoiceEnrollmentAudio.shared.prepare(url, userID: owner, consent: take == .consent)
-            guard cloud.userID == owner, !Task.isCancelled else { await VoiceEnrollmentAudio.shared.remove([prepared]); return false }
+            guard cloud.userID == owner, !Task.isCancelled else {
+                AppLog.trace("Prepared voice recording discarded after account change or cancellation", category: "cloud_narration", metadata: ["recording_kind": .string(take.rawValue), "cancelled": .bool(Task.isCancelled)])
+                await VoiceEnrollmentAudio.shared.remove([prepared]); return false
+            }
             let previous = take == .reference ? referenceURL : consentURL
             if take == .reference { referenceURL = prepared } else { consentURL = prepared }
             if let previous { await VoiceEnrollmentAudio.shared.remove([previous]) }
+            AppLog.debug("Voice recording accepted for enrollment", category: "cloud_narration", metadata: ["recording_kind": .string(take.rawValue), "replaced_previous_take": .bool(previous != nil)])
             return true
         } catch is CancellationError {
             AppLog.trace("Voice recording acceptance cancelled", category: "cloud_narration")
             return false
         }
         // VoiceEnrollmentAudio owns diagnostics before it translates an audio SDK error.
-        catch { message = error.localizedDescription; return false }
+        catch {
+            AppLog.trace("Voice enrollment recording remains unavailable after preparation failure", category: "cloud_narration", metadata: ["recording_kind": .string(take.rawValue)])
+            message = error.localizedDescription; return false
+        }
     }
 
     private func upload(_ enrollment: VoiceEnrollment) {
-        guard let referenceURL, let consentURL else { return }
+        guard let referenceURL, let consentURL else {
+            AppLog.warning("Voice enrollment upload requires both recordings", category: "cloud_narration", metadata: ["has_reference": .bool(referenceURL != nil), "has_consent": .bool(consentURL != nil)])
+            return
+        }
+        AppLog.debug("Voice enrollment upload requested by user", category: "cloud_narration")
         operation?.cancel(); working = true; message = nil
         operation = Task {
             defer { working = false }
             do {
                 _ = try await cloud.uploadEnrollment(enrollment: enrollment, referenceURL: referenceURL, consentURL: consentURL)
                 await VoiceEnrollmentAudio.shared.remove([referenceURL, consentURL])
+                AppLog.debug("Voice enrollment screen completed submission", category: "cloud_narration")
                 dismiss()
             } catch is CancellationError { AppLog.trace("Voice enrollment screen upload cancelled", category: "cloud_narration") }
             catch {
@@ -134,6 +168,7 @@ struct VoiceEnrollmentView: View {
     }
 
     private func restart() {
+        AppLog.debug("Voice enrollment restarted by user", category: "cloud_narration", metadata: ["has_reference": .bool(referenceURL != nil), "has_consent": .bool(consentURL != nil)])
         let urls = [referenceURL, consentURL].compactMap { $0 }
         enrollment = nil; referenceURL = nil; consentURL = nil; message = nil
         Task { await VoiceEnrollmentAudio.shared.remove(urls) }

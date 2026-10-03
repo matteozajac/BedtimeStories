@@ -1,3 +1,4 @@
+import MZAppFoundation
 import SwiftUI
 
 struct DraftImageView: View {
@@ -29,11 +30,11 @@ struct DraftImageView: View {
             let data = try await store.imageData(at: url)
             let thumbnail = await ArtworkDecoder.thumbnail(data)
             guard !Task.isCancelled else { return nil }
-            if thumbnail == nil { AppLog.warning("Draft artwork could not be decoded", category: "creator") }
+            if thumbnail == nil { AppLog.warning("Draft artwork could not be decoded", category: "creator", metadata: ["draft_id": .string(draftID.uuidString)]) }
             return thumbnail.map { UIImage(cgImage: $0) }
         } catch is CancellationError { return nil }
         catch {
-            AppLog.warning("Draft artwork unavailable", error: error, category: "creator")
+            AppLog.warning("Draft artwork unavailable", error: error, category: "creator", metadata: ["draft_id": .string(draftID.uuidString)])
             return nil
         }
     }

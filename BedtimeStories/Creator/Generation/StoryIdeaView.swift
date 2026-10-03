@@ -11,6 +11,7 @@ struct StoryIdeaView: View {
     @State private var generationID: UUID?
     @State private var model: StoryGenerationModel
     @State private var availability: String?
+    @State private var lastAvailabilityState: String?
     @FocusState private var editingDescription: Bool
     let openDraft: (BookDraft) -> Void
 
@@ -93,7 +94,10 @@ struct StoryIdeaView: View {
                             .storyFont(.headline, weight: .semibold).foregroundStyle(Theme.ink)
                     }
                     .padding(.vertical, 8)
-                    Button("Stop Creating", role: .cancel) { generationID = nil }
+                    Button("Stop Creating", role: .cancel) {
+                        AppLog.debug("Story creation stop requested", category: "creator", metadata: ["mode": .string(mode.rawValue)])
+                        generationID = nil
+                    }
                         .accessibilityIdentifier("stop-story-generation")
                 } footer: { Text("The entire book is written together and checked before it is saved to Your Drafts.") }
                 .listRowBackground(Theme.surface)
@@ -104,7 +108,10 @@ struct StoryIdeaView: View {
                         if let draft = model.draft {
                             Text("Saved chapters: \(model.completedChapterCount)")
                                 .font(.footnote).foregroundStyle(.secondary)
-                            Button("Open Saved Draft", systemImage: "doc.text") { openDraft(draft) }
+                            Button("Open Saved Draft", systemImage: "doc.text") {
+                                AppLog.debug("Generated draft editor opening requested", category: "creator", metadata: ["chapter_count": .integer(draft.chapters.count)])
+                                openDraft(draft)
+                            }
                         }
                     }
                     .listRowBackground(Theme.surface)
@@ -129,12 +136,27 @@ struct StoryIdeaView: View {
         .scrollDismissesKeyboard(.interactively)
         .navigationTitle("Create from an Idea")
         .navigationBarTitleDisplayMode(.inline)
-        .task { refreshAvailability() }
+        .task {
+            AppLog.debug("Story idea creator opened", category: "creator", metadata: ["mode": .string(mode.rawValue)])
+            refreshAvailability()
+        }
+        .onDisappear { AppLog.trace("Story idea creator closed", category: "creator", metadata: ["generation_running": .bool(model.working)]) }
         .onChange(of: language) { refreshAvailability() }
         .onChange(of: mode) { refreshAvailability() }
+        .onChange(of: readingMinutes) { _, value in
+            AppLog.debug("Story reading time changed", category: "creator", metadata: ["reading_minutes": .integer(value)])
+            refreshAvailability()
+        }
+        .onChange(of: wordsPerMinute) { _, value in
+            AppLog.debug("Story reading pace changed", category: "creator", metadata: ["words_per_minute": .integer(value)])
+            refreshAvailability()
+        }
         .onChange(of: phase) { _, phase in
             if phase == .active { refreshAvailability() }
-            else { generationID = nil }
+            else {
+                if generationID != nil { AppLog.trace("Story generation stopped because the app became inactive", category: "creator", metadata: ["mode": .string(mode.rawValue)]) }
+                generationID = nil
+            }
         }
         .task(id: generationID) {
             guard generationID != nil else { return }
@@ -147,6 +169,12 @@ struct StoryIdeaView: View {
 
     private func refreshAvailability() {
         availability = model.unavailabilityReason(for: mode, language: language)
+        let state = "\(mode.rawValue):\(language.rawValue):\(availability == nil):\(durationWarning == nil)"
+        if state != lastAvailabilityState {
+            lastAvailabilityState = state
+            AppLog.debug("Story creation availability changed", category: "creator", metadata: ["mode": .string(mode.rawValue),
+                "language": .string(language.rawValue), "model_available": .bool(availability == nil), "duration_supported": .bool(durationWarning == nil)])
+        }
     }
 
     private var durationWarning: String? {

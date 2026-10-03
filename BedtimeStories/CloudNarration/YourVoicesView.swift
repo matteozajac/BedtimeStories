@@ -44,7 +44,10 @@ struct YourVoicesView: View {
                         }.padding(.vertical, 4)
                     }
                     if cloud.voices.isEmpty { Text("Save your voice once, then use it to narrate your stories.").foregroundStyle(.secondary) }
-                    Button("Add Your Voice", systemImage: "mic.badge.plus") { enrolling = true }
+                    Button("Add Your Voice", systemImage: "mic.badge.plus") {
+                        AppLog.debug("Add private voice requested", category: "cloud_narration")
+                        enrolling = true
+                    }
                         .disabled(cloud.isWorking)
                         .accessibilityIdentifier("add-private-voice")
                 } header: { Text("Your Voices") } footer: {
@@ -79,10 +82,19 @@ struct YourVoicesView: View {
             }
         } message: { Text("Your saved voices, recordings, and cloud narration will be removed. Books already saved to your library remain.") }
         .onChange(of: cloud.jobs.map { $0.id + $0.state }) { _, _ in receivePreview() }
-        .onChange(of: preview.playingURL) { _, url in if url != nil { auditionedVoiceID = previewVoiceID } }
+        .onChange(of: preview.playingURL) { _, url in if url != nil {
+            auditionedVoiceID = previewVoiceID
+            AppLog.debug("Private voice preview audition confirmed", category: "cloud_narration")
+        } }
         .onChange(of: cloud.userID) { _, _ in operation?.cancel(); enrolling = false; deletingVoice = nil; message = nil; preview.stop(); previewJobID = nil; auditionedVoiceID = nil; previewLoading = false }
-        .onAppear { active = true; receivePreview() }
-        .onDisappear { active = false; operation?.cancel(); previewLoading = false; preview.stop() }
+        .onAppear {
+            AppLog.debug("Private voices screen opened", category: "cloud_narration", metadata: ["voice_count": .integer(cloud.voices.count), "signed_in": .bool(cloud.userID != nil)])
+            active = true; receivePreview()
+        }
+        .onDisappear {
+            AppLog.trace("Private voices screen closed", category: "cloud_narration", metadata: ["preview_pending": .bool(previewLoading)])
+            active = false; operation?.cancel(); previewLoading = false; preview.stop()
+        }
     }
 
     private func status(_ value: String) -> String {
@@ -97,7 +109,11 @@ struct YourVoicesView: View {
     }
 
     private func audition(_ voice: VoiceProfile) {
-        guard let owner = cloud.userID, active else { return }
+        guard let owner = cloud.userID, active else {
+            AppLog.warning("Private voice preview requires an active signed-in screen", category: "cloud_narration")
+            return
+        }
+        AppLog.debug("Private voice preview requested by user", category: "cloud_narration")
         operation?.cancel()
         preview.stop(); previewLoading = true; message = nil
         operation = Task {
@@ -105,6 +121,7 @@ struct YourVoicesView: View {
                 let id = try await cloud.startVoicePreview(profileID: voice.id)
                 guard owner == cloud.userID, active, !Task.isCancelled else { return }
                 previewVoiceID = voice.id; previewJobID = id
+                AppLog.debug("Private voice preview waiting for worker output", category: "cloud_narration")
                 receivePreview()
             } catch is CancellationError {
                 AppLog.trace("Voice preview request cancelled", category: "cloud_narration")
@@ -124,12 +141,18 @@ struct YourVoicesView: View {
                 defer { previewLoading = false }
                 do {
                     let urls = try await cloud.download(job: job)
-                    guard owner == cloud.userID, active, !Task.isCancelled, let url = urls.values.first else { return }
+                    guard owner == cloud.userID, active, !Task.isCancelled else {
+                        AppLog.trace("Private voice preview download result discarded after navigation or account change", category: "cloud_narration", metadata: ["cancelled": .bool(Task.isCancelled)])
+                        return
+                    }
+                    guard let url = urls.values.first else { throw CloudNarrationFailure.invalidAudio }
+                    AppLog.debug("Private voice preview ready to play", category: "cloud_narration")
                     previewVoiceID = voiceID; preview.toggle(url)
                 } catch is CancellationError { AppLog.trace("Voice preview download cancelled", category: "cloud_narration") }
                 catch { reportFailure("Voice preview download failed", error: error) }
             }
         } else if job.state == "failed" || job.state == "cancelled" || job.state == "expired" || job.expiresAt <= Date().timeIntervalSince1970 {
+            AppLog.trace("Private voice preview stopped before audio became available", category: "cloud_narration", metadata: ["expired": .bool(job.expiresAt <= Date().timeIntervalSince1970 || job.state == "expired"), "worker_failed": .bool(job.state == "failed"), "cancelled": .bool(job.state == "cancelled")])
             previewJobID = nil; previewLoading = false
             message = job.state == "expired" || job.expiresAt <= Date().timeIntervalSince1970
                 ? CloudNarrationFailure.expired.localizedDescription

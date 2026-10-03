@@ -5,6 +5,14 @@ Open **Settings → Developer → Open Logs**, or enable Developer Mode and shak
 the device. Select a log entry, then tap **Info** to inspect its source and metadata. Keep the
 Debug level included in the console filters to see connection traces.
 The clipboard button opens Sessions when diagnosing a previous app launch.
+Copied plain-text logs now include each entry's context and, for failures, safe
+technical explanations, original type/domain/code, nested causes, caller and
+capture locations, and the full bounded stack. This is rendered only by the
+app-owned local Pulse sink; diagnostic event codes and structured fields remain
+unchanged for other destinations.
+The app's Pulse sink preserves metadata asynchronously on the store's write
+context. This avoids Foundation 0.5.0's synchronous metadata-repair deadlock
+when the console is observing saves on the main thread.
 
 ## App evidence
 
@@ -20,8 +28,8 @@ file/function/line, and stack provenance. Pulse details contain
 `error.stack.01`, etc. Individual frames preserve spaces and stay readable.
 Swift reporting stacks identify where an error was captured; they do not claim
 to identify the original throw. Previously supplied stacks remain supplied.
-Use the entry details or the Pulse store export for stack evidence; Pulse's
-plain-text message export does not include all structured metadata.
+The app's local adapter renders these details into the text that Pulse's normal
+copy/share action exports. Pulse's Info view still retains the structured fields.
 
 File actors capture immutable error snapshots before delivering ordered logs
 to the main-actor sink. Firebase and audio delegate callbacks also capture
@@ -34,6 +42,21 @@ imports, library/iCloud downloads and fallback, audio sessions and decoder
 failures, Apple/Firebase sign-in, App Attest provider setup, callable requests,
 Firestore listeners/document decoding, cloud output downloads/checksums,
 private recovery files, and voice/narration worker state transitions.
+
+Book editing records a single operation ID through checkout, provider downloads,
+manifest reading, indexed asset copies, fingerprint validation, draft creation and
+publication. iCloud waits report download status changes and a five-second
+heartbeat, with asset kind/index, elapsed time and the existing 45-second timeout.
+Provider coordination records requested and granted access separately. A failed
+phase preserves its original error snapshot before unwinding; cancellations and
+edit-conflict recovery keep their existing behavior.
+
+The app audit also added explicit navigation/import/share/offline actions,
+editor changes and chapter actions, migrations and progress recovery, model
+availability/inference/validation, playback controls/sleep/track preparation,
+reader loading, and enrollment/narration UI transitions. Rendering, every
+keystroke and every audio buffer do not produce new log entries. Corrupt progress
+reads are deduplicated until the stored value changes.
 
 ## Following a Gemini request
 
@@ -81,25 +104,35 @@ microphone/playback behavior.
 `Tests/AppTests/LoggingTests.swift` verifies caller forwarding, readable persisted
 Pulse frames, nested/supplied evidence, one-entry error routing, cancellation,
 private-data exclusion, file-actor fallback/recovery, and backend correlation.
+`Tests/AppTests/DiagnosticTextTests.swift` verifies normal copied text, original
+diagnostic payloads, remote opt-out, complete checkout timelines, preserved
+failed-phase decoding evidence, Gemini explanations, and repeated errors while
+a console fetched-results controller observes saves.
 The worker and Functions diagnostics tests exercise private exception text,
 bounded/cyclic causes, connection phases, concurrency context isolation, retry
 evidence, and safe provider status codes.
 
 Verified on 2026-10-03:
 
-- 47 local simulator app tests and 8 standalone core tests passed.
-- 52 worker tests and 10 Functions tests passed, with no worker skips.
-- The final unsigned Internal device build succeeded with Firebase linked.
+- 55 local simulator app tests and 9 standalone core tests passed.
+- The signed Internal build 12 archive/export succeeded with Firebase linked.
+- Local binary isolation passed; Ruby setup syntax and generated logger hooks passed.
 - Gitleaks found no secrets in the changed source and new diagnostics files.
-- A saved failed-generation fixture was inspected in Pulse's Message Details:
-  `StoryGenerationModel.swift`, `save(_:)`, line 113, original Cocoa code 512,
-  underlying POSIX code 20, and readable individual reporting-stack fields.
-  The local screenshot is `.build/logging-evidence/pulse-error-details.png`.
+- A filesystem failure was inspected in Pulse's message text and Info view:
+  `LibraryRepository.swift`, `scan(root:discoveredFolders:)`, line 66, Cocoa
+  code 260, underlying POSIX code 2, safe explanations and readable individual
+  reporting-stack fields. The screenshot is
+  `.build/logging-evidence/pulse-context-and-stack-build-12.png`.
+- The deadlock regression completed 20 observed error saves; the app remained
+  responsive with its actual Pulse console open. The captured pre-fix thread
+  sample is `.build/logging-evidence/foundation-pulse-console-deadlock.sample.txt`.
 
 The app-test result bundle is
-`.build/mz-local/Logs/Test/Test-BedtimeStoriesLocal-2026.10.03_17-50-51-+0200.xcresult`.
+`.build/mz-local/Logs/Test/Test-BedtimeStoriesLocal-2026.10.03_20-04-48-+0200.xcresult`.
 
-The worker and all nine Functions are deployed with this logging implementation.
+The preceding backend logging release passed 52 worker tests and 10 Functions
+tests, with no worker skips. The worker and all nine Functions are deployed
+with that implementation; build 12 adds app logging only.
 A harmless invalid-task probe verified a structured worker ERROR and original
 exception frames in Cloud Logging. The dispatch-recovery scheduler verified
 DEBUG Firestore connection timelines and successful completion on the new

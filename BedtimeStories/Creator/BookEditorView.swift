@@ -1,3 +1,4 @@
+import MZAppFoundation
 import PhotosUI
 import SwiftUI
 import UniformTypeIdentifiers
@@ -20,6 +21,12 @@ struct BookEditorView: View {
 
     init(draft: BookDraft, store: BookDraftStore) {
         _editor = State(initialValue: BookEditorModel(draft: draft, store: store))
+    }
+
+    private var diagnosticFields: [String: TelemetryValue] {
+        var values: [String: TelemetryValue] = ["draft_id": .string(editor.draft.id.uuidString)]
+        if let source = editor.draft.source { values["book_id"] = .string(source.bookID.uuidString) }
+        return values
     }
 
     var body: some View {
@@ -47,7 +54,7 @@ struct BookEditorView: View {
                     Label(hasCover ? "Change Cover Photo" : "Add Cover Photo", systemImage: "photo")
                 }.disabled(loadingPhoto || editor.working)
                 BookIllustrationButton(editor: editor)
-                if editor.draft.cover != nil { Button("Remove Cover", role: .destructive) { editor.draft.cover = nil } }
+                if editor.draft.cover != nil { Button("Remove Cover", role: .destructive) { editor.draft.cover = nil; AppLog.trace("Book cover removed", category: "creator", metadata: diagnosticFields) } }
             }
             .listRowBackground(Theme.surface)
             Section("Reading Time") {
@@ -158,7 +165,7 @@ struct BookEditorView: View {
             switch result {
             case .success(let url): Task { _ = await editor.setFullAudio(url) }
             case .failure(let error):
-                AppLog.error("Book recording selection failed", error: error, category: "creator")
+                AppLog.error("Book recording selection failed", error: error, category: "creator", metadata: diagnosticFields)
                 editor.message = error.localizedDescription
             }
         }
@@ -172,20 +179,27 @@ struct BookEditorView: View {
             guard let photo else { return }
             loadingPhoto = true
             defer { loadingPhoto = false }
-            do { if let data = try await photo.loadTransferable(type: Data.self) { await editor.setImage(data) } }
-            catch is CancellationError { AppLog.trace("Cover photo loading cancelled", category: "creator") }
+            AppLog.trace("Cover photo transfer started", category: "creator", metadata: diagnosticFields)
+            do {
+                if let data = try await photo.loadTransferable(type: Data.self) {
+                    AppLog.trace("Cover photo transfer completed", category: "creator", metadata: diagnosticFields.merging(["byte_count": .integer(data.count)]) { _, new in new })
+                    await editor.setImage(data)
+                } else { AppLog.warning("Cover photo transfer returned no image data", category: "creator", metadata: diagnosticFields) }
+            }
+            catch is CancellationError { AppLog.trace("Cover photo loading cancelled", category: "creator", metadata: diagnosticFields) }
             catch {
-                AppLog.error("Cover photo loading failed", error: error, category: "creator")
+                AppLog.error("Cover photo loading failed", error: error, category: "creator", metadata: diagnosticFields)
                 editor.message = String(localized: "The photo could not be opened. Try another photo.")
             }
         }
         .onChange(of: phase) { _, new in
             if new != .active {
+                AppLog.trace("Book editor scene background persistence requested", category: "creator", metadata: diagnosticFields)
                 Task {
                     do { try await editor.persist() }
-                    catch is CancellationError { AppLog.trace("Background draft save cancelled", category: "creator") }
+                    catch is CancellationError { AppLog.trace("Background draft save cancelled", category: "creator", metadata: diagnosticFields) }
                     catch {
-                        AppLog.error("Background draft save failed", error: error, category: "creator")
+                        AppLog.error("Background draft save failed", error: error, category: "creator", metadata: diagnosticFields)
                         editor.message = String(localized: "Your draft could not be saved. Keep the editor open and try again.")
                     }
                 }
