@@ -35,8 +35,8 @@ resource "google_project_iam_member" "api_permissions" {
   member  = "serviceAccount:${google_service_account.app["voice-api"].email}"
 }
 resource "google_storage_bucket_iam_member" "worker_objects" {
-  for_each = google_storage_bucket.private
-  bucket   = each.value.name
+  for_each = toset(["voices", "audio"])
+  bucket   = google_storage_bucket.private[each.key].name
   role     = "roles/storage.objectUser"
   member   = "serviceAccount:${google_service_account.app["voice-worker"].email}"
 }
@@ -88,4 +88,18 @@ resource "google_service_account_iam_member" "scheduler_oidc" {
   service_account_id = google_service_account.app["voice-scheduler"].name
   role               = "roles/iam.serviceAccountOpenIdTokenCreator"
   member             = "serviceAccount:${google_project_service_identity.scheduler_agent.email}"
+}
+
+# Storage rules consult account/job documents to authorize audio downloads.
+# Only Google's Storage service agent receives the documented read-only role.
+resource "google_project_service_identity" "storage_agent" {
+  provider   = google-beta
+  project    = var.project_id
+  service    = "firebasestorage.googleapis.com"
+  depends_on = [google_project_service.apis]
+}
+resource "google_project_iam_member" "storage_rule_documents" {
+  project = var.project_id
+  role    = "roles/firebaserules.firestoreServiceAgent"
+  member  = "serviceAccount:${google_project_service_identity.storage_agent.email}"
 }

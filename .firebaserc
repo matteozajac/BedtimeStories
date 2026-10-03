@@ -1,1 +1,15 @@
-{ "projects": {} }
+{
+  "projects": {
+    "default": "gen-lang-client-0154884984"
+  },
+  "targets": {
+    "gen-lang-client-0154884984": {
+      "storage": {
+        "cloud-audio": [
+          "gen-lang-client-0154884984-audio"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

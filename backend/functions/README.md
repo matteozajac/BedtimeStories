@@ -49,7 +49,7 @@ Cloud Tasks sends `{kind: enroll/narrate/deleteVoice/deleteAccount, uid, id}` to
 
 Scheduled cleanup also retries pending account/voice deletion after queue attempts are exhausted. It isolates failures, preserves deletion intent, and advances a server-only cursor before each bounded attempt so an unavailable provider does not repeatedly starve later accounts. Cleanup never creates or renews a provider voice. It waits for live upload reservations, removes expired/orphan recordings, and repeatedly sweeps deleted-account prefixes to erase late writes from interrupted requests.
 
-Resolve/provision a **dedicated Bedtime Stories project** before deployment. Do not reuse another app's Firebase project when account/project quota prevents creation. Enable billing, required APIs, Apple Auth and production App Attest; deploy owner rules/indexes and IAM before enabling the feature. `.firebaserc` is deliberately empty until a specific project is confirmed. The root infrastructure scripts own bucket/KMS/queue/worker provisioning and live readback.
+Use the user-approved shared project `gen-lang-client-0154884984` (**Always Near Stories**) for TestFlight and production. `.firebaserc` now pins that exact project and the `cloud-audio` Storage target. European infrastructure, runtime identities, billing, and App Attest registration have been provisioned; see the [deployment receipt](../../docs/CLOUD_NARRATION_DEPLOYMENT.md). Keep the feature gate disabled until real voice, Apple OAuth revocation, and device checks pass.
 
 ## Local verification and deployment
 
@@ -63,7 +63,7 @@ npx -y firebase-tools@latest emulators:exec --only firestore,storage --project d
 
 Use Node 22 and Java 21 or newer on `PATH`. Emulator tests refuse to run without both emulator hosts and only use `demo-bedtime-cloud`. They test cross-owner access, source isolation, write denial, expiry, immutable/idempotent jobs, approval, deletion tombstones, feature gating and outbox recovery. Unit tests cover Apple/recent auth, exact consent acceptance, hostile WAV payloads, request-owner overrides, input cost limits, and AES-GCM context/tampering.
 
-After the dedicated project and worker are validated, register the **custom output bucket** and bind its explicit Storage target using the [infrastructure helpers](../infra/README.md). `register_output_bucket.py --register --configure-cli` writes ignored `.env.firebase.PROJECT.json` beside the root `firebase.json`; that config targets rules at `PROJECT-audio` rather than the default Firebase bucket. Generate the safe Functions environment with `prepare_functions_env.py` and deploy explicitly (replace the placeholder with the confirmed project ID):
+After the shared project and worker are validated, register the **custom output bucket** and bind its explicit Storage target using the [infrastructure helpers](../infra/README.md). `register_output_bucket.py --register --configure-cli` writes ignored `.env.firebase.PROJECT.json` beside the root `firebase.json`; that config targets rules at `PROJECT-audio` rather than the default Firebase bucket. Generate the safe Functions environment with `prepare_functions_env.py` and deploy explicitly (replace the placeholder with the confirmed project ID):
 
 ```sh
 npx -y firebase-tools@latest deploy --config .env.firebase.CONFIRMED_BEDTIME_PROJECT.json --project CONFIRMED_BEDTIME_PROJECT --only firestore:rules,firestore:indexes,storage:cloud-audio,functions:cloud-voice

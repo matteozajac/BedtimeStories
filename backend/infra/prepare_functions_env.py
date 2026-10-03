@@ -2,7 +2,6 @@
 """Generate safe identifier-only Functions env from Terraform JSON outputs; feature stays off."""
 import argparse
 import json
-import re
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -19,7 +18,7 @@ def main():
     if set(environment) != expected or environment.get("ENABLE_CLOUD_NARRATION") != "false":
         parser.error("The outputs must contain only safe configuration identifiers with the feature gate false.")
     project = environment["PROJECT_ID"]
-    if not re.fullmatch(r"bedtime-stories-(staging|prod)-[a-z0-9-]+", project):
+    if project != "gen-lang-client-0154884984":
         parser.error("Unexpected project identity.")
     if environment["VOICE_BUCKET"] != project + "-voices" or environment["OUTPUT_BUCKET"] != project + "-audio" or environment["TASK_LOCATION"] != "europe-west1" or environment["TASK_QUEUE"] != "bedtime-voice-worker":
         parser.error("The bucket, region, and queue must belong to the exact environment.")

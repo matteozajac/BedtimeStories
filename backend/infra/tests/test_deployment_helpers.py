@@ -21,7 +21,7 @@ registration = module("registration", "register_output_bucket.py")
 
 
 def environment():
-    project = "bedtime-stories-staging-mz"
+    project = "gen-lang-client-0154884984"
     return {"PROJECT_ID": project, "ENABLE_CLOUD_NARRATION": "false", "API_SERVICE_ACCOUNT": f"voice-api@{project}.iam.gserviceaccount.com",
             "VOICE_BUCKET": project + "-voices", "OUTPUT_BUCKET": project + "-audio", "KMS_KEY_NAME": f"projects/{project}/locations/europe-west1/keyRings/voices/cryptoKeys/envelopes",
             "TASK_LOCATION": "europe-west1", "TASK_QUEUE": "bedtime-voice-worker", "TASK_SERVICE_ACCOUNT": f"voice-queue@{project}.iam.gserviceaccount.com",
@@ -36,7 +36,7 @@ class EnvironmentTests(unittest.TestCase):
             source.write_text(json.dumps({"functions_environment": {"value": env}}))
             with patch.object(sys, "argv", ["prepare", "--outputs-json", str(source), "--functions-dir", str(path)]), contextlib.redirect_stdout(io.StringIO()):
                 prepare.main()
-            return (path / ".env.bedtime-stories-staging-mz").read_text()
+            return (path / ".env.gen-lang-client-0154884984").read_text()
     def test_safe_identifiers_keep_feature_disabled(self):
         text = self.invoke(environment())
         self.assertIn("ENABLE_CLOUD_NARRATION=false\n", text)
@@ -73,7 +73,7 @@ class Session:
 @unittest.skipUnless(importlib.util.find_spec("google.auth"), "Install worker requirements for ADC adapter checks")
 class RegistrationTests(unittest.TestCase):
     def invoke(self, session, extra=None):
-        arguments = ["register", "--project", "bedtime-stories-staging-mz", "--bucket", "bedtime-stories-staging-mz-audio", *(extra or [])]
+        arguments = ["register", "--project", "gen-lang-client-0154884984", "--bucket", "gen-lang-client-0154884984-audio", *(extra or [])]
         with patch.object(sys, "argv", arguments), patch("google.auth.default", return_value=(object(), "project")), \
              patch("google.auth.transport.requests.AuthorizedSession", return_value=session), contextlib.redirect_stdout(io.StringIO()):
             return registration.main()
@@ -99,10 +99,10 @@ class RegistrationTests(unittest.TestCase):
             (root / "firebase.json").write_text(json.dumps({"functions": [{"source": "backend/functions"}], "storage": {"rules": "backend/storage.rules"}}))
             with patch.object(registration, "__file__", str(root / "backend/infra/register_output_bucket.py")), patch.object(registration.subprocess, "run") as command:
                 self.assertEqual(self.invoke(session, ["--configure-cli"]), 0)
-            generated = json.loads((root / ".env.firebase.bedtime-stories-staging-mz.json").read_text())
+            generated = json.loads((root / ".env.firebase.gen-lang-client-0154884984.json").read_text())
             self.assertEqual(generated["storage"], [{"target": "cloud-audio", "rules": "backend/storage.rules"}])
             self.assertEqual(generated["functions"], [{"source": "backend/functions"}])
-            self.assertIn("bedtime-stories-staging-mz-audio", command.call_args.args[0])
+            self.assertIn("gen-lang-client-0154884984-audio", command.call_args.args[0])
             self.assertEqual(command.call_args.kwargs["cwd"], root.resolve())
 
 

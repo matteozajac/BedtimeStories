@@ -1,0 +1,6 @@
+project_id      = "gen-lang-client-0154884984"
+display_name    = "Always Near Stories"
+billing_account = "017113-E9FBF5-49BBC9"
+# User-approved shared TestFlight/production project. Import existing project
+# and Firebase association before applying. Keep one protected Terraform state.
+worker_image = null

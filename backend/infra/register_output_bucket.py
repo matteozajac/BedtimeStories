@@ -2,7 +2,6 @@
 """Explicit Firebase Storage registration; ADC is consumed without printing credentials."""
 import argparse
 import json
-import re
 import subprocess
 from pathlib import Path
 
@@ -14,8 +13,8 @@ def main():
     parser.add_argument("--register", action="store_true", help="Perform addFirebase after successful ownership verification.")
     parser.add_argument("--configure-cli", action="store_true", help="Bind the cloud-audio target locally and write its ignored, explicit Firebase deployment config.")
     args = parser.parse_args()
-    if not re.fullmatch(r"bedtime-stories-(staging|prod)-[a-z0-9-]+", args.project) or args.bucket != args.project + "-audio":
-        parser.error("Only the dedicated environment's exact audio bucket can be registered.")
+    if args.project != "gen-lang-client-0154884984" or args.bucket != args.project + "-audio":
+        parser.error("Only the approved shared project's exact audio bucket can be registered.")
     import google.auth
     from google.auth.transport.requests import AuthorizedSession
     credentials, _ = google.auth.default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
@@ -43,7 +42,7 @@ def main():
         configuration["storage"] = [{"target": "cloud-audio", "rules": "backend/storage.rules"}]
         target = root / f".env.firebase.{args.project}.json"
         target.write_text(json.dumps(configuration, indent=2) + "\n")
-        subprocess.run(["firebase", "target:apply", "storage", "cloud-audio", args.bucket,
+        subprocess.run(["npx", "-y", "firebase-tools@latest", "target:apply", "storage", "cloud-audio", args.bucket,
                         "--project", args.project, "--config", str(target)], cwd=root, check=True)
         print(json.dumps({"deploymentConfig": str(target), "storageTarget": "cloud-audio"}))
     print(json.dumps({"project": args.project, "bucket": args.bucket, "linked": True}))

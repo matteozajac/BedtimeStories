@@ -1,8 +1,8 @@
 variable "project_id" {
   type = string
   validation {
-    condition     = can(regex("^bedtime-stories-(staging|prod)-[a-z0-9-]+$", var.project_id))
-    error_message = "Use a dedicated BedtimeStories staging or production project."
+    condition     = var.project_id == "gen-lang-client-0154884984"
+    error_message = "Use the user-approved Always Near Stories shared project gen-lang-client-0154884984."
   }
 }
 variable "display_name" { type = string }

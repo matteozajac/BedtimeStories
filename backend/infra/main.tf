@@ -93,7 +93,6 @@ resource "google_cloud_tasks_queue" "worker" {
     # threshold expires before the first retry, so the 30-attempt cap governs.
     max_retry_duration = "1s"
   }
-  stackdriver_logging_config { sampling_ratio = 0 }
   depends_on = [google_project_service.apis]
 }
 resource "google_cloud_run_v2_service" "worker" {
@@ -114,7 +113,10 @@ resource "google_cloud_run_v2_service" "worker" {
     }
     containers {
       image = var.worker_image
-      resources { limits = { cpu = "2", memory = "2Gi" } }
+      resources {
+        limits   = { cpu = "2", memory = "2Gi" }
+        cpu_idle = true
+      }
       dynamic "env" {
         for_each = {
           GCLOUD_PROJECT = var.project_id
