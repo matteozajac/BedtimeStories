@@ -20,55 +20,99 @@ struct VoiceEnrollmentView: View {
         Form {
             Section {
                 TextField("Voice name", text: $name).textContentType(.nickname)
+                    .storyFont(.title3, weight: .semibold).foregroundStyle(Theme.ink)
                     .onChange(of: name) { _, value in if value.count > 80 { name = String(value.prefix(80)) } }
-                Picker("Language", selection: $language) {
-                    Text("English").tag("en-US")
-                    Text("Polish").tag("pl-PL")
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Language")
+                    Picker("Language", selection: $language) {
+                        Text("English").tag("en-US")
+                        Text("Polish").tag("pl-PL")
+                    }
+                    .pickerStyle(.segmented).labelsHidden()
                 }
-                Toggle("I am an adult recording my own voice", isOn: $confirmsOwnVoice)
-                Toggle("Keep my voice sample and consent recording until I delete my voice", isOn: $retentionAccepted)
-                Text("Keeping these recordings lets us recreate your voice if needed. You can delete them together with your voice at any time.")
-                    .font(.footnote).foregroundStyle(.secondary)
-                Text("To prepare your voice and narrate stories, your recordings and story text are sent to Google. Processing may take place outside Europe.")
-                    .font(.footnote).foregroundStyle(.secondary)
-                if enrollment == nil {
-                    Button("Continue") { begin() }
-                        .disabled(!confirmsOwnVoice || !retentionAccepted || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || working)
-                }
+                .padding(.vertical, 4)
+                Toggle("I am an adult recording my own voice", isOn: $confirmsOwnVoice).tint(Theme.accent)
+                Toggle("Keep my voice sample and consent recording until I delete my voice", isOn: $retentionAccepted).tint(Theme.accent)
+                Label {
+                    Text("Keeping these recordings lets us recreate your voice if needed. You can delete them together with your voice at any time.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                } icon: { Image(systemName: "lock.fill").font(.footnote).foregroundStyle(Theme.glow) }
+                Label {
+                    Text("To prepare your voice and narrate stories, your recordings and story text are sent to Google. Processing may take place outside Europe.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                } icon: { Image(systemName: "globe").font(.footnote).foregroundStyle(Theme.glow) }
             } header: { Text("Your Voice") } footer: {
                 Text("Use a quiet room and your normal speaking voice. You will record a voice sample and a separate consent statement.")
             }
+            .listRowBackground(Theme.surface)
             .disabled(enrollment != nil)
+            if enrollment == nil {
+                Section {
+                    Button { begin() } label: { Label("Continue", systemImage: "arrow.right").labelStyle(TrailingIconLabelStyle()) }
+                        .buttonStyle(.storyProminent(fullWidth: true))
+                        .disabled(!confirmsOwnVoice || !retentionAccepted || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || working)
+                }
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+            }
             if let enrollment {
                 Section {
                     Text("Speak naturally for 10–30 seconds. Keep the microphone at a comfortable distance and avoid music or other voices.")
-                    Button(referenceURL == nil ? "Record Voice Sample" : "Record Voice Sample Again", systemImage: "mic") {
+                        .font(.subheadline).foregroundStyle(.secondary)
+                    takeRow(ready: referenceURL != nil, readyTitle: "Voice sample ready",
+                            title: referenceURL == nil ? "Record Voice Sample" : "Record Voice Sample Again") {
                         AppLog.debug("Voice reference recording requested", category: "cloud_narration", metadata: ["replacing_take": .bool(referenceURL != nil)])
                         recording = .reference
                     }
-                    if referenceURL != nil { Label("Voice sample ready", systemImage: "checkmark.circle") }
                 } header: { Text("1. Voice Sample") }
+                .listRowBackground(Theme.surface)
                 Section {
-                    Text(enrollment.consentStatement).textSelection(.enabled)
-                        .accessibilityIdentifier("voice-consent-statement")
-                    Button(consentURL == nil ? "Record Consent Statement" : "Record Consent Again", systemImage: "mic") {
+                    HStack(alignment: .top, spacing: 12) {
+                        Capsule().fill(Theme.glow).frame(width: 3).accessibilityHidden(true)
+                        Text(enrollment.consentStatement).storyFont(.body).italic().lineSpacing(4).foregroundStyle(Theme.ink)
+                            .textSelection(.enabled)
+                            .accessibilityIdentifier("voice-consent-statement")
+                    }
+                    .padding(.vertical, 6)
+                    takeRow(ready: consentURL != nil, readyTitle: "Consent recording ready",
+                            title: consentURL == nil ? "Record Consent Statement" : "Record Consent Again") {
                         AppLog.debug("Voice consent recording requested", category: "cloud_narration", metadata: ["replacing_take": .bool(consentURL != nil)])
                         recording = .consent
                     }
-                    if consentURL != nil { Label("Consent recording ready", systemImage: "checkmark.circle") }
                 } header: { Text("2. Your Consent") } footer: {
                     Text("Read this statement exactly as shown. Record it separately from your voice sample.")
                 }
+                .listRowBackground(Theme.surface)
                 Section {
-                    Button("Create My Voice", systemImage: "waveform.badge.plus") { upload(enrollment) }
-                        .disabled(referenceURL == nil || consentURL == nil || working || cloud.userID == nil)
-                        .accessibilityIdentifier("create-private-voice")
-                    Text("Your recordings will be uploaded securely to create a reusable voice. You can delete your voice and its original samples from Your Voices.").font(.footnote).foregroundStyle(.secondary)
-                    Button("Start Again", role: .destructive) { restart() }.disabled(working)
+                    VStack(spacing: 12) {
+                        Button("Create My Voice", systemImage: "waveform.badge.plus") { upload(enrollment) }
+                            .buttonStyle(.storyProminent(fullWidth: true))
+                            .disabled(referenceURL == nil || consentURL == nil || working || cloud.userID == nil)
+                            .accessibilityIdentifier("create-private-voice")
+                        Text("Your recordings will be uploaded securely to create a reusable voice. You can delete your voice and its original samples from Your Voices.")
+                            .font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                        Button("Start Again", role: .destructive) { restart() }
+                            .font(.subheadline.weight(.semibold)).frame(minHeight: 44)
+                            .disabled(working)
+                    }
                 }
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
             }
-            if working { ProgressView("Preparing your voice…") }
-            if let message { Text(message).foregroundStyle(.secondary) }
+            if working {
+                Section {
+                    HStack(spacing: 14) {
+                        ProgressView().tint(Theme.glow)
+                        Text("Preparing your voice…").font(.subheadline).foregroundStyle(.secondary)
+                    }
+                }
+                .listRowBackground(Theme.surface)
+            }
+            if let message {
+                Section { NoteCard(systemImage: "info.circle.fill", text: Text(message)) }
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+            }
         }
         .storyFormStyle().disabled(working)
         .navigationTitle("Add Your Voice").navigationBarTitleDisplayMode(.inline)
@@ -92,6 +136,21 @@ struct VoiceEnrollmentView: View {
             let urls = [referenceURL, consentURL].compactMap { $0 }
             Task { await VoiceEnrollmentAudio.shared.remove(urls) }
         }
+    }
+
+    /// A recording step: a capsule button to record, and a check once a take is kept.
+    private func takeRow(ready: Bool, readyTitle: LocalizedStringKey, title: LocalizedStringKey, action: @escaping () -> Void) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if ready {
+                Label(readyTitle, systemImage: "checkmark.circle.fill").font(.subheadline.weight(.semibold)).foregroundStyle(Theme.ready)
+            }
+            if ready {
+                Button(title, systemImage: "mic.fill", action: action).buttonStyle(.storySoft(fullWidth: true)).controlSize(.small)
+            } else {
+                Button(title, systemImage: "mic.fill", action: action).buttonStyle(.storyRecord).controlSize(.small)
+            }
+        }
+        .padding(.vertical, 4)
     }
 
     private var referenceScript: String {

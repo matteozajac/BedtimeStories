@@ -3,6 +3,7 @@ import SwiftUI
 
 struct YourVoicesView: View {
     @Environment(CloudNarrationModel.self) private var cloud
+    @Environment(\.colorScheme) private var colorScheme
     @State private var enrolling = false
     @State private var deletingVoice: VoiceProfile?
     @State private var deleteAccount = false
@@ -21,50 +22,117 @@ struct YourVoicesView: View {
             if cloud.isConfigured, cloud.isEnabled, cloud.userID != nil {
                 Section {
                     ForEach(cloud.voices.filter { $0.status != "deleted" }) { voice in
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Label(voice.displayName, systemImage: "person.wave.2")
-                                Spacer()
-                                Text(status(voice.status)).font(.caption).foregroundStyle(.secondary)
+                        VStack(alignment: .leading, spacing: 14) {
+                            HStack(spacing: 14) {
+                                VoiceAvatar()
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text(voice.displayName).storyFont(.headline, weight: .semibold).foregroundStyle(Theme.ink)
+                                    VoiceStatusPill(status: voice.status)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                Menu {
+                                    Button("Delete Voice", systemImage: "trash", role: .destructive) { deletingVoice = voice }
+                                        .disabled(cloud.isWorking || voice.status == "deleting")
+                                } label: {
+                                    Image(systemName: "ellipsis").font(.body.weight(.semibold)).foregroundStyle(.secondary)
+                                        .frame(width: 44, height: 44).contentShape(.rect)
+                                }
+                                .accessibilityLabel(String(localized: "Voice options"))
                             }
-                            if voice.status == "processing" { ProgressView("Preparing your voice…") }
+                            if voice.status == "processing" {
+                                HStack(spacing: 12) {
+                                    ProgressView().tint(Theme.glow)
+                                    Text("Preparing your voice…").font(.subheadline).foregroundStyle(.secondary)
+                                }
+                            }
                             if voice.status == "failed" { Text("This voice could not be prepared. Delete it and record a new sample.").font(.footnote).foregroundStyle(.secondary) }
-                            if voice.status == "ready" || voice.status == "awaitingApproval" {
-                                Button("Preview Voice", systemImage: "play.circle") { audition(voice) }
-                                    .disabled(cloud.isWorking || previewLoading || preview.loading)
-                            }
                             if voice.status == "awaitingApproval" {
                                 Text("Listen to a preview, then choose whether to keep this voice.").font(.footnote).foregroundStyle(.secondary)
-                                Button("Use This Voice", systemImage: "checkmark.circle") {
-                                    Task { do { try await cloud.approveVoice(profileID: voice.id) } catch { reportFailure("Voice approval failed", error: error) } }
-                                }.disabled(auditionedVoiceID != voice.id || cloud.isWorking)
                             }
-                            Button("Delete Voice", systemImage: "trash", role: .destructive) { deletingVoice = voice }
-                                .disabled(cloud.isWorking || voice.status == "deleting")
-                        }.padding(.vertical, 4)
+                            if voice.status == "ready" || voice.status == "awaitingApproval" {
+                                let reviewing = voice.status == "awaitingApproval"
+                                VStack(alignment: .leading, spacing: 10) {
+                                    Button("Preview Voice", systemImage: "play.fill") { audition(voice) }
+                                        .buttonStyle(.storySoft(fullWidth: reviewing))
+                                        .disabled(cloud.isWorking || previewLoading || preview.loading)
+                                    if reviewing {
+                                        Button("Use This Voice", systemImage: "checkmark") {
+                                            Task { do { try await cloud.approveVoice(profileID: voice.id) } catch { reportFailure("Voice approval failed", error: error) } }
+                                        }
+                                        .buttonStyle(.storyProminent(fullWidth: true))
+                                        .disabled(auditionedVoiceID != voice.id || cloud.isWorking)
+                                    }
+                                }
+                                .controlSize(.small)
+                            }
+                        }
+                        .padding(.vertical, 8)
                     }
-                    if cloud.voices.isEmpty { Text("Save your voice once, then use it to narrate your stories.").foregroundStyle(.secondary) }
+                    if cloud.voices.isEmpty {
+                        Label {
+                            Text("Save your voice once, then use it to narrate your stories.").foregroundStyle(.secondary)
+                        } icon: { IconTile(systemName: "mic.fill", color: Theme.glow, size: 34) }
+                        .padding(.vertical, 4)
+                    }
+                } header: { Text("Your Voices") } footer: {
+                    Text("Record only your own voice. Your original samples stay private and are never included when you share a book.")
+                }
+                .listRowBackground(Theme.surface)
+                Section {
                     Button("Add Your Voice", systemImage: "mic.badge.plus") {
                         AppLog.debug("Add private voice requested", category: "cloud_narration")
                         enrolling = true
                     }
-                        .disabled(cloud.isWorking)
-                        .accessibilityIdentifier("add-private-voice")
-                } header: { Text("Your Voices") } footer: {
-                    Text("Record only your own voice. Your original samples stay private and are never included when you share a book.")
+                    .buttonStyle(.storyProminent(fullWidth: true))
+                    .disabled(cloud.isWorking)
+                    .accessibilityIdentifier("add-private-voice")
                 }
-                if previewLoading { ProgressView("Creating your voice preview…") }
-                if preview.playingURL != nil { Button("Stop Preview", systemImage: "stop.circle", action: preview.stop) }
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+                if previewLoading || preview.playingURL != nil {
+                    Section {
+                        if previewLoading {
+                            HStack(spacing: 14) {
+                                ProgressView().tint(Theme.glow)
+                                Text("Creating your voice preview…").font(.subheadline).foregroundStyle(.secondary)
+                            }
+                        }
+                        if preview.playingURL != nil {
+                            HStack(spacing: 14) {
+                                Image(systemName: "waveform").font(.title3.weight(.semibold)).foregroundStyle(Theme.accent)
+                                    .symbolEffect(.variableColor.iterative).accessibilityHidden(true)
+                                Button("Stop Preview", systemImage: "stop.fill", action: preview.stop)
+                                    .buttonStyle(.storySoft).controlSize(.small)
+                            }
+                        }
+                    }
+                    .listRowBackground(Theme.surface)
+                }
                 Section {
-                    Button("Sign Out") { cloud.signOut() }.disabled(cloud.isWorking)
-                    Text("Confirm with Apple before deleting your voice account.").font(.footnote).foregroundStyle(.secondary)
-                    SignInWithAppleButton(.continue, onRequest: cloud.prepareAppleSignIn, onCompletion: cloud.handleAppleSignIn)
-                        .frame(minHeight: 50).clipShape(.rect(cornerRadius: 10)).disabled(cloud.isWorking)
-                        .accessibilityLabel("Confirm with Apple")
-                    Button("Delete Voice Account", role: .destructive) { deleteAccount = true }.disabled(cloud.isWorking)
+                    Button { cloud.signOut() } label: {
+                        Label { Text("Sign Out").foregroundStyle(Theme.accent) } icon: { IconTile(systemName: "rectangle.portrait.and.arrow.right", size: 30) }
+                    }
+                    .disabled(cloud.isWorking)
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Confirm with Apple before deleting your voice account.").font(.footnote).foregroundStyle(.secondary)
+                        SignInWithAppleButton(.continue, onRequest: cloud.prepareAppleSignIn, onCompletion: cloud.handleAppleSignIn)
+                            .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
+                            .frame(height: 50).clipShape(.capsule).disabled(cloud.isWorking)
+                            .accessibilityLabel("Confirm with Apple")
+                    }
+                    .padding(.vertical, 6)
+                    Button(role: .destructive) { deleteAccount = true } label: {
+                        Label { Text("Delete Voice Account") } icon: { IconTile(systemName: "trash.fill", color: Theme.recording, size: 30) }
+                    }
+                    .disabled(cloud.isWorking)
                 } footer: { Text("Books you have already saved in your library remain available after signing out.") }
+                .listRowBackground(Theme.surface)
             }
-            if let message = message ?? cloud.message { Text(message).font(.footnote).foregroundStyle(.secondary) }
+            if let message = message ?? cloud.message {
+                Section { NoteCard(systemImage: "info.circle.fill", text: Text(message)) }
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+            }
         }
         .storyFormStyle()
         .navigationTitle("Your Voices").navigationBarTitleDisplayMode(.inline)
@@ -94,17 +162,6 @@ struct YourVoicesView: View {
         .onDisappear {
             AppLog.trace("Private voices screen closed", category: "cloud_narration", metadata: ["preview_pending": .bool(previewLoading)])
             active = false; operation?.cancel(); previewLoading = false; preview.stop()
-        }
-    }
-
-    private func status(_ value: String) -> String {
-        switch value {
-        case "ready": String(localized: "Ready")
-        case "processing": String(localized: "Preparing")
-        case "awaitingApproval": String(localized: "Review Your Voice")
-        case "deleting": String(localized: "Deleting")
-        case "failed": String(localized: "Try Again")
-        default: String(localized: "Unavailable")
         }
     }
 

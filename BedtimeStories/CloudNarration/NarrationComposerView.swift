@@ -27,48 +27,98 @@ struct NarrationComposerView: View {
             CloudAccountView()
             if cloud.isConfigured, cloud.isEnabled, cloud.userID != nil {
                 Section {
-                    Picker("Voice", selection: $preferences.voiceID) {
+                    Picker(selection: $preferences.voiceID) {
                         Text("Choose Your Voice").tag("")
                         ForEach(cloud.voices.filter { $0.status == "ready" }) { voice in Text(voice.displayName).tag(voice.id) }
+                    } label: {
+                        Label { Text("Voice").foregroundStyle(Theme.ink) } icon: { IconTile(systemName: "person.wave.2.fill", size: 30) }
                     }
-                    NavigationLink("Manage Your Voices") { YourVoicesView() }
-                    Picker("Book Style", selection: $preferences.defaultStyle) {
-                        ForEach(NarrationStyle.allCases, id: \.rawValue) { style in Text(style.title).tag(style) }
+                    NavigationLink { YourVoicesView() } label: {
+                        Label { Text("Manage Your Voices").foregroundStyle(Theme.ink) } icon: { IconTile(systemName: "slider.horizontal.3", size: 30) }
                     }
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Book Style").foregroundStyle(Theme.ink)
+                        FlowLayout(spacing: 8) {
+                            ForEach(NarrationStyle.allCases) { style in
+                                Button { preferences.defaultStyle = style } label: {
+                                    NarrationStyleChip(title: style.title, style: style, selected: preferences.defaultStyle == style)
+                                }
+                                .buttonStyle(.pressable)
+                                .accessibilityAddTraits(preferences.defaultStyle == style ? .isSelected : [])
+                            }
+                        }
+                    }
+                    .padding(.vertical, 6)
                 } header: { Text("Narration") } footer: {
                     Text("Choose a feeling for the whole book, then adjust individual paragraphs below. Your story’s words stay the same.")
                 }
+                .listRowBackground(Theme.surface)
                 Section("Paragraph Styles") {
-                    ForEach(chapters) { chapter in
+                    ForEach(Array(chapters.enumerated()), id: \.element.id) { index, chapter in
                         NavigationLink {
                             NarrationParagraphStyleView(chapter: chapter, defaultStyle: preferences.defaultStyle,
                                 overrides: Binding(get: { preferences.styleOverrides[chapter.id] ?? [:] }, set: { preferences.styleOverrides[chapter.id] = $0 }))
                         } label: {
-                            VStack(alignment: .leading) {
-                                Text(chapter.title.isEmpty ? String(localized: "Untitled Chapter") : chapter.title)
-                                Text("\(NarrationParagraphStyleView.paragraphs(chapter).count) paragraphs").font(.caption).foregroundStyle(.secondary)
+                            HStack(spacing: 14) {
+                                ChapterNumber(number: (editor.draft.chapters.firstIndex { $0.id == chapter.id } ?? index) + 1)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(chapter.title.isEmpty ? String(localized: "Untitled Chapter") : chapter.title)
+                                        .storyFont(.headline, weight: .semibold).foregroundStyle(Theme.ink)
+                                    Text("\(NarrationParagraphStyleView.paragraphs(chapter).count) paragraphs").font(.caption).foregroundStyle(.secondary)
+                                }
                             }
+                            .padding(.vertical, 4)
                         }
                     }
                 }
+                .listRowBackground(Theme.surface)
                 Section {
-                    Button("Preview Opening", systemImage: "play.circle") { start(previewOnly: true) }
-                        .disabled(cannotCreate)
-                    Button("Create Book Narration", systemImage: "waveform") { start(previewOnly: false) }
-                        .disabled(cannotCreate)
-                        .accessibilityIdentifier("create-book-narration")
+                    VStack(spacing: 12) {
+                        Button("Create Book Narration", systemImage: "waveform") { start(previewOnly: false) }
+                            .buttonStyle(.storyProminent(fullWidth: true))
+                            .disabled(cannotCreate)
+                            .accessibilityIdentifier("create-book-narration")
+                        Button("Preview Opening", systemImage: "play.fill") { start(previewOnly: true) }
+                            .buttonStyle(.storySoft(fullWidth: true))
+                            .disabled(cannotCreate)
+                    }
                 } footer: {
                     Text("Creation continues when you close this screen. Listen and choose Use Narration before it changes your draft. Saving the book adds the audio to your library.")
+                        .padding(.top, 8)
                 }
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
                 if !jobs.isEmpty {
                     Section("Recent Narration") {
                         ForEach(jobs) { job in jobRow(job) }
                     }
+                    .listRowBackground(Theme.surface)
                 }
-                if preview.playingURL != nil { Button("Stop Preview", systemImage: "stop.circle", action: preview.stop) }
-                if working { ProgressView("Preparing narration…") }
+                if preview.playingURL != nil || working {
+                    Section {
+                        if preview.playingURL != nil {
+                            HStack(spacing: 14) {
+                                Image(systemName: "waveform").font(.title3.weight(.semibold)).foregroundStyle(Theme.accent)
+                                    .symbolEffect(.variableColor.iterative).accessibilityHidden(true)
+                                Button("Stop Preview", systemImage: "stop.fill", action: preview.stop)
+                                    .buttonStyle(.storySoft).controlSize(.small)
+                            }
+                        }
+                        if working {
+                            HStack(spacing: 14) {
+                                ProgressView().tint(Theme.glow)
+                                Text("Preparing narration…").font(.subheadline).foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    .listRowBackground(Theme.surface)
+                }
             }
-            if let message = message ?? cloud.message ?? preview.message { Text(message).foregroundStyle(.secondary).font(.footnote) }
+            if let message = message ?? cloud.message ?? preview.message {
+                Section { NoteCard(systemImage: "info.circle.fill", text: Text(message)) }
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+            }
         }
         .storyFormStyle()
         .navigationTitle("Create Narration").navigationBarTitleDisplayMode(.inline)
@@ -92,10 +142,19 @@ struct NarrationComposerView: View {
     }
 
     @ViewBuilder private func jobRow(_ job: NarrationJob) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(job.preview ? "Opening Preview" : "Book Narration").font(.headline)
-            if job.state == "queued" || job.state == "processing" {
-                ProgressView(value: min(1, max(0, job.progress))) { Text(job.state == "queued" ? "Waiting to create narration…" : "Creating narration…") }
+        let expired = job.state == "expired" || job.expiresAt <= Date().timeIntervalSince1970
+        let active = job.state == "queued" || job.state == "processing"
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 14) {
+                IconTile(systemName: job.preview ? "play.circle.fill" : "waveform",
+                         color: active ? Theme.glow : job.state == "ready" && !expired ? Theme.accent : .secondary, size: 40)
+                Text(job.preview ? "Opening Preview" : "Book Narration").storyFont(.headline, weight: .semibold).foregroundStyle(Theme.ink)
+            }
+            if active {
+                ProgressView(value: min(1, max(0, job.progress))) {
+                    Text(job.state == "queued" ? "Waiting to create narration…" : "Creating narration…").font(.subheadline).foregroundStyle(.secondary)
+                }
+                .tint(Theme.glow)
                 Button("Cancel Creation", role: .cancel) {
                     Task {
                         do { try await cloud.cancel(jobID: job.id) }
@@ -104,23 +163,32 @@ struct NarrationComposerView: View {
                             if !(error is CancellationError) { message = error.localizedDescription }
                         }
                     }
-                }.disabled(working || cloud.isWorking)
-            } else if job.state == "ready", job.expiresAt > Date().timeIntervalSince1970 {
-                Button("Listen to Narration", systemImage: "play.circle") { listen(job) }.disabled(working)
-                if !job.preview {
-                    Button("Use Narration", systemImage: "checkmark.circle") { accepting = job }
-                        .disabled(working || job.snapshotHash != currentHash)
-                    if job.snapshotHash != currentHash { Text("The text or narration settings have changed. Create a new narration to match them.").font(.footnote).foregroundStyle(.secondary) }
                 }
+                .font(.subheadline.weight(.semibold)).buttonStyle(.borderless)
+                .disabled(working || cloud.isWorking)
+            } else if job.state == "ready", !expired {
+                VStack(alignment: .leading, spacing: 10) {
+                    Button("Listen to Narration", systemImage: "play.fill") { listen(job) }
+                        .buttonStyle(.storySoft(fullWidth: !job.preview))
+                        .disabled(working)
+                    if !job.preview {
+                        Button("Use Narration", systemImage: "checkmark") { accepting = job }
+                            .buttonStyle(.storyProminent(fullWidth: true))
+                            .disabled(working || job.snapshotHash != currentHash)
+                    }
+                }
+                .controlSize(.small)
+                if !job.preview && job.snapshotHash != currentHash {
+                    Text("The text or narration settings have changed. Create a new narration to match them.").font(.footnote).foregroundStyle(.secondary)
+                }
+            } else if expired {
+                Text("This narration has expired. Create it again to continue.").font(.footnote).foregroundStyle(.secondary)
             } else {
-                if job.state == "expired" || job.expiresAt <= Date().timeIntervalSince1970 {
-                    Text("This narration has expired. Create it again to continue.").font(.footnote).foregroundStyle(.secondary)
-                } else {
-                    Text(job.state == "cancelled" ? "Creation cancelled. Your book is unchanged." : "Narration could not be completed. Your book is unchanged; try again.")
-                        .font(.footnote).foregroundStyle(.secondary)
-                }
+                Text(job.state == "cancelled" ? "Creation cancelled. Your book is unchanged." : "Narration could not be completed. Your book is unchanged; try again.")
+                    .font(.footnote).foregroundStyle(.secondary)
             }
-        }.padding(.vertical, 4)
+        }
+        .padding(.vertical, 8)
     }
 
     private func loadPreferences() {

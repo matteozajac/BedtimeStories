@@ -1,23 +1,26 @@
 import SwiftUI
 
 /// A large, friendly capsule for the main action on a screen.
+/// Both story button styles shrink for `.controlSize(.small)`, for actions inside list rows.
 struct StoryProminentButtonStyle: ButtonStyle {
     var fullWidth = false
     var color = Theme.accent
     var labelColor = Theme.onAccent
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.controlSize) private var controlSize
 
     func makeBody(configuration: Configuration) -> some View {
+        let compact = controlSize <= .small
         configuration.label
-            .font(.headline)
+            .font(compact ? .subheadline.weight(.semibold) : .headline)
             .foregroundStyle(labelColor)
-            .padding(.horizontal, 26)
-            .frame(maxWidth: fullWidth ? .infinity : nil, minHeight: 56)
+            .padding(.horizontal, compact ? 16 : 26)
+            .frame(maxWidth: fullWidth ? .infinity : nil, minHeight: compact ? 40 : 56)
             .background {
                 Capsule().fill(color)
                     .overlay(Capsule().fill(LinearGradient(colors: [.white.opacity(0.18), .clear], startPoint: .top, endPoint: .center)))
             }
-            .shadow(color: color.opacity(isEnabled ? 0.28 : 0), radius: 14, y: 6)
+            .shadow(color: color.opacity(isEnabled ? 0.28 : 0), radius: compact ? 8 : 14, y: compact ? 3 : 6)
             .contentShape(.capsule)
             .scaleEffect(configuration.isPressed ? 0.96 : 1)
             .opacity(isEnabled ? 1 : 0.45)
@@ -29,13 +32,15 @@ struct StoryProminentButtonStyle: ButtonStyle {
 struct StorySoftButtonStyle: ButtonStyle {
     var fullWidth = false
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.controlSize) private var controlSize
 
     func makeBody(configuration: Configuration) -> some View {
+        let compact = controlSize <= .small
         configuration.label
-            .font(.headline)
+            .font(compact ? .subheadline.weight(.semibold) : .headline)
             .foregroundStyle(Theme.accent)
-            .padding(.horizontal, 24)
-            .frame(maxWidth: fullWidth ? .infinity : nil, minHeight: 56)
+            .padding(.horizontal, compact ? 16 : 24)
+            .frame(maxWidth: fullWidth ? .infinity : nil, minHeight: compact ? 40 : 56)
             .background(Theme.accentSoft, in: .capsule)
             .overlay(Capsule().fill(Theme.accent.opacity(configuration.isPressed ? 0.08 : 0)))
             .contentShape(.capsule)
@@ -90,6 +95,37 @@ extension View {
         self.padding(padding)
             .background(Theme.surface, in: .rect(cornerRadius: cornerRadius))
             .overlay(RoundedRectangle(cornerRadius: cornerRadius).strokeBorder(Theme.surfaceStroke))
+    }
+}
+
+/// A small night sky behind special features, like creating with Apple Intelligence or your voice.
+struct NightCardBackground: View {
+    var cornerRadius: CGFloat = 24
+    var seed: UInt64 = 0x1DEA
+
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: [Color(hex: 0x3A3478), Theme.nightBottom], startPoint: .topLeading, endPoint: .bottomTrailing)
+            Starfield(seed: seed, color: Theme.moonlight, intensity: 0.8)
+        }
+        .clipShape(.rect(cornerRadius: cornerRadius))
+        .accessibilityHidden(true)
+    }
+}
+
+/// A tinted capsule showing a short status, like "Ready" or "Preparing".
+struct StatusPill: View {
+    let title: String
+    let systemImage: String
+    var color: Color = Theme.accent
+
+    var body: some View {
+        Label(title, systemImage: systemImage)
+            .labelStyle(CompactLabelStyle())
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(color)
+            .padding(.horizontal, 10).padding(.vertical, 5)
+            .background(color.opacity(0.14), in: .capsule)
     }
 }
 

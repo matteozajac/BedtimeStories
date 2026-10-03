@@ -142,11 +142,7 @@ private struct CreatorOption: View {
             .padding(18)
             .background {
                 if magical {
-                    ZStack {
-                        LinearGradient(colors: [Color(hex: 0x3A3478), Theme.nightBottom], startPoint: .topLeading, endPoint: .bottomTrailing)
-                        Starfield(seed: 0x1DEA, color: Theme.moonlight, intensity: 0.8)
-                    }
-                    .clipShape(.rect(cornerRadius: 24))
+                    NightCardBackground()
                 } else {
                     RoundedRectangle(cornerRadius: 24).fill(Theme.surface)
                         .overlay(RoundedRectangle(cornerRadius: 24).strokeBorder(Theme.surfaceStroke))

@@ -1745,6 +1745,22 @@
         }
       }
     },
+    "Paragraph %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paragraph %lld"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Akapit %lld"
+          }
+        }
+      }
+    },
     "Pause": {
       "localizations": {
         "en": {
@@ -3037,6 +3053,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wersja"
+          }
+        }
+      }
+    },
+    "Voice options": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voice options"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcje głosu"
           }
         }
       }

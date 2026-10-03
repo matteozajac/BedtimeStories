@@ -18,6 +18,8 @@ enum Theme {
     static let surfaceStroke = Color(light: UIColor(hex: 0x5B4B9A, alpha: 0.08), dark: UIColor(white: 1, alpha: 0.08))
     static let shadow = Color(light: UIColor(hex: 0x2B2440, alpha: 0.16), dark: UIColor(white: 0, alpha: 0.45))
     static let recording = Color(light: 0xD9534F, dark: 0xFF7A70)
+    /// A calm sage for finished, ready-to-use states.
+    static let ready = Color(light: 0x3E8E6A, dark: 0x8FD3AE)
 
     /// The night sky used behind the player and the welcome screen in every appearance.
     static let nightTop = Color(hex: 0x1D2042)

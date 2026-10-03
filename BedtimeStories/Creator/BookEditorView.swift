@@ -68,8 +68,10 @@ struct BookEditorView: View {
             .listRowBackground(Theme.surface)
             if cloud.isConfigured, cloud.isEnabled {
                 Section {
-                    Button("Create Narration with Your Voice", systemImage: "waveform") { preview.stop(); creatingNarration = true }
-                        .disabled(editor.draft.wordCount == 0)
+                    Button { preview.stop(); creatingNarration = true } label: {
+                        Label { Text("Create Narration with Your Voice") } icon: { IconTile(systemName: "waveform", size: 30) }
+                    }
+                    .disabled(editor.draft.wordCount == 0)
                 } header: { Text("Your Voice") }
                 .listRowBackground(Theme.surface)
             }
