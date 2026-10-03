@@ -174,3 +174,109 @@ test("a late enrollment dispatch cannot erase a newer voice deletion outbox", as
   assert.equal((await profile.get()).get("dispatchPending"), false);
   assert.ok(tasks.some((task) => task.uid === "outboxDeletionRace" && task.kind === "deleteVoice"));
 });
+
+test("Story service: Apple auth, independent owner quotas and concurrent lease fence", async () => {
+  const { StoryGenerationService } = await import("../story");
+  let finish!: (value: unknown) => void, started!: () => void;
+  const pending = new Promise<unknown>((resolve) => { finish = resolve; });
+  const ready = new Promise<void>((resolve) => { started = resolve; });
+  let calls = 0;
+  const provider = { generate: async (input: { description: string }) => { calls++; if (input.description === "held") { started(); return pending; } return storyBook(); } };
+  const service = new StoryGenerationService(db, provider, { enabled: () => true, now: () => now });
+  await assert.rejects(service.generate(undefined, storyRequest()), { code: "unauthenticated" });
+  const a = service.generate(principal("storyA"), { ...storyRequest(), description: "held" });
+  await ready;
+  await assert.rejects(service.generate(principal("storyA"), storyRequest()), { code: "resource-exhausted" });
+  assert.equal(calls, 1);
+  assert.equal((await db.doc("privateAccounts/storyA").get()).get("storyUsage.count"), 1);
+  assert.equal((await service.generate(principal("storyB"), storyRequest())).title, "Lis i księżyc");
+  finish(storyBook()); await a;
+  assert.equal((await db.doc("privateAccounts/storyA").get()).get("storyGeneration"), undefined);
+  await db.doc("privateAccounts/storyB").set({ storyUsage: { day: new Date(now).toISOString().slice(0, 10), count: 10 }, limits: { day: "old", books: 3 } }, { merge: true });
+  await assert.rejects(service.generate(principal("storyB"), storyRequest()), { code: "resource-exhausted" });
+  const tomorrow = new StoryGenerationService(db, provider, { enabled: () => true, now: () => now + 86400000 });
+  await tomorrow.generate(principal("storyB"), storyRequest());
+  const account = await db.doc("privateAccounts/storyB").get();
+  assert.equal(account.get("storyUsage.count"), 1); assert.equal(account.get("limits.books"), 3);
+});
+
+test("Story service: deletion during inference rejects result without reviving account", async () => {
+  const { StoryGenerationService } = await import("../story");
+  let finish!: (value: unknown) => void, started!: () => void;
+  const pending = new Promise<unknown>((resolve) => { finish = resolve; });
+  const ready = new Promise<void>((resolve) => { started = resolve; });
+  const service = new StoryGenerationService(db, { generate: async () => { started(); return pending; } }, { enabled: () => true, now: () => now });
+  const result = service.generate(principal("storyDelete"), storyRequest());
+  await ready;
+  await api().deleteAccount(principal("storyDelete"), {});
+  finish(storyBook()); await assert.rejects(result, { code: "permission-denied" });
+  const account = await db.doc("privateAccounts/storyDelete").get();
+  assert.equal(account.get("state"), "deleting"); assert.equal(account.get("storyUsage"), undefined); assert.equal(account.get("storyGeneration"), undefined);
+});
+
+test("Story service: safe provider failure releases lease and incomplete output retries once", async () => {
+  const { StoryGenerationService } = await import("../story");
+  const failing = new StoryGenerationService(db, { generate: async () => { throw new Error("private provider details"); } }, { enabled: () => true, now: () => now });
+  await assert.rejects(failing.generate(principal("storyFailure"), storyRequest()), (error: unknown) => (error as { code: string; message: string }).code === "unavailable" && !(error as Error).message.includes("private"));
+  assert.equal((await db.doc("privateAccounts/storyFailure").get()).get("storyGeneration"), undefined);
+  const counts: (number | undefined)[] = [];
+  const contexts: unknown[] = [];
+  const retrying = new StoryGenerationService(db, { generate: async (_, previous, previousBook) => { counts.push(previous); contexts.push(previousBook); return counts.length === 1 ? { ...storyBook(), chapters: [{ title: "Noc", text: Array(60).fill("księżyc").join(" ") + "." }] } : storyBook(); } }, { enabled: () => true, now: () => now });
+  await retrying.generate(principal("storyFailure"), storyRequest());
+  assert.deepEqual(counts, [undefined, 60]);
+  assert.equal(contexts[0], undefined);
+  assert.equal((contexts[1] as { title: string }).title, "Lis i księżyc");
+  assert.equal((await db.doc("privateAccounts/storyFailure").get()).get("storyUsage.count"), 2);
+});
+
+function storyRequest() { return { description: "Lis wraca do domu.", language: "polish", readerAge: "3–5", readingMinutes: 1, wordsPerMinute: 80, consentVersion: "2026-10-04", cloudProcessingAccepted: true }; }
+function storyBook() { return { title: "Lis i księżyc", summary: "Lis wraca do domu.", chapters: [{ title: "Pod gwiazdami", text: Array(79).fill("księżyc").join(" ") + " zasnął." }], illustrationGuide: "An amber fox under stars." }; }
+
+test("Story service: an expired request cannot clear the replacement lease", async () => {
+  const { StoryGenerationService } = await import("../story");
+  let time = now, calls = 0;
+  let firstFinish!: (value: unknown) => void, secondFinish!: (value: unknown) => void;
+  let firstStart!: () => void, secondStart!: () => void;
+  const firstPending = new Promise<unknown>((r) => { firstFinish = r; });
+  const secondPending = new Promise<unknown>((r) => { secondFinish = r; });
+  const firstReady = new Promise<void>((r) => { firstStart = r; });
+  const secondReady = new Promise<void>((r) => { secondStart = r; });
+  const service = new StoryGenerationService(db, { generate: async () => { if (++calls === 1) { firstStart(); return firstPending; } secondStart(); return secondPending; } }, { enabled: () => true, now: () => time });
+  const first = service.generate(principal("storyExpired"), storyRequest()); await firstReady;
+  time += 421000;
+  const second = service.generate(principal("storyExpired"), storyRequest()); await secondReady;
+  const replacement = (await db.doc("privateAccounts/storyExpired").get()).get("storyGeneration.lease");
+  firstFinish(storyBook()); await assert.rejects(first, { code: "permission-denied" });
+  assert.equal((await db.doc("privateAccounts/storyExpired").get()).get("storyGeneration.lease"), replacement);
+  secondFinish(storyBook()); await second;
+  assert.equal((await db.doc("privateAccounts/storyExpired").get()).get("storyGeneration"), undefined);
+});
+
+test("Story service: near-complete long books receive one validated bounded scene repair", async () => {
+  const { StoryGenerationService } = await import("../story");
+  let calls = 0, repairs = 0;
+  const incomplete = { ...storyBook(), chapters: [{ title: "Pod gwiazdami", text: Array(899).fill("księżyc").join(" ") + " zasnął." }] };
+  const service = new StoryGenerationService(db, {
+    generate: async () => { calls++; return incomplete; },
+    supplement: async (_, book, missingWords) => {
+      repairs++; assert.equal(missingWords, 60);
+      return { ...book, chapters: book.chapters.map((chapter) => ({ ...chapter, text: chapter.text + " " + Array(179).fill("cisza").join(" ") + " zapadła." })) };
+    },
+  }, { enabled: () => true, now: () => now });
+  const result = await service.generate(principal("storyRepair"), { ...storyRequest(), readingMinutes: 15 });
+  assert.equal(calls, 2); assert.equal(repairs, 1); assert.equal(result.title, incomplete.title);
+  assert.equal((await db.doc("privateAccounts/storyRepair").get()).get("storyUsage.count"), 1);
+  assert.equal((await db.doc("privateAccounts/storyRepair").get()).get("storyGeneration"), undefined);
+});
+
+test("Story service: substantially incomplete books do not trigger an unbounded scene repair", async () => {
+  const { StoryGenerationService } = await import("../story");
+  let calls = 0, repairs = 0;
+  const short = { ...storyBook(), chapters: [{ title: "Pod gwiazdami", text: Array(499).fill("księżyc").join(" ") + " zasnął." }] };
+  const service = new StoryGenerationService(db, {
+    generate: async () => { calls++; return short; },
+    supplement: async () => { repairs++; return short; },
+  }, { enabled: () => true, now: () => now });
+  await assert.rejects(service.generate(principal("storyTooShort"), { ...storyRequest(), readingMinutes: 15 }), { code: "internal" });
+  assert.equal(calls, 2); assert.equal(repairs, 0);
+});

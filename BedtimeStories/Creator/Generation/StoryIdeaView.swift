@@ -1,6 +1,8 @@
+import AuthenticationServices
 import SwiftUI
 
 struct StoryIdeaView: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.scenePhase) private var phase
     @AppStorage("bookCreatorStoryIdea") private var description = ""
     @State private var language = StoryLanguage.preferred
@@ -10,13 +12,17 @@ struct StoryIdeaView: View {
     @State private var mode = StoryGenerationMode.onDevice
     @State private var generationID: UUID?
     @State private var model: StoryGenerationModel
+    @State private var cloudProcessingAccepted = false
+    private let cloud: CloudNarrationModel
     @State private var availability: String?
     @State private var lastAvailabilityState: String?
     @FocusState private var editingDescription: Bool
     let openDraft: (BookDraft) -> Void
 
-    init(store: BookDraftStore, openDraft: @escaping (BookDraft) -> Void) {
-        _model = State(initialValue: StoryGenerationModel(store: store))
+    init(store: BookDraftStore, cloud: CloudNarrationModel, openDraft: @escaping (BookDraft) -> Void) {
+        self.cloud = cloud
+        _mode = State(initialValue: StoryLanguage.preferred == .polish && cloud.isConfigured && cloud.isEnabled ? .gemini : .onDevice)
+        _model = State(initialValue: StoryGenerationModel(store: store, generator: StoryGenerator(cloud: cloud)))
         self.openDraft = openDraft
     }
 
@@ -58,7 +64,7 @@ struct StoryIdeaView: View {
                     .accessibilityIdentifier("story-reading-minutes")
                 Stepper("Reading pace: \(wordsPerMinute) words/minute", value: $wordsPerMinute, in: 80...180, step: 10)
                     .accessibilityIdentifier("story-reading-pace")
-                Text("About \(readingMinutes * wordsPerMinute) words for the whole book. Apple Intelligence chooses the chapter count; you can change it in the editor.")
+                Text("About \(readingMinutes * wordsPerMinute) words for the whole book. The story model chooses the chapter count; you can change it in the editor.")
                     .font(.footnote).foregroundStyle(.secondary)
             }
             .listRowBackground(Theme.surface)
@@ -71,6 +77,13 @@ struct StoryIdeaView: View {
                 if mode == .onDevice {
                     Label("Your description and story are processed on this device. No internet connection is needed once the model is ready.", systemImage: "iphone")
                         .font(.subheadline).foregroundStyle(.secondary)
+                } else if mode == .gemini {
+                    Label("Gemini writes stories in Polish and English through our server. An internet connection and Apple sign-in are required.", systemImage: "sparkles")
+                        .font(.subheadline).foregroundStyle(.secondary)
+                    Toggle("I agree to send my story idea to Gemini", isOn: $cloudProcessingAccepted)
+                        .accessibilityIdentifier("gemini-story-consent")
+                    Text("Your idea, reader age, language and reading time are sent through our server to Google Gemini. Processing may take place outside Europe. Our server does not save your idea or generated story. The finished draft is saved on this device. Avoid personal or sensitive details.")
+                        .font(.footnote).foregroundStyle(.secondary)
                 } else {
                     Label("Your description and story context are sent to Apple's Private Cloud Compute to create the book. An internet connection is required.", systemImage: "cloud")
                         .font(.subheadline).foregroundStyle(.secondary)
@@ -81,6 +94,19 @@ struct StoryIdeaView: View {
             } header: { Text("Processing") }
             .listRowBackground(Theme.surface)
             .disabled(model.working)
+
+            if mode == .gemini, cloud.isConfigured, cloud.isEnabled, cloud.userID == nil {
+                Section {
+                    Text("Sign in with Apple to create a story with Gemini.")
+                    SignInWithAppleButton(.signIn, onRequest: cloud.prepareAppleSignIn, onCompletion: cloud.handleAppleSignIn)
+                        .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
+                        .frame(height: 50).clipShape(.capsule)
+                        .disabled(cloud.isWorking)
+                        .accessibilityIdentifier("story-apple-sign-in")
+                    if let message = cloud.message { Text(message).foregroundStyle(.secondary) }
+                }
+                .listRowBackground(Theme.surface)
+            }
 
             if model.working {
                 Section {
@@ -99,7 +125,10 @@ struct StoryIdeaView: View {
                         generationID = nil
                     }
                         .accessibilityIdentifier("stop-story-generation")
-                } footer: { Text("The entire book is written together and checked before it is saved to Your Drafts.") }
+                } footer: {
+                    Text("The entire book is written together and checked before it is saved to Your Drafts.")
+                    if mode == .gemini { Text("Stop Creating stops waiting and leaves no draft. Gemini may finish processing an idea already sent; wait a few minutes before trying again.") }
+                }
                 .listRowBackground(Theme.surface)
             } else {
                 if let message = model.message {
@@ -122,10 +151,10 @@ struct StoryIdeaView: View {
                         generationID = UUID()
                     }
                     .buttonStyle(.storyProminent(fullWidth: true))
-                    .disabled(availability != nil || durationWarning != nil || description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || description.count > StoryGenerationRequest.maximumDescriptionLength)
+                    .disabled((mode == .gemini && !cloudProcessingAccepted) || availability != nil || durationWarning != nil || description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || description.count > StoryGenerationRequest.maximumDescriptionLength)
                     .accessibilityIdentifier("generate-story-draft")
                 } footer: {
-                    Text("Apple Intelligence creates the title and chapter text. Review the story before sharing it with a child, then add pictures and narration.")
+                    Text("Your chosen model creates the title and chapter text. Review the story before sharing it with a child, then add pictures and narration.")
                         .padding(.top, 8)
                 }
                 .listRowInsets(EdgeInsets())
@@ -142,6 +171,13 @@ struct StoryIdeaView: View {
         }
         .onDisappear { AppLog.trace("Story idea creator closed", category: "creator", metadata: ["generation_running": .bool(model.working)]) }
         .onChange(of: language) { refreshAvailability() }
+        .onChange(of: cloud.userID) {
+            cloudProcessingAccepted = false
+            generationID = nil
+            refreshAvailability()
+        }
+        .onChange(of: cloud.isConfigured) { refreshAvailability() }
+        .onChange(of: cloud.isEnabled) { refreshAvailability() }
         .onChange(of: mode) { refreshAvailability() }
         .onChange(of: readingMinutes) { _, value in
             AppLog.debug("Story reading time changed", category: "creator", metadata: ["reading_minutes": .integer(value)])
@@ -160,7 +196,7 @@ struct StoryIdeaView: View {
         }
         .task(id: generationID) {
             guard generationID != nil else { return }
-            let request = StoryGenerationRequest(description: description.trimmingCharacters(in: .whitespacesAndNewlines), language: language, readerAge: readerAge, readingMinutes: readingMinutes, wordsPerMinute: wordsPerMinute)
+            let request = StoryGenerationRequest(description: description.trimmingCharacters(in: .whitespacesAndNewlines), language: language, readerAge: readerAge, readingMinutes: readingMinutes, wordsPerMinute: wordsPerMinute, cloudProcessingAccepted: cloudProcessingAccepted)
             await model.generate(request, mode: mode)
             if model.completed, !Task.isCancelled, let draft = model.draft { openDraft(draft) }
             refreshAvailability()

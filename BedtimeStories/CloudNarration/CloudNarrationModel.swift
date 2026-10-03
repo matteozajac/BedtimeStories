@@ -392,6 +392,33 @@ final class CloudNarrationModel {
         }
     }
 
+    func generateStory(_ request: StoryGenerationRequest) async throws -> GeneratedStoryBook {
+        try request.validate(mode: .gemini)
+        if let reason = storyUnavailabilityReason { throw StoryGenerationFailure.unavailable(reason) }
+        let operation = CloudNarrationLogOperation(name: "generate_story")
+        do {
+            let data = try await call("generateStoryBook", payload: [
+                "description": request.description, "language": request.language.rawValue,
+                "readerAge": request.readerAge.rawValue, "readingMinutes": request.readingMinutes,
+                "wordsPerMinute": request.wordsPerMinute, "cloudProcessingAccepted": request.cloudProcessingAccepted,
+                "consentVersion": "2026-10-04"
+            ], parent: operation, timeout: 360)
+            try Task.checkCancellation()
+            return try JSONDecoder().decode(GeneratedStoryBook.self, from: JSONSerialization.data(withJSONObject: data))
+        } catch {
+            if ErrorSnapshot.isCancellation(error) || Task.isCancelled { throw CancellationError() }
+            if error is CloudNarrationFailureContext || error is StoryGenerationFailure { throw error }
+            let presentation: StoryGenerationFailure
+            switch error {
+            case CloudNarrationFailure.signInRequired: presentation = .geminiSignInRequired
+            case CloudNarrationFailure.accountChanged: presentation = .geminiAccountChanged
+            case CloudNarrationFailure.invalidResponse, is DecodingError: presentation = .geminiIncomplete
+            default: presentation = .geminiUnavailable
+            }
+            throw CloudNarrationFailureContext(presentation: presentation, underlyingLogError: ErrorSnapshot(error))
+        }
+    }
+
     private struct Session { let uid: String; let generation: UUID }
     private func currentSession() throws -> Session {
         guard isConfigured, isEnabled else { throw CloudNarrationFailure.unavailable }
@@ -404,20 +431,36 @@ final class CloudNarrationModel {
         try Task.checkCancellation()
     }
 
-    private func call(_ name: String, payload: [String: Any], parent: CloudNarrationLogOperation) async throws -> [String: Any] {
+    private func call(_ name: String, payload: [String: Any], parent: CloudNarrationLogOperation, timeout: TimeInterval = 90) async throws -> [String: Any] {
         let operation = CloudNarrationLogOperation(name: name)
-        let metadata = operation.metadata.merging(["parent_operation_id": .string(parent.id), "transport": .string("firebase_callable"), "attestation_required": .bool(true), "timeout_seconds": .integer(90)]) { _, new in new }
+        let metadata = operation.metadata.merging(["parent_operation_id": .string(parent.id), "transport": .string("firebase_callable"), "attestation_required": .bool(true), "timeout_seconds": .integer(Int(timeout))]) { _, new in new }
         logger.trace("Cloud callable \(name) preparation started", category: "cloud_narration", metadata: metadata)
         let session = try currentSession()
         guard let functions else { throw CloudNarrationFailure.unavailable }
         let callable = functions.httpsCallable(name, options: HTTPSCallableOptions(requireLimitedUseAppCheckTokens: true))
-        callable.timeoutInterval = 90
-        let result: HTTPSCallableResult
+        callable.timeoutInterval = timeout
+        let responseJSON: Data
         do {
             // Reconstitute a disconnected JSON value before transferring it to the SDK's concurrent API.
             let json = try JSONSerialization.data(withJSONObject: payload)
             logger.trace("Cloud callable \(name) dispatch started", category: "cloud_narration", metadata: metadata.merging(["payload_bytes": .integer(json.count)]) { _, new in new })
-            result = try await callable.call(JSONSerialization.jsonObject(with: json))
+            if name == "generateStoryBook" {
+                // The SDK's active fetch does not propagate task cancellation. Stop waiting
+                // immediately; its later completion cannot reach creator or account state.
+                responseJSON = try await CloudStoryResponse.wait { finish in
+                    do {
+                        callable.call(try JSONSerialization.jsonObject(with: json)) { result, error in
+                            if let error { finish(.failure(error)); return }
+                            guard let data = result?.data else { finish(.failure(CloudNarrationFailure.invalidResponse)); return }
+                            do { finish(.success(try JSONSerialization.data(withJSONObject: data))) }
+                            catch { finish(.failure(error)) }
+                        }
+                    } catch { finish(.failure(error)) }
+                }
+            } else {
+                let result = try await callable.call(JSONSerialization.jsonObject(with: json))
+                responseJSON = try JSONSerialization.data(withJSONObject: result.data)
+            }
         }
         catch {
             let evidence = ErrorSnapshot(error)
@@ -426,9 +469,26 @@ final class CloudNarrationModel {
             do { try validate(session) }
             catch {
                 if error is CancellationError { throw error }
+                if name == "generateStoryBook" { throw CloudNarrationFailureContext(presentation: StoryGenerationFailure.geminiAccountChanged, underlyingLogError: evidence) }
                 throw CloudNarrationFailureContext(presentation: error, underlyingLogError: evidence)
             }
             let code = (error as NSError).code
+            if name == "generateStoryBook" {
+                let details = (error as NSError).userInfo[FunctionsErrorDetailsKey] as? [String: Any]
+                let reason = details?["reason"] as? String
+                let presentation: StoryGenerationFailure
+                switch FunctionsErrorCode(rawValue: code) {
+                case .unauthenticated: presentation = .geminiSignInRequired
+                case .permissionDenied: presentation = .geminiAccountChanged
+                case .resourceExhausted: presentation = reason == "daily_limit" ? StoryGenerationFailure.geminiDailyLimit : StoryGenerationFailure.geminiBusy
+                case .failedPrecondition:
+                    presentation = reason == "refused" ? StoryGenerationFailure.refused : StoryGenerationFailure.geminiConsentRequired
+                case .invalidArgument: presentation = .invalidDuration
+                case .internal: presentation = .geminiIncomplete
+                default: presentation = .geminiUnavailable
+                }
+                throw CloudNarrationFailureContext(presentation: presentation, underlyingLogError: evidence)
+            }
             switch FunctionsErrorCode(rawValue: code) {
             case .unauthenticated: throw CloudNarrationFailureContext(presentation: CloudNarrationFailure.signInRequired, underlyingLogError: evidence)
             case .permissionDenied: throw CloudNarrationFailureContext(presentation: CloudNarrationFailure.permissionDenied, underlyingLogError: evidence)
@@ -441,7 +501,7 @@ final class CloudNarrationModel {
             }
         }
         try validate(session)
-        guard let data = result.data as? [String: Any] else { throw CloudNarrationFailure.invalidResponse }
+        guard let data = try JSONSerialization.jsonObject(with: responseJSON) as? [String: Any] else { throw CloudNarrationFailure.invalidResponse }
         logger.debug("Cloud callable \(name) completed", category: "cloud_narration", metadata: operation.metadata.merging(["parent_operation_id": .string(parent.id), "field_count": .integer(data.count)]) { _, new in new })
         return data
     }

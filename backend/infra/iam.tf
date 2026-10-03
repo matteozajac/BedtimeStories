@@ -103,3 +103,16 @@ resource "google_project_iam_member" "storage_rule_documents" {
   role    = "roles/firebaserules.firestoreServiceAgent"
   member  = "serviceAccount:${google_project_service_identity.storage_agent.email}"
 }
+
+# Story generation calls a fixed Vertex Gemini model directly from the API.
+resource "google_project_iam_custom_role" "story_generation" {
+  project     = var.project_id
+  role_id     = "bedtimeStoryGeneration"
+  title       = "BedtimeStories story generation"
+  permissions = ["aiplatform.endpoints.predict"]
+}
+resource "google_project_iam_member" "story_generation" {
+  project = var.project_id
+  role    = google_project_iam_custom_role.story_generation.name
+  member  = "serviceAccount:${google_service_account.app["voice-api"].email}"
+}

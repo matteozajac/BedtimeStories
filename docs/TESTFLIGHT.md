@@ -1,5 +1,41 @@
 # Internal TestFlight
 
+## 1.0 (15) — 4 October 2026
+
+Gemini story generation for Polish and English is processed and available to
+**Internal Testers**. Exact readback confirms **VALID / INTERNAL_ONLY /
+IN_BETA_TESTING**, complete effective group access and matching saved English
+What to Test notes.
+
+- Build/upload ID: `2afdbb22-8be2-4ce8-ad2d-f9e76d5f2cb4`.
+- App ID: `6818278413`; bundle `com.matteozajac.bedtimestories`; team `4TCJLR98Y5`.
+- Group: `20328e88-9f9c-4c47-be78-c33a809d1a71` (**Internal Testers**, explicit and all-build access).
+- English notes: `21a87ff5-876f-4f1e-a30f-7122b659f1b8`.
+- Minimum iOS/iPadOS, compatible Mac and Vision OS: 27.0.
+- IPA SHA256: `2b11de0be1aa5212107b4184dad6c63aa513e8232bea394f8bc3a2141aa292e9`.
+- Release input fingerprint: `49f873eb15085d44f1704b20d7e9925f08b2c08a2161d72243fc6f3fb6ee144b`; all 134 inputs matched through archive, export, upload, distribution and closeout.
+- Signed Internal archive/export passed strict signature, bundle/version/build, Firebase identity and entitlement checks. Production iCloud, Apple sign-in, App Attest and PCC entitlements remain. Export is Internal-only; profile `5abe4610-98c2-404b-89ee-2d87f303e113` expires 9 August 2027.
+
+Select **Gemini** in Create from an Idea, sign in with Apple and accept the
+processing disclosure. Ideas are sent through the authenticated Firebase
+function to Google; complete books open in the existing draft editor. Consent
+resets on account change. Polish initially selects Gemini in the enabled
+Internal build; Apple processing choices remain explicit. Stop Creating ends
+the wait immediately and ignores late responses. Existing editing, pictures,
+narration, library saving and sharing remain available.
+
+Validation: **59 optimized Internal app tests**, **9 core tests**, **6 Python
+authoring tests**, Local SDK isolation, **19 backend unit tests** and **18
+emulator tests** passed. Actual Gemini provider probes validated Polish and
+English, including a maximum-duration Polish request after bounded scene
+repair. [Deployment and validation receipt](GEMINI_STORY_GENERATION_DEPLOYMENT.md).
+
+The two existing tester records are INSTALLED; that does not establish
+installation of build 15. Physical Apple sign-in/App Attest, account switching
+and iCloud sync remain acceptance checks. No external beta or App Store review
+was submitted. Raw release evidence remains in ignored `.build/pti/1.0-15/`.
+[Open TestFlight](https://appstoreconnect.apple.com/apps/6818278413/testflight/ios).
+
 ## 1.0 (14) — 4 October 2026
 
 The narration-screen storybook redesign is processed and available to

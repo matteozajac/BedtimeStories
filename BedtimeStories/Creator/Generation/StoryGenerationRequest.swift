@@ -10,6 +10,7 @@ struct StoryGenerationRequest: Codable, Sendable {
     let readingMinutes: Int
     let wordsPerMinute: Int
     var previousWordCount: Int? = nil
+    var cloudProcessingAccepted = false
 
     var targetWords: Int { readingMinutes * wordsPerMinute }
     var minimumWords: Int { Int(Double(targetWords) * 0.8) }
@@ -29,6 +30,7 @@ struct StoryGenerationRequest: Codable, Sendable {
 
     func validate(mode: StoryGenerationMode) throws {
         try validate()
+        if mode == .gemini, !cloudProcessingAccepted { throw StoryGenerationFailure.geminiConsentRequired }
         if mode == .onDevice, targetWords > Self.localWordLimit { throw StoryGenerationFailure.localDurationTooLong }
     }
 

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct BookCreatorView: View {
+    @Environment(CloudNarrationModel.self) private var cloud
     @Environment(\.dismiss) private var dismiss
     @State private var drafts: [BookDraft] = []
     @State private var path = NavigationPath()
@@ -13,7 +14,7 @@ struct BookCreatorView: View {
         NavigationStack(path: $path) {
             List {
                 Section {
-                    CreatorOption(title: "Create from an Idea", subtitle: "Describe a story and Apple Intelligence writes it for you.", systemImage: "sparkles", magical: true) {
+                    CreatorOption(title: "Create from an Idea", subtitle: "Describe a story and choose Gemini or Apple Intelligence to write it.", systemImage: "sparkles", magical: true) {
                         path.append(BookCreatorRoute.storyIdea)
                     }
                     .accessibilityIdentifier("create-book-from-idea")
@@ -71,7 +72,7 @@ struct BookCreatorView: View {
             .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Close") { dismiss() } } }
             .navigationDestination(for: BookDraft.self) { BookEditorView(draft: $0, store: store) }
             .navigationDestination(for: BookCreatorRoute.self) { _ in
-                StoryIdeaView(store: store) { draft in
+                StoryIdeaView(store: store, cloud: cloud) { draft in
                     path = NavigationPath([draft])
                 }
             }

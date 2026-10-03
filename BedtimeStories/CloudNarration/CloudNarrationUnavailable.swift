@@ -18,6 +18,8 @@ final class CloudNarrationModel {
         AppLog.trace("Cloud narration configuration skipped", category: "cloud_narration", metadata: ["reason": .string("local_services")])
     }
 
+    func generateStory(_ request: StoryGenerationRequest) async throws -> GeneratedStoryBook { throw StoryGenerationFailure.geminiUnavailable }
+
     func prepareAppleSignIn(_ request: ASAuthorizationAppleIDRequest) { message = CloudNarrationFailure.unavailable.localizedDescription }
     func handleAppleSignIn(_ result: Result<ASAuthorization, Error>) { message = CloudNarrationFailure.unavailable.localizedDescription }
     func signOut() {}

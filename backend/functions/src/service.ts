@@ -264,7 +264,7 @@ export class CloudVoiceService {
     await this.transaction(async (tx) => {
       const account = await tx.get(this.account(uid));
       if (account.get("state") === "deleted") return;
-      tx.set(this.account(uid), { state: "deleting", deletionRequestedAt: Timestamp.fromMillis(this.now()), taskKind: "deleteAccount", dispatchPending: true }, { merge: true });
+      tx.set(this.account(uid), { state: "deleting", storyGeneration: FieldValue.delete(), storyUsage: FieldValue.delete(), deletionRequestedAt: Timestamp.fromMillis(this.now()), taskKind: "deleteAccount", dispatchPending: true }, { merge: true });
       // Every API and worker checks this tombstone before reading/writing user data.
       tx.set(this.db.doc(`users/${uid}`), { state: "deleting" }, { merge: true });
       needsDispatch = true;

@@ -23,6 +23,7 @@ final class FoundationStoryGenerator: StoryGenerating {
 
     func availabilityCode(for mode: StoryGenerationMode, language: StoryLanguage) -> String {
         switch mode {
+        case .gemini: return "gemini_requires_backend"
         case .onDevice:
             switch local.availability {
             case .available: return local.supportsLocale(language.locale) ? "available" : "unsupported_language"
@@ -53,6 +54,7 @@ final class FoundationStoryGenerator: StoryGenerating {
 
     func unavailabilityReason(for mode: StoryGenerationMode, language: StoryLanguage) -> String? {
         switch mode {
+        case .gemini: return StoryGenerationFailure.geminiUnavailable.errorDescription
         case .onDevice:
             switch local.availability {
             case .available: return local.supportsLocale(language.locale) ? nil : StoryGenerationFailure.unsupportedLanguage.errorDescription
@@ -105,6 +107,7 @@ final class FoundationStoryGenerator: StoryGenerating {
         let session: LanguageModelSession
         var responseTokens = maximumTokens
         switch mode {
+        case .gemini: throw StoryGenerationFailure.geminiUnavailable
         case .onDevice:
             guard local.supportsLocale(request.language.locale) else { throw StoryGenerationFailure.unsupportedLanguage }
             // Account for instructions, guided output schema and the response before inference.

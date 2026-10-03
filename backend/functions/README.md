@@ -70,3 +70,11 @@ npx -y firebase-tools@latest deploy --config .env.firebase.CONFIRMED_BEDTIME_PRO
 ```
 
 Keep `ENABLE_CLOUD_NARRATION=false` through Gemini English/Polish quality, retention/deletion and IAM tests; a physical device must verify Apple sign-in, App Attest, recording, download/import, account switching, cancellation and Apple authorization revocation before enabling customer access. Verify real B-as-A token/object attacks against deployed endpoints, not only emulator rules.
+
+## Gemini book creation
+
+`generateStoryBook` shares Apple-only verified authentication, consumed App Check and safe structured diagnostics with narration. Its bounded fields are description, `english`/`polish`, age, reading minutes, pace, `cloudProcessingAccepted=true` and `consentVersion=2026-10-04`. The server owns the prompt, fixed `gemini-3.8-flash`, global Vertex endpoint and structured schema. It returns only title, summary, complete chapters and illustration guide. Inputs and story output are not written to Firestore/Storage or logs. Per-account quota and lease metadata use the existing private account, with no new client-readable collection.
+
+Set the nonsecret server gate `ENABLE_STORY_GENERATION=true` in the existing ignored project environment. API IAM is declared by `google_project_iam_custom_role.story_generation` and its binding; the only inference permission is `aiplatform.endpoints.predict`. The callable has a 360-second timeout and one complete-book validation retry, each full provider request bounded to 155 seconds. A complete long book just below the minimum can receive one 35-second connecting-scene repair; the entire result is validated again. Account deletion clears both quota and lease; expired/mismatched leases cannot resurrect an account or erase another request.
+
+Run `npm test` for validation/parsing and `npm run test:emulator` through Firebase emulators for quota, concurrency, deletion and failure isolation. The latest Firebase emulator CLI requires Java 21 on PATH. Deployment can be scoped to `functions:cloud-voice:generateStoryBook,functions:cloud-voice:deleteAccount` in the confirmed existing project. [Creator behavior](../../docs/AI_CREATOR.md).

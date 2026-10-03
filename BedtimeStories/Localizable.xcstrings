@@ -7256,6 +7256,278 @@
           }
         }
       }
+    },
+    "About %lld words for the whole book. The story model chooses the chapter count; you can change it in the editor.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %lld words for the whole book. The story model chooses the chapter count; you can change it in the editor."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Około %lld słów w całej książce. Model dobierze liczbę rozdziałów; możesz ją zmienić w edytorze."
+          }
+        }
+      }
+    },
+    "Describe a story and choose Gemini or Apple Intelligence to write it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Describe a story and choose Gemini or Apple Intelligence to write it."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opisz pomysł na bajkę i wybierz Gemini lub Apple Intelligence, aby ją napisać."
+          }
+        }
+      }
+    },
+    "Gemini": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemini"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemini"
+          }
+        }
+      }
+    },
+    "Gemini could not complete the story at this reading length. Try a shorter reading time or a simpler idea.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemini could not complete the story at this reading length. Try a shorter reading time or a simpler idea."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemini nie udało się dokończyć bajki o wybranej długości. Wybierz krótszy czas czytania lub prostszy pomysł."
+          }
+        }
+      }
+    },
+    "Gemini could not connect or finish the story. Check your connection and try again in a few minutes.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemini could not connect or finish the story. Check your connection and try again in a few minutes."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemini nie może się połączyć lub dokończyć bajki. Sprawdź połączenie z internetem i spróbuj ponownie za kilka minut."
+          }
+        }
+      }
+    },
+    "Gemini is busy or a story is already being created. Try again in a few minutes.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemini is busy or a story is already being created. Try again in a few minutes."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemini jest teraz zajęte lub bajka jest już tworzona. Spróbuj ponownie za kilka minut."
+          }
+        }
+      }
+    },
+    "Gemini writes stories in Polish and English through our server. An internet connection and Apple sign-in are required.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemini writes stories in Polish and English through our server. An internet connection and Apple sign-in are required."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemini tworzy bajki po polsku i po angielsku za pośrednictwem naszego serwera. Potrzebujesz internetu i logowania przez Apple."
+          }
+        }
+      }
+    },
+    "I agree to send my story idea to Gemini": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I agree to send my story idea to Gemini"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zgadzam się na przesłanie pomysłu na bajkę do Gemini"
+          }
+        }
+      }
+    },
+    "Review and accept how your story idea is processed by Gemini.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review and accept how your story idea is processed by Gemini."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przeczytaj informacje o przetwarzaniu pomysłu przez Gemini i wyraź zgodę."
+          }
+        }
+      }
+    },
+    "Sign in with Apple to create a story with Gemini.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in with Apple to create a story with Gemini."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zaloguj się przez Apple, aby utworzyć bajkę z Gemini."
+          }
+        }
+      }
+    },
+    "Stop Creating stops waiting and leaves no draft. Gemini may finish processing an idea already sent; wait a few minutes before trying again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop Creating stops waiting and leaves no draft. Gemini may finish processing an idea already sent; wait a few minutes before trying again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zatrzymanie kończy oczekiwanie i nie zapisuje szkicu. Gemini może dokończyć przetwarzanie przesłanego pomysłu; odczekaj kilka minut przed kolejną próbą."
+          }
+        }
+      }
+    },
+    "This reading time is too long for the on-device model to create a complete book at once. Choose Gemini or Private Cloud Compute, or reduce the duration or reading pace.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This reading time is too long for the on-device model to create a complete book at once. Choose Gemini or Private Cloud Compute, or reduce the duration or reading pace."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model na urządzeniu nie może utworzyć całej książki o takiej długości w jednej próbie. Wybierz Gemini lub Private Cloud Compute albo zmniejsz czas czytania lub tempo."
+          }
+        }
+      }
+    },
+    "You have reached the limit of 10 Gemini stories today. Try again tomorrow.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You have reached the limit of 10 Gemini stories today. Try again tomorrow."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wykorzystano dzisiejszy limit 10 bajek z Gemini. Spróbuj ponownie jutro."
+          }
+        }
+      }
+    },
+    "Your account changed while the story was being created. Sign in and try again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your account changed while the story was being created. Sign in and try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Konto zmieniło się podczas tworzenia bajki. Zaloguj się i spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "Your chosen model creates the title and chapter text. Review the story before sharing it with a child, then add pictures and narration.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your chosen model creates the title and chapter text. Review the story before sharing it with a child, then add pictures and narration."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wybrany model napisze tytuł i treść rozdziałów. Przeczytaj bajkę, zanim pokażesz ją dziecku, a potem dodaj ilustracje i nagrania."
+          }
+        }
+      }
+    },
+    "Your idea, reader age, language and reading time are sent through our server to Google Gemini. Processing may take place outside Europe. Our server does not save your idea or generated story. The finished draft is saved on this device. Avoid personal or sensitive details.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your idea, reader age, language and reading time are sent through our server to Google Gemini. Processing may take place outside Europe. Our server does not save your idea or generated story. The finished draft is saved on this device. Avoid personal or sensitive details."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Twój pomysł, wiek dziecka, język i czas czytania trafiają przez nasz serwer do Google Gemini. Dane mogą być przetwarzane poza Europą. Nasz serwer nie zapisuje pomysłu ani wygenerowanej bajki. Gotowy szkic zostanie zapisany na tym urządzeniu. Nie podawaj danych osobowych ani poufnych informacji."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

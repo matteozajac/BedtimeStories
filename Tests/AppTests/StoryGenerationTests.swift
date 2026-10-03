@@ -1,5 +1,6 @@
 import Foundation
 import FoundationModels
+import MZAppFoundation
 import Testing
 @testable import BedtimeStories
 
@@ -186,6 +187,88 @@ struct StoryGenerationTests {
         #expect(IllustrationPromptBuilder.context(draft, chapterID: draft.chapters[1].id).contains("window"))
         #expect(!IllustrationPromptBuilder.context(draft, chapterID: draft.chapters[1].id).contains("stream"))
         #expect(IllustrationPromptBuilder.style.contains("storybook"))
+    }
+
+    @Test func geminiRoutesPolishAndSavesAnEditableDraft() async throws {
+        let root = workspace()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let apple = TestGenerator(), cloud = TestCloud()
+        let generator = StoryGenerator(cloud: cloud, apple: apple)
+        let model = StoryGenerationModel(store: BookDraftStore(root: root), generator: generator)
+        let request = StoryGenerationRequest(description: "Lis wraca do domu.", language: .polish,
+            readerAge: .preschool, readingMinutes: 1, wordsPerMinute: 80, cloudProcessingAccepted: true)
+        await model.generate(request, mode: .gemini)
+        #expect(model.completed && apple.modes.isEmpty && cloud.requests.count == 1)
+        let draft = try #require(model.draft)
+        #expect(draft.title == "Lis i księżyc" && draft.chapters[0].text.contains("księżyc"))
+        let saved = try await model.store.list()
+        #expect(saved.count == 1 && saved[0].id == draft.id)
+        _ = try await generator.book(for: self.request(), mode: .onDevice)
+        #expect(apple.modes == [.onDevice] && cloud.requests.count == 1)
+    }
+
+    @Test func geminiRequiresConsentAndKeepsSafeServiceErrors() async throws {
+        let root = workspace()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let cloud = TestCloud()
+        let model = StoryGenerationModel(store: BookDraftStore(root: root), generator: StoryGenerator(cloud: cloud))
+        await model.generate(request(), mode: .gemini)
+        #expect(cloud.requests.isEmpty && model.message == StoryGenerationFailure.geminiConsentRequired.errorDescription)
+        var accepted = request(); accepted.cloudProcessingAccepted = true
+        cloud.failure = CloudNarrationFailureContext(presentation: StoryGenerationFailure.geminiDailyLimit,
+            underlyingLogError: ErrorSnapshot(NSError(domain: "FirebaseFunctions", code: 8)))
+        await model.generate(accepted, mode: .gemini)
+        #expect(cloud.requests.count == 1 && model.message == StoryGenerationFailure.geminiDailyLimit.errorDescription)
+        #expect(try await model.store.list().isEmpty)
+    }
+
+    @Test func cancelledCloudWaitFinishesImmediatelyAndDiscardsLateBook() async throws {
+        let root = workspace()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let cloud = TestCloud(); cloud.waitForCloud = true
+        let model = StoryGenerationModel(store: BookDraftStore(root: root), generator: StoryGenerator(cloud: cloud))
+        var accepted = request(); accepted.cloudProcessingAccepted = true
+        let operation = Task { await model.generate(accepted, mode: .gemini) }
+        await cloud.waitForRequest()
+        operation.cancel()
+        await operation.value
+        #expect(!model.working && model.draft == nil && !model.completed)
+        cloud.completion?(.success(try JSONEncoder().encode(cloud.book)))
+        #expect(try await model.store.list().isEmpty)
+    }
+
+    @Test func localCloudStoryAvailabilityIsDisabled() {
+        let cloud = CloudNarrationModel(configureFirebase: false)
+        #expect(cloud.storyUnavailabilityReason == StoryGenerationFailure.geminiUnavailable.errorDescription)
+    }
+
+    @MainActor private final class TestCloud: CloudStoryGenerating {
+        var storyUnavailabilityReason: String?
+        var requests: [StoryGenerationRequest] = []
+        var failure: Error?
+        var waitForCloud = false
+        var completion: (@Sendable (Result<Data, any Error>) -> Void)?
+        private var waiter: CheckedContinuation<Void, Never>?
+        var book: GeneratedStoryBook {
+            let text = Array(repeating: "księżyc", count: 79).joined(separator: " ") + " zasnął."
+            return GeneratedStoryBook(title: "Lis i księżyc", summary: "Lis wraca do domu.",
+                chapters: [GeneratedBookChapter(title: "Pod gwiazdami", text: text)], illustrationGuide: "An amber fox under stars.")
+        }
+        func generateStory(_ request: StoryGenerationRequest) async throws -> GeneratedStoryBook {
+            requests.append(request)
+            if let failure { throw failure }
+            if waitForCloud {
+                _ = try await CloudStoryResponse.wait { completion in
+                    self.completion = completion
+                    waiter?.resume(); waiter = nil
+                }
+            }
+            return book
+        }
+        func waitForRequest() async {
+            if completion != nil { return }
+            await withCheckedContinuation { waiter = $0 }
+        }
     }
 
     private func request(description: String = "A fox follows a star home.") -> StoryGenerationRequest {

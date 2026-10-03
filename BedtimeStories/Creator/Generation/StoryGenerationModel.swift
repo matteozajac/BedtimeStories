@@ -78,7 +78,7 @@ final class StoryGenerationModel {
                     logger.debug("Generated story completeness validation completed", category: "creator", metadata: fields.merging(["attempt": .integer(attempt + 1)]) { _, new in new })
                     break
                 } catch {
-                    guard !Task.isCancelled, attempt == 0, Self.canRetry(error) else { throw error }
+                    guard !Task.isCancelled, mode != .gemini, attempt == 0, Self.canRetry(error) else { throw error }
                     logger.warning("Story creation retry", error: error, category: "creator", metadata: fields.merging(["phase": .string(phase), "attempt": .integer(attempt + 1), "actual_words": .integer(attemptRequest.previousWordCount ?? 0), "failure_reason": .string(Self.technicalFailureMessage(for: error))]) { _, new in new })
                 }
             }
@@ -146,6 +146,7 @@ final class StoryGenerationModel {
     private static func classifiedFailure(for error: Error) -> StoryGenerationFailure {
         let failure: StoryGenerationFailure
         switch error {
+        case let context as CloudNarrationFailureContext: return classifiedFailure(for: context.presentation)
         case let error as StoryGenerationFailure: failure = error
         case let error as LanguageModelError:
             switch error {

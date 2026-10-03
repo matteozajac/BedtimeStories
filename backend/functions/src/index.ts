@@ -9,6 +9,7 @@ import { KMSRecordingStore } from "./encryption";
 import { CloudVoiceService } from "./service";
 import { CloudTaskDispatcher } from "./tasks";
 import { connection, operation, preserveCause } from "./diagnostics";
+import { StoryGenerationService, VertexStoryProvider } from "./story";
 
 initializeApp();
 setGlobalOptions({ region: "europe-west1", maxInstances: 10, memory: "512MiB", timeoutSeconds: 120, serviceAccount: process.env.API_SERVICE_ACCOUNT });
@@ -43,3 +44,10 @@ export const cancelNarration = onCall(secured, async (request) => operation("can
 export const deleteVoice = onCall(secured, async (request) => operation("deleteVoice", async () => service().deleteVoice(await principal(request), request.data)));
 export const deleteAccount = onCall(secured, async (request) => operation("deleteAccount", async () => service().deleteAccount(await principal(request), request.data)));
 export const retryPendingDispatches = onSchedule({ schedule: "every 5 minutes", timeZone: "UTC", timeoutSeconds: 120 }, async () => operation("retryPendingDispatches", async () => service().retryPendingDispatches()));
+
+export const generateStoryBook = onCall({ ...secured, timeoutSeconds: 360, maxInstances: 4, concurrency: 4 }, async (request) => operation("generateStoryBook", async () => {
+  const owner = await principal(request);
+  const project = process.env.GCLOUD_PROJECT ?? process.env.GCP_PROJECT ?? "";
+  return new StoryGenerationService(getFirestore(), new VertexStoryProvider(project),
+    { enabled: () => process.env.ENABLE_STORY_GENERATION === "true" }).generate(owner, request.data);
+}));
