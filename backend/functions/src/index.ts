@@ -8,6 +8,7 @@ import { Principal } from "./contracts";
 import { KMSRecordingStore } from "./encryption";
 import { CloudVoiceService } from "./service";
 import { CloudTaskDispatcher } from "./tasks";
+import { connection, operation, preserveCause } from "./diagnostics";
 
 initializeApp();
 setGlobalOptions({ region: "europe-west1", maxInstances: 10, memory: "512MiB", timeoutSeconds: 120, serviceAccount: process.env.API_SERVICE_ACCOUNT });
@@ -27,18 +28,18 @@ async function principal(request: CallableRequest): Promise<Principal> {
   const authorization = request.rawRequest.headers.authorization;
   if (!authorization?.startsWith("Bearer ")) throw new HttpsError("unauthenticated", "Sign in with Apple to continue.");
   let token;
-  try { token = await getAuth().verifyIdToken(authorization.substring(7), true); }
-  catch { throw new HttpsError("unauthenticated", "Sign in with Apple again to continue."); }
+  try { token = await connection("firebase_auth", "verify_id_token", () => getAuth().verifyIdToken(authorization.substring(7), true)); }
+  catch (error) { throw preserveCause(new HttpsError("unauthenticated", "Sign in with Apple again to continue."), error); }
   if (token.uid !== request.auth.uid || token.firebase?.sign_in_provider !== "apple.com") throw new HttpsError("unauthenticated", "Sign in with Apple to continue.");
   return { uid: token.uid, provider: token.firebase.sign_in_provider, authTime: token.auth_time };
 }
 const secured = { enforceAppCheck: true, consumeAppCheckToken: true } as const;
-export const beginVoiceEnrollment = onCall(secured, async (request) => service().beginVoiceEnrollment(await principal(request), request.data));
-export const uploadEnrollmentRecording = onCall(secured, async (request) => service().uploadEnrollmentRecording(await principal(request), request.data));
-export const completeVoiceEnrollment = onCall(secured, async (request) => service().completeVoiceEnrollment(await principal(request), request.data));
-export const approveVoice = onCall(secured, async (request) => service().approveVoice(await principal(request), request.data));
-export const startNarration = onCall(secured, async (request) => service().startNarration(await principal(request), request.data));
-export const cancelNarration = onCall(secured, async (request) => service().cancelNarration(await principal(request), request.data));
-export const deleteVoice = onCall(secured, async (request) => service().deleteVoice(await principal(request), request.data));
-export const deleteAccount = onCall(secured, async (request) => service().deleteAccount(await principal(request), request.data));
-export const retryPendingDispatches = onSchedule({ schedule: "every 5 minutes", timeZone: "UTC", timeoutSeconds: 120 }, async () => service().retryPendingDispatches());
+export const beginVoiceEnrollment = onCall(secured, async (request) => operation("beginVoiceEnrollment", async () => service().beginVoiceEnrollment(await principal(request), request.data)));
+export const uploadEnrollmentRecording = onCall(secured, async (request) => operation("uploadEnrollmentRecording", async () => service().uploadEnrollmentRecording(await principal(request), request.data)));
+export const completeVoiceEnrollment = onCall(secured, async (request) => operation("completeVoiceEnrollment", async () => service().completeVoiceEnrollment(await principal(request), request.data)));
+export const approveVoice = onCall(secured, async (request) => operation("approveVoice", async () => service().approveVoice(await principal(request), request.data)));
+export const startNarration = onCall(secured, async (request) => operation("startNarration", async () => service().startNarration(await principal(request), request.data)));
+export const cancelNarration = onCall(secured, async (request) => operation("cancelNarration", async () => service().cancelNarration(await principal(request), request.data)));
+export const deleteVoice = onCall(secured, async (request) => operation("deleteVoice", async () => service().deleteVoice(await principal(request), request.data)));
+export const deleteAccount = onCall(secured, async (request) => operation("deleteAccount", async () => service().deleteAccount(await principal(request), request.data)));
+export const retryPendingDispatches = onSchedule({ schedule: "every 5 minutes", timeZone: "UTC", timeoutSeconds: 120 }, async () => operation("retryPendingDispatches", async () => service().retryPendingDispatches()));

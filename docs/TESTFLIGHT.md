@@ -1,5 +1,41 @@
 # Internal TestFlight
 
+## 1.0 (11) — 3 October 2026
+
+The MZAppFoundation 0.5.0 upgrade and expanded app/Gemini/connection logging are
+processed and available to **Internal Testers**. Exact readback confirms
+**VALID / INTERNAL_ONLY / IN_BETA_TESTING**, complete effective group access and
+matching English What to Test notes. Cloud narration remains enabled for this
+Internal build against the existing shared backend.
+
+- Build/upload ID: `6fb981c9-1f28-451b-81ef-454d8b825146`.
+- App ID: `6818278413`; bundle `com.matteozajac.bedtimestories`; team `4TCJLR98Y5`.
+- Group: `20328e88-9f9c-4c47-be78-c33a809d1a71` (**Internal Testers**, explicit and all-build access).
+- English notes: `d70c6006-da9e-4ad2-b57a-f1cd87a5703b`.
+- Minimum iOS/iPadOS, compatible Mac and Vision OS: 27.0.
+- IPA SHA256: `3c022f284424067afdebb048049bdd3e71c479fc6222b77072193459d29fbaa5`.
+- Release input fingerprint: `33a9dc4d75414b1ca9ba3213f919d8086a1e9eecea9f16b9bf571db38a2934fc`; 128 matching inputs, including the ignored Firebase client configuration.
+- Signed Internal archive and Internal-only export passed strict signature,
+  identity, Firebase configuration, Foundation metadata and entitlement checks.
+  Apple sign-in, production App Attest, PCC and the exact production iCloud
+  container were verified in the exported app.
+
+Validation: 8 Swift core tests, 47 native app tests, 52 worker tests and 10 Functions
+tests passed. Local binary isolation passed. All nine Functions are ACTIVE on
+new revisions; the private worker serves revision `bedtime-voice-worker-00003-gcr`
+at 100% traffic. A harmless deployed error probe verified original exception
+frames in Cloud Logging, and the recovery scheduler verified DEBUG Firestore
+connection traces. See [deployment readback](CLOUD_NARRATION_DEPLOYMENT.md).
+
+Test voice enrollment, narration, playback and failed/offline connections; open
+Settings → Developer → Open Logs, select an error and inspect Info for stacks.
+Also test draft saves, recording, library sync and recovery. The two existing
+tester records remain INSTALLED; this does not prove installation of build 11.
+Physical-device and real parent-voice acceptance remain open.
+
+Raw release receipts are retained in ignored `.build/pti/1.0-11/`.
+[Open TestFlight](https://appstoreconnect.apple.com/apps/6818278413/testflight/ios).
+
 ## 1.0 (10) — 3 October 2026
 
 Cloud narration is enabled for this Internal beta against shared **Always Near Stories** Firebase project `gen-lang-client-0154884984`. Apple sign-in/code-flow credentials are configured, App Attest is registered, and all nine Functions are ACTIVE with narration enabled. Exact readback confirms **VALID / INTERNAL_ONLY / IN_BETA_TESTING**, complete effective Internal Testers access and matching English What to Test notes. Safari independently shows build 10 Testing with two invites and no installs yet.

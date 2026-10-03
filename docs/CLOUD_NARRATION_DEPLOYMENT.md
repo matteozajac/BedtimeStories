@@ -1,5 +1,28 @@
 # Shared cloud deployment — 2026-10-03
 
+## Logging deployment — 3 October 2026
+
+The logging update is deployed to the existing shared project. Cloud Build
+`e6b012e5-5b37-44ff-bded-6418fc7ef799` completed successfully. Worker revision
+`bedtime-voice-worker-00003-gcr` serves 100% of traffic using image
+`europe-west1-docker.pkg.dev/gen-lang-client-0154884984/bedtime-voice/worker@sha256:f1058c75a6ff0ea43e66daeb617e6112510911238d809545b7680f6c5395d2a2`.
+The protected Terraform variable file was updated to this same digest.
+
+All nine Functions were rebuilt and redeployed; fresh readback verifies ACTIVE
+revision 00003, the existing API service account and `ENABLE_CLOUD_NARRATION=true`.
+Worker runtime configuration and private invoker bindings were preserved.
+Unauthenticated health access returns 403; authenticated health returns 200.
+A malformed task was rejected before any provider or storage work. Cloud Logging
+contains its structured ERROR entry, operation ID, original `SafeError` code and
+exception frames in `server.py` and `core.py`. This verifies deployed error and
+stack logging; it does not establish real voice enrollment or device acceptance.
+The existing dispatch-recovery scheduler also completed successfully on its new
+Functions revision, with DEBUG Firestore connection start/completion events and
+an INFO operation-completed event freshly read back from Cloud Logging.
+
+Deployment, runtime and logging readbacks are retained in ignored
+`.build/pti/1.0-11/`. See [logging diagnostics](LOGGING.md).
+
 The backend is deployed to the user-selected existing Firebase/Google Cloud project **Always Near Stories** (`gen-lang-client-0154884984`, project number `280562253820`). TestFlight and production share this project. The original Via Tales project ID is immutable; both its project and Firebase public-facing names now match the app.
 
 ## Deployed resources and readback

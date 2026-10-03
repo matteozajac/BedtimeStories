@@ -19,8 +19,13 @@ struct BookCreatorView: View {
                     .accessibilityIdentifier("create-book-from-idea")
                     CreatorOption(title: "Create a Book", subtitle: "Write it yourself, add pictures, and record your voice.", systemImage: "square.and.pencil") {
                         Task {
+                            AppLog.trace("Draft creation started", category: "creator")
                             do { let draft = try await store.create(); path.append(draft) }
-                            catch { message = String(localized: "A draft could not be created. Free some space on this device and try again.") }
+                            catch is CancellationError { AppLog.trace("Draft creation cancelled", category: "creator") }
+                            catch {
+                                AppLog.error("Draft creation failed", error: error, category: "creator")
+                                message = String(localized: "A draft could not be created. Free some space on this device and try again.")
+                            }
                         }
                     }
                     .accessibilityIdentifier("new-book-draft")
@@ -72,7 +77,10 @@ struct BookCreatorView: View {
                     guard let draft = deleting else { return }
                     Task {
                         do { try await store.remove(draft.id); deleting = nil; await reload() }
-                        catch { message = String(localized: "The draft could not be deleted. Try again.") }
+                        catch {
+                            AppLog.error("Draft deletion failed", error: error, category: "creator")
+                            message = String(localized: "The draft could not be deleted. Try again.")
+                        }
                     }
                 }
                 Button("Cancel", role: .cancel) { deleting = nil }
@@ -82,8 +90,16 @@ struct BookCreatorView: View {
     }
 
     private func reload() async {
-        do { drafts = try await store.list() }
-        catch { message = String(localized: "Your drafts could not be opened. Try again.") }
+        AppLog.trace("Draft listing started", category: "creator")
+        do {
+            drafts = try await store.list()
+            AppLog.debug("Draft listing completed", category: "creator", metadata: ["draft_count": .integer(drafts.count)])
+        }
+        catch is CancellationError { AppLog.trace("Draft listing cancelled", category: "creator") }
+        catch {
+            AppLog.error("Draft listing failed", error: error, category: "creator")
+            message = String(localized: "Your drafts could not be opened. Try again.")
+        }
         loading = false
     }
 }

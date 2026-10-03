@@ -8,15 +8,18 @@ from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 from core import SafeError, canonical_aad
+from diagnostics import observed
 
 
 class Envelope:
+    @observed("kms", "initialize")
     def __init__(self, kms_key_name: str, kms=None):
         if kms is None:
             from google.cloud import kms as cloud_kms
             kms = cloud_kms.KeyManagementServiceClient()
         self.kms, self.key_name = kms, kms_key_name
 
+    @observed("kms", "encrypt_envelope")
     def encrypt(self, plaintext: bytes, uid: str, voice_id: str, kind: str) -> dict:
         key, iv = AESGCM.generate_key(bit_length=256), os.urandom(12)
         aad = canonical_aad(uid, voice_id, kind)
@@ -25,6 +28,7 @@ class Envelope:
                 "wrappedKey": base64.b64encode(wrapped).decode(), "iv": base64.b64encode(iv).decode(),
                 "ciphertext": base64.b64encode(AESGCM(key).encrypt(iv, plaintext, aad)).decode()}
 
+    @observed("kms", "decrypt_envelope")
     def decrypt(self, envelope: dict, uid: str, voice_id: str, kind: str) -> bytes:
         if not isinstance(envelope, dict) or any(envelope.get(field) != value for field, value in {
                 "version": 1, "uid": uid, "voiceId": voice_id, "kind": kind, "kmsKeyName": self.key_name}.items()):

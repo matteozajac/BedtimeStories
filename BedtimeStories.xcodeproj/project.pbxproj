@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		035A3A0B0A0A203F0BD17B23 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = ACDD52B62FA697CC2D1473F9 /* FirebaseAppCheck */; };
+		04B530F44CD3B8C5E7E1C641 /* MZAppFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = E974F5AD3E6306BDFD717E6B /* MZAppFoundation */; };
 		04F55525229ED09C833BE4B2 /* MZAppFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = B9CF3FA09FC9A76B593922BE /* MZAppFoundation */; };
 		1AC7ABA92552619AA3765F9D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D12C0E93DC1642D6D9289F8 /* Foundation.framework */; };
 		2647D774EB40CA537097BF25 /* MZBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36FFFE7796703E53912C9C90 /* MZBootstrap.swift */; };
@@ -18,7 +19,6 @@
 		92ACC9018693EDBCE6898AED /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 312991D5AD08568E2246239A /* FirebaseFunctions */; };
 		AA2F9B238DF6FCF96FC693C8 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B54B86C81076392C72D564C9 /* GoogleService-Info.plist */; };
 		B247302611BB02169A13A5B6 /* MZAppFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 6635A88F20CBA2D6CBFCEFF3 /* MZAppFoundation */; };
-		D7988E3066A69F3A73352AF2 /* MZAppFoundationFirebase in Frameworks */ = {isa = PBXBuildFile; productRef = B3805C9CE106044038711549 /* MZAppFoundationFirebase */; };
 		E251A974DFCE2898205FF51F /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = EC7B3F92A4E1EE4A7838E307 /* FirebaseFirestore */; };
 		E8D993D9C30C9D651A98B24F /* MZBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36FFFE7796703E53912C9C90 /* MZBootstrap.swift */; };
 /* End PBXBuildFile section */
@@ -89,7 +89,7 @@
 				E251A974DFCE2898205FF51F /* FirebaseFirestore in Frameworks */,
 				92ACC9018693EDBCE6898AED /* FirebaseFunctions in Frameworks */,
 				5335E69267632AE47B1D29AA /* FirebaseStorage in Frameworks */,
-				D7988E3066A69F3A73352AF2 /* MZAppFoundationFirebase in Frameworks */,
+				04B530F44CD3B8C5E7E1C641 /* MZAppFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -197,6 +197,7 @@
 				61EC4C362DF195A20069B96B /* Sources */,
 				61EC4C372DF195A20069B96B /* Frameworks */,
 				61EC4C382DF195A20069B96B /* Resources */,
+				786EB4017F8B0CC8584783CF /* MZ Build Metadata */,
 			);
 			buildRules = (
 			);
@@ -212,7 +213,7 @@
 				EC7B3F92A4E1EE4A7838E307 /* FirebaseFirestore */,
 				312991D5AD08568E2246239A /* FirebaseFunctions */,
 				F25B6F070D2FAE45A4B9F4BB /* FirebaseStorage */,
-				B3805C9CE106044038711549 /* MZAppFoundationFirebase */,
+				E974F5AD3E6306BDFD717E6B /* MZAppFoundation */,
 			);
 			productName = BedtimeStories;
 			productReference = 61EC4C3A2DF195A20069B96B /* BedtimeStories.app */;
@@ -225,6 +226,7 @@
 				BA5E32C45664C0AC09FA9DA7 /* Sources */,
 				F3B372DBF896ADE1A4C86BF9 /* Frameworks */,
 				93AB5B8220BD1FE6B81D5B00 /* Resources */,
+				93DB73F5BB4D4AC3742D3E9D /* MZ Build Metadata */,
 			);
 			buildRules = (
 			);
@@ -363,6 +365,47 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		786EB4017F8B0CC8584783CF /* MZ Build Metadata */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "MZ Build Metadata";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "python3 \"$SRCROOT/.mzappfoundation/Generated/generate_build_metadata.py\" --app-root \"$SRCROOT\" --foundation-version 0.5.0 --channel \"$CONFIGURATION\" --stamp-build-time --output \"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/MZFoundationBuildMetadata.plist\"";
+		};
+		93DB73F5BB4D4AC3742D3E9D /* MZ Build Metadata */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "MZ Build Metadata";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "python3 \"$SRCROOT/.mzappfoundation/Generated/generate_build_metadata.py\" --app-root \"$SRCROOT\" --foundation-version 0.5.0 --channel \"$CONFIGURATION\" --stamp-build-time --output \"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/MZFoundationBuildMetadata.plist\"";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		61EC4C362DF195A20069B96B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -412,44 +455,45 @@
 
 /* Begin XCBuildConfiguration section */
 		2CDD0FFF7A0FF07499CEA1C1 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
-				CODE_SIGN_ENTITLEMENTS = Config/BedtimeStories.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
-				DEVELOPMENT_TEAM = 4TCJLR98Y5;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = Config/Info.plist;
-				INFOPLIST_KEY_FIREBASE_ANALYTICS_COLLECTION_ENABLED = NO;
-				INFOPLIST_KEY_FirebaseAutomaticScreenReportingEnabled = NO;
-				INFOPLIST_KEY_GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS = NO;
-				INFOPLIST_KEY_GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED = NO;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories;
-				PRODUCT_MODULE_NAME = BedtimeStories;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = iphonesimulator;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) MZ_LOCAL";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_STRICT_CONCURRENCY = complete;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
+	buildSettings = {
+		"ASSETCATALOG_COMPILER_APPICON_NAME" = AppIcon;
+		"ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME" = AccentColor;
+		"BEDTIME_CLOUD_NARRATION_ENABLED" = NO;
+		"CODE_SIGN_ENTITLEMENTS" = "Config/BedtimeStories.entitlements";
+		"CODE_SIGN_STYLE" = Automatic;
+		"CURRENT_PROJECT_VERSION" = 11;
+		"DEVELOPMENT_TEAM" = 4TCJLR98Y5;
+		"ENABLE_PREVIEWS" = YES;
+		"ENABLE_USER_SCRIPT_SANDBOXING" = NO;
+		"GENERATE_INFOPLIST_FILE" = NO;
+		"INFOPLIST_FILE" = "Config/Info.plist";
+		"INFOPLIST_KEY_FIREBASE_ANALYTICS_COLLECTION_ENABLED" = NO;
+		"INFOPLIST_KEY_FirebaseAutomaticScreenReportingEnabled" = NO;
+		"INFOPLIST_KEY_GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS" = NO;
+		"INFOPLIST_KEY_GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED" = NO;
+		"INFOPLIST_KEY_UIApplicationSceneManifest_Generation" = YES;
+		"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents" = YES;
+		"INFOPLIST_KEY_UILaunchScreen_Generation" = YES;
+		"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+		"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone" = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+		"LD_RUNPATH_SEARCH_PATHS" = (
+			"$(inherited)",
+			"@executable_path/Frameworks",
+		);
+		"MARKETING_VERSION" = "1.0";
+		"PRODUCT_BUNDLE_IDENTIFIER" = "com.matteozajac.bedtimestories";
+		"PRODUCT_MODULE_NAME" = BedtimeStories;
+		"PRODUCT_NAME" = "$(TARGET_NAME)";
+		"SUPPORTED_PLATFORMS" = iphonesimulator;
+		"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "$(inherited) MZ_LOCAL";
+		"SWIFT_EMIT_LOC_STRINGS" = YES;
+		"SWIFT_STRICT_CONCURRENCY" = complete;
+		"SWIFT_VERSION" = "6.0";
+		"TARGETED_DEVICE_FAMILY" = "1,2";
+	};
+	isa = XCBuildConfiguration;
+	name = Debug;
+};
 		57F40A0CB909DB04F48F0830 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -593,81 +637,83 @@
 			name = Release;
 		};
 		61EC4C462DF195A30069B96B /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
-				CODE_SIGN_ENTITLEMENTS = Config/BedtimeStories.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
-				DEVELOPMENT_TEAM = 4TCJLR98Y5;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = Config/Info.plist;
-				INFOPLIST_KEY_FIREBASE_ANALYTICS_COLLECTION_ENABLED = NO;
-				INFOPLIST_KEY_FirebaseAutomaticScreenReportingEnabled = NO;
-				INFOPLIST_KEY_GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS = NO;
-				INFOPLIST_KEY_GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED = NO;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_STRICT_CONCURRENCY = complete;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
+	buildSettings = {
+		"ASSETCATALOG_COMPILER_APPICON_NAME" = AppIcon;
+		"ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME" = AccentColor;
+		"BEDTIME_CLOUD_NARRATION_ENABLED" = NO;
+		"CODE_SIGN_ENTITLEMENTS" = "Config/BedtimeStories.entitlements";
+		"CODE_SIGN_STYLE" = Automatic;
+		"CURRENT_PROJECT_VERSION" = 11;
+		"DEVELOPMENT_TEAM" = 4TCJLR98Y5;
+		"ENABLE_PREVIEWS" = YES;
+		"ENABLE_USER_SCRIPT_SANDBOXING" = NO;
+		"GENERATE_INFOPLIST_FILE" = NO;
+		"INFOPLIST_FILE" = "Config/Info.plist";
+		"INFOPLIST_KEY_FIREBASE_ANALYTICS_COLLECTION_ENABLED" = NO;
+		"INFOPLIST_KEY_FirebaseAutomaticScreenReportingEnabled" = NO;
+		"INFOPLIST_KEY_GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS" = NO;
+		"INFOPLIST_KEY_GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED" = NO;
+		"INFOPLIST_KEY_UIApplicationSceneManifest_Generation" = YES;
+		"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents" = YES;
+		"INFOPLIST_KEY_UILaunchScreen_Generation" = YES;
+		"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+		"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone" = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+		"LD_RUNPATH_SEARCH_PATHS" = (
+			"$(inherited)",
+			"@executable_path/Frameworks",
+		);
+		"MARKETING_VERSION" = "1.0";
+		"PRODUCT_BUNDLE_IDENTIFIER" = "com.matteozajac.bedtimestories";
+		"PRODUCT_NAME" = "$(TARGET_NAME)";
+		"SUPPORTED_PLATFORMS" = iphoneos;
+		"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "$(inherited)";
+		"SWIFT_EMIT_LOC_STRINGS" = YES;
+		"SWIFT_STRICT_CONCURRENCY" = complete;
+		"SWIFT_VERSION" = "6.0";
+		"TARGETED_DEVICE_FAMILY" = "1,2";
+	};
+	isa = XCBuildConfiguration;
+	name = Debug;
+};
 		61EC4C472DF195A30069B96B /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
-				CODE_SIGN_ENTITLEMENTS = Config/PrivateCloudCompute.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
-				DEVELOPMENT_TEAM = 4TCJLR98Y5;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = Config/Info.plist;
-				INFOPLIST_KEY_FIREBASE_ANALYTICS_COLLECTION_ENABLED = NO;
-				INFOPLIST_KEY_FirebaseAutomaticScreenReportingEnabled = NO;
-				INFOPLIST_KEY_GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS = NO;
-				INFOPLIST_KEY_GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED = NO;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) BEDTIME_PRIVATE_CLOUD_COMPUTE";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_STRICT_CONCURRENCY = complete;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
+	buildSettings = {
+		"ASSETCATALOG_COMPILER_APPICON_NAME" = AppIcon;
+		"ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME" = AccentColor;
+		"BEDTIME_CLOUD_NARRATION_ENABLED" = NO;
+		"CODE_SIGN_ENTITLEMENTS" = "Config/PrivateCloudCompute.entitlements";
+		"CODE_SIGN_STYLE" = Automatic;
+		"CURRENT_PROJECT_VERSION" = 11;
+		"DEVELOPMENT_TEAM" = 4TCJLR98Y5;
+		"ENABLE_PREVIEWS" = YES;
+		"ENABLE_USER_SCRIPT_SANDBOXING" = NO;
+		"GENERATE_INFOPLIST_FILE" = NO;
+		"INFOPLIST_FILE" = "Config/Info.plist";
+		"INFOPLIST_KEY_FIREBASE_ANALYTICS_COLLECTION_ENABLED" = NO;
+		"INFOPLIST_KEY_FirebaseAutomaticScreenReportingEnabled" = NO;
+		"INFOPLIST_KEY_GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS" = NO;
+		"INFOPLIST_KEY_GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED" = NO;
+		"INFOPLIST_KEY_UIApplicationSceneManifest_Generation" = YES;
+		"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents" = YES;
+		"INFOPLIST_KEY_UILaunchScreen_Generation" = YES;
+		"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+		"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone" = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+		"LD_RUNPATH_SEARCH_PATHS" = (
+			"$(inherited)",
+			"@executable_path/Frameworks",
+		);
+		"MARKETING_VERSION" = "1.0";
+		"PRODUCT_BUNDLE_IDENTIFIER" = "com.matteozajac.bedtimestories";
+		"PRODUCT_NAME" = "$(TARGET_NAME)";
+		"SUPPORTED_PLATFORMS" = iphoneos;
+		"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "$(inherited) BEDTIME_PRIVATE_CLOUD_COMPUTE";
+		"SWIFT_EMIT_LOC_STRINGS" = YES;
+		"SWIFT_STRICT_CONCURRENCY" = complete;
+		"SWIFT_VERSION" = "6.0";
+		"TARGETED_DEVICE_FAMILY" = "1,2";
+	};
+	isa = XCBuildConfiguration;
+	name = Release;
+};
 		857E7928C21A1F55B591CA9A /* Internal */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -690,82 +736,84 @@
 			name = Internal;
 		};
 		8E203481E4EAEEA5503A5D25 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
-				CODE_SIGN_ENTITLEMENTS = Config/PrivateCloudCompute.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
-				DEVELOPMENT_TEAM = 4TCJLR98Y5;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = Config/Info.plist;
-				INFOPLIST_KEY_FIREBASE_ANALYTICS_COLLECTION_ENABLED = NO;
-				INFOPLIST_KEY_FirebaseAutomaticScreenReportingEnabled = NO;
-				INFOPLIST_KEY_GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS = NO;
-				INFOPLIST_KEY_GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED = NO;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories;
-				PRODUCT_MODULE_NAME = BedtimeStories;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = iphonesimulator;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) BEDTIME_PRIVATE_CLOUD_COMPUTE MZ_LOCAL";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_STRICT_CONCURRENCY = complete;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
+	buildSettings = {
+		"ASSETCATALOG_COMPILER_APPICON_NAME" = AppIcon;
+		"ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME" = AccentColor;
+		"BEDTIME_CLOUD_NARRATION_ENABLED" = NO;
+		"CODE_SIGN_ENTITLEMENTS" = "Config/PrivateCloudCompute.entitlements";
+		"CODE_SIGN_STYLE" = Automatic;
+		"CURRENT_PROJECT_VERSION" = 11;
+		"DEVELOPMENT_TEAM" = 4TCJLR98Y5;
+		"ENABLE_PREVIEWS" = YES;
+		"ENABLE_USER_SCRIPT_SANDBOXING" = NO;
+		"GENERATE_INFOPLIST_FILE" = NO;
+		"INFOPLIST_FILE" = "Config/Info.plist";
+		"INFOPLIST_KEY_FIREBASE_ANALYTICS_COLLECTION_ENABLED" = NO;
+		"INFOPLIST_KEY_FirebaseAutomaticScreenReportingEnabled" = NO;
+		"INFOPLIST_KEY_GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS" = NO;
+		"INFOPLIST_KEY_GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED" = NO;
+		"INFOPLIST_KEY_UIApplicationSceneManifest_Generation" = YES;
+		"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents" = YES;
+		"INFOPLIST_KEY_UILaunchScreen_Generation" = YES;
+		"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+		"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone" = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+		"LD_RUNPATH_SEARCH_PATHS" = (
+			"$(inherited)",
+			"@executable_path/Frameworks",
+		);
+		"MARKETING_VERSION" = "1.0";
+		"PRODUCT_BUNDLE_IDENTIFIER" = "com.matteozajac.bedtimestories";
+		"PRODUCT_MODULE_NAME" = BedtimeStories;
+		"PRODUCT_NAME" = "$(TARGET_NAME)";
+		"SUPPORTED_PLATFORMS" = iphonesimulator;
+		"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "$(inherited) BEDTIME_PRIVATE_CLOUD_COMPUTE MZ_LOCAL";
+		"SWIFT_EMIT_LOC_STRINGS" = YES;
+		"SWIFT_STRICT_CONCURRENCY" = complete;
+		"SWIFT_VERSION" = "6.0";
+		"TARGETED_DEVICE_FAMILY" = "1,2";
+	};
+	isa = XCBuildConfiguration;
+	name = Release;
+};
 		A9FF491E9C7B38791C15B0DE /* Internal */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				BEDTIME_CLOUD_NARRATION_ENABLED = YES;
-				CODE_SIGN_ENTITLEMENTS = Config/PrivateCloudCompute.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
-				DEVELOPMENT_TEAM = 4TCJLR98Y5;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = Config/Info.plist;
-				INFOPLIST_KEY_FIREBASE_ANALYTICS_COLLECTION_ENABLED = NO;
-				INFOPLIST_KEY_FirebaseAutomaticScreenReportingEnabled = NO;
-				INFOPLIST_KEY_GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS = NO;
-				INFOPLIST_KEY_GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED = NO;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) BEDTIME_PRIVATE_CLOUD_COMPUTE MZ_INTERNAL";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_STRICT_CONCURRENCY = complete;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Internal;
-		};
+	buildSettings = {
+		"ASSETCATALOG_COMPILER_APPICON_NAME" = AppIcon;
+		"ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME" = AccentColor;
+		"BEDTIME_CLOUD_NARRATION_ENABLED" = YES;
+		"CODE_SIGN_ENTITLEMENTS" = "Config/PrivateCloudCompute.entitlements";
+		"CODE_SIGN_STYLE" = Automatic;
+		"CURRENT_PROJECT_VERSION" = 11;
+		"DEVELOPMENT_TEAM" = 4TCJLR98Y5;
+		"ENABLE_PREVIEWS" = YES;
+		"ENABLE_USER_SCRIPT_SANDBOXING" = NO;
+		"GENERATE_INFOPLIST_FILE" = NO;
+		"INFOPLIST_FILE" = "Config/Info.plist";
+		"INFOPLIST_KEY_FIREBASE_ANALYTICS_COLLECTION_ENABLED" = NO;
+		"INFOPLIST_KEY_FirebaseAutomaticScreenReportingEnabled" = NO;
+		"INFOPLIST_KEY_GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS" = NO;
+		"INFOPLIST_KEY_GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED" = NO;
+		"INFOPLIST_KEY_UIApplicationSceneManifest_Generation" = YES;
+		"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents" = YES;
+		"INFOPLIST_KEY_UILaunchScreen_Generation" = YES;
+		"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+		"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone" = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+		"LD_RUNPATH_SEARCH_PATHS" = (
+			"$(inherited)",
+			"@executable_path/Frameworks",
+		);
+		"MARKETING_VERSION" = "1.0";
+		"PRODUCT_BUNDLE_IDENTIFIER" = "com.matteozajac.bedtimestories";
+		"PRODUCT_NAME" = "$(TARGET_NAME)";
+		"SUPPORTED_PLATFORMS" = iphoneos;
+		"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "$(inherited) BEDTIME_PRIVATE_CLOUD_COMPUTE MZ_INTERNAL";
+		"SWIFT_EMIT_LOC_STRINGS" = YES;
+		"SWIFT_STRICT_CONCURRENCY" = complete;
+		"SWIFT_VERSION" = "6.0";
+		"TARGETED_DEVICE_FAMILY" = "1,2";
+	};
+	isa = XCBuildConfiguration;
+	name = Internal;
+};
 		ABCDEF00000000000000000A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -881,44 +929,45 @@
 			name = Release;
 		};
 		D066119F07730425D5A00198 /* Internal */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
-				CODE_SIGN_ENTITLEMENTS = Config/PrivateCloudCompute.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
-				DEVELOPMENT_TEAM = 4TCJLR98Y5;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = Config/Info.plist;
-				INFOPLIST_KEY_FIREBASE_ANALYTICS_COLLECTION_ENABLED = NO;
-				INFOPLIST_KEY_FirebaseAutomaticScreenReportingEnabled = NO;
-				INFOPLIST_KEY_GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS = NO;
-				INFOPLIST_KEY_GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED = NO;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories;
-				PRODUCT_MODULE_NAME = BedtimeStories;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = iphonesimulator;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) BEDTIME_PRIVATE_CLOUD_COMPUTE MZ_LOCAL MZ_INTERNAL";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_STRICT_CONCURRENCY = complete;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Internal;
-		};
+	buildSettings = {
+		"ASSETCATALOG_COMPILER_APPICON_NAME" = AppIcon;
+		"ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME" = AccentColor;
+		"BEDTIME_CLOUD_NARRATION_ENABLED" = NO;
+		"CODE_SIGN_ENTITLEMENTS" = "Config/PrivateCloudCompute.entitlements";
+		"CODE_SIGN_STYLE" = Automatic;
+		"CURRENT_PROJECT_VERSION" = 11;
+		"DEVELOPMENT_TEAM" = 4TCJLR98Y5;
+		"ENABLE_PREVIEWS" = YES;
+		"ENABLE_USER_SCRIPT_SANDBOXING" = NO;
+		"GENERATE_INFOPLIST_FILE" = NO;
+		"INFOPLIST_FILE" = "Config/Info.plist";
+		"INFOPLIST_KEY_FIREBASE_ANALYTICS_COLLECTION_ENABLED" = NO;
+		"INFOPLIST_KEY_FirebaseAutomaticScreenReportingEnabled" = NO;
+		"INFOPLIST_KEY_GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS" = NO;
+		"INFOPLIST_KEY_GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED" = NO;
+		"INFOPLIST_KEY_UIApplicationSceneManifest_Generation" = YES;
+		"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents" = YES;
+		"INFOPLIST_KEY_UILaunchScreen_Generation" = YES;
+		"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+		"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone" = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+		"LD_RUNPATH_SEARCH_PATHS" = (
+			"$(inherited)",
+			"@executable_path/Frameworks",
+		);
+		"MARKETING_VERSION" = "1.0";
+		"PRODUCT_BUNDLE_IDENTIFIER" = "com.matteozajac.bedtimestories";
+		"PRODUCT_MODULE_NAME" = BedtimeStories;
+		"PRODUCT_NAME" = "$(TARGET_NAME)";
+		"SUPPORTED_PLATFORMS" = iphonesimulator;
+		"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "$(inherited) BEDTIME_PRIVATE_CLOUD_COMPUTE MZ_LOCAL MZ_INTERNAL";
+		"SWIFT_EMIT_LOC_STRINGS" = YES;
+		"SWIFT_STRICT_CONCURRENCY" = complete;
+		"SWIFT_VERSION" = "6.0";
+		"TARGETED_DEVICE_FAMILY" = "1,2";
+	};
+	isa = XCBuildConfiguration;
+	name = Internal;
+};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -987,7 +1036,7 @@
 			repositoryURL = "git@github.com:matteozajac/MZAppFoundation.git";
 			requirement = {
 				kind = exactVersion;
-				version = 0.3.1;
+				version = 0.5.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -1013,11 +1062,6 @@
 			package = 41380ABFC1B8187E6B42AC19 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAppCheck;
 		};
-		B3805C9CE106044038711549 /* MZAppFoundationFirebase */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = EEB9ED7AAC32B3FBB84B3FF3 /* XCRemoteSwiftPackageReference "MZAppFoundation" */;
-			productName = MZAppFoundationFirebase;
-		};
 		B9CF3FA09FC9A76B593922BE /* MZAppFoundation */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = EEB9ED7AAC32B3FBB84B3FF3 /* XCRemoteSwiftPackageReference "MZAppFoundation" */;
@@ -1027,6 +1071,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 41380ABFC1B8187E6B42AC19 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAuth;
+		};
+		E974F5AD3E6306BDFD717E6B /* MZAppFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EEB9ED7AAC32B3FBB84B3FF3 /* XCRemoteSwiftPackageReference "MZAppFoundation" */;
+			productName = MZAppFoundation;
 		};
 		EC7B3F92A4E1EE4A7838E307 /* FirebaseFirestore */ = {
 			isa = XCSwiftPackageProductDependency;

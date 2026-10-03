@@ -1,12 +1,19 @@
 import AVFoundation
 import Foundation
+import MZAppFoundation
 
 actor BookDraftStore {
-    static let shared = BookDraftStore(root: URL.applicationSupportDirectory.appendingPathComponent("BookDrafts", isDirectory: true))
+    @MainActor static let shared = BookDraftStore(root: URL.applicationSupportDirectory.appendingPathComponent("BookDrafts", isDirectory: true), logDestination: FeatureLogDestination(logger: AppLog.logger))
     let root: URL
     private let files = FileManager.default
+    private var diagnosticLog: FeatureLogBuffer
 
-    init(root: URL) { self.root = root }
+    init(root: URL, logDestination: FeatureLogDestination? = nil) {
+        self.root = root
+        diagnosticLog = FeatureLogBuffer(destination: logDestination)
+    }
+
+    func flushDiagnosticLogs() async { await diagnosticLog.flush() }
 
     func list() throws -> [BookDraft] {
         try files.createDirectory(at: root, withIntermediateDirectories: true)
@@ -53,7 +60,7 @@ actor BookDraftStore {
             try save(draft)
             try JSONEncoder().encode(draft).write(to: destination.appendingPathComponent("baseline.json"), options: .atomic)
             return draft
-        } catch { try? files.removeItem(at: folder(draft.id)); throw error }
+        } catch { removeIfPresent(folder(draft.id), phase: "editing_draft"); throw error }
     }
 
     func baseline(_ id: UUID) throws -> BookDraft? {
@@ -75,7 +82,10 @@ actor BookDraftStore {
         try draft.validateDraft()
         let location = folder(draft.id)
         // Ignore a delayed autosave that arrived after a newer explicit save.
-        if let existing = try? load(draft.id), existing.modifiedAt > draft.modifiedAt { return }
+        if files.fileExists(atPath: location.appendingPathComponent("draft.json").path) {
+            do { if try load(draft.id).modifiedAt > draft.modifiedAt { return } }
+            catch { diagnosticLog.warning("Existing draft validation failed before save", error: error, category: "creator") }
+        }
         try files.createDirectory(at: location, withIntermediateDirectories: true)
         let encoder = JSONEncoder(); encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         try encoder.encode(draft).write(to: location.appendingPathComponent("draft.json"), options: .atomic)
@@ -132,12 +142,13 @@ actor BookDraftStore {
             let tracks = try await AVURLAsset(url: destination).loadTracks(withMediaType: .audio)
             guard !tracks.isEmpty else { throw BookError.invalid("This recording has no playable audio.") }
             return (path, duration)
-        } catch { try? files.removeItem(at: destination); throw error }
+        } catch { removeIfPresent(destination, phase: "failed_audio_copy"); throw error }
     }
 
     func removeMedia(_ paths: [String], draftID: UUID) {
         for path in paths {
-            if let url = try? mediaURL(path, draftID: draftID) { try? files.removeItem(at: url) }
+            do { removeIfPresent(try mediaURL(path, draftID: draftID), phase: "draft_media") }
+            catch { diagnosticLog.warning("Draft media cleanup resolution failed", error: error, category: "creator") }
         }
     }
 
@@ -165,7 +176,13 @@ actor BookDraftStore {
             try encoder.encode(manifest).write(to: output.appendingPathComponent("book.json"), options: .atomic)
             _ = try BookManifest.load(from: output, requireAssets: true)
             return LibraryBook(manifest: manifest, folder: output)
-        } catch { try? files.removeItem(at: workspace); throw error }
+        } catch { removeIfPresent(workspace, phase: "publication_workspace"); throw error }
+    }
+
+    private func removeIfPresent(_ url: URL, phase: String) {
+        guard files.fileExists(atPath: url.path) else { return }
+        do { try files.removeItem(at: url) }
+        catch { diagnosticLog.warning("Draft cleanup failed", error: error, category: "creator", metadata: ["phase": .string(phase)]) }
     }
 
     private func folder(_ id: UUID) -> URL { root.appendingPathComponent(id.uuidString, isDirectory: true) }

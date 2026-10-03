@@ -1,5 +1,6 @@
 import CryptoKit
 import Foundation
+import MZAppFoundation
 
 extension LibraryRepository {
     func checkout(_ book: LibraryBook, root: URL) async throws -> BookEditCheckout {
@@ -33,7 +34,7 @@ extension LibraryRepository {
                 return BookEditCheckout(book: LibraryBook(manifest: manifest, folder: copy), source: BookEditSource(bookID: book.id, libraryRoot: root, fingerprint: hash))
             }
             return result
-        } catch { try? files.removeItem(at: workspace); throw error }
+        } catch { removeIfPresent(workspace, operation: "editing_workspace"); throw error }
     }
 
     func commitEdit(_ staged: LibraryBook, source: BookEditSource, root: URL) throws {
@@ -50,7 +51,7 @@ extension LibraryRepository {
         let pinned = files.fileExists(atPath: cache.appendingPathComponent(".pinned").path)
         let preparedCache = cacheRoot.appendingPathComponent(".incoming-\(UUID().uuidString)")
         let previousCache = cacheRoot.appendingPathComponent(".backup-\(UUID().uuidString)")
-        defer { try? files.removeItem(at: preparedCache) }
+        defer { removeIfPresent(preparedCache, operation: "prepared_edit_cache") }
         // Prepare a complete offline copy before changing the library. Storage failure leaves both originals intact.
         if pinned {
             try files.copyItem(at: staged.folder, to: preparedCache)
@@ -63,7 +64,7 @@ extension LibraryRepository {
                 guard try Self.editFingerprint(folder) == source.fingerprint else { throw BookError.editConflict }
                 let incoming = root.appendingPathComponent(".incoming-\(UUID().uuidString)")
                 let backup = root.appendingPathComponent(".backup-\(UUID().uuidString)")
-                defer { try? files.removeItem(at: incoming) }
+                defer { removeIfPresent(incoming, operation: "editing_incoming") }
                 try Task.checkCancellation()
                 try files.copyItem(at: staged.folder, to: incoming)
                 _ = try BookManifest.load(from: incoming, requireAssets: true)
@@ -78,19 +79,19 @@ extension LibraryRepository {
                         catch { try files.moveItem(at: previousCache, to: cache); throw error }
                     }
                 } catch {
-                    try? files.removeItem(at: folder)
+                    removeIfPresent(folder, operation: "failed_edit_destination")
                     try files.moveItem(at: backup, to: folder)
                     throw error
                 }
-                try? files.removeItem(at: backup)
-                if pinned { try? files.removeItem(at: previousCache) }
+                removeIfPresent(backup, operation: "editing_backup")
+                if pinned { removeIfPresent(previousCache, operation: "previous_edit_cache") }
             }
         }
         if let coordinationError { throw coordinationError }
         guard let result else { throw BookError.unavailable(String(localized: "The book could not be opened for saving.")) }
         try result.get()
         discardImport(staged)
-        if !pinned { try? files.removeItem(at: cache) }
+        if !pinned { removeIfPresent(cache, operation: "unrequested_edit_cache") }
     }
 
     private static func editFingerprint(_ folder: URL) throws -> String {

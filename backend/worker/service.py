@@ -12,6 +12,7 @@ from cloud import now
 from core import (SafeError, Stopped, assert_owner, assemble_m4a, chapter_chunks,
                   chunk_hash, identity, provider_identity, validate_task, wav_pcm)
 from provider import ProviderError
+from diagnostics import connection, event, observed, operation_context, task_key
 
 LEASE_SECONDS = 1200
 WORK_SECONDS = 600
@@ -36,6 +37,7 @@ class Worker:
         if not account or account.get("state") != "active":
             raise Stopped()
 
+    @observed("worker", "claim_lease")
     def claim(self, uid, kind, item_id, renewal=False):
         private_path, public_path = self.paths(uid, kind, item_id)
         account_path = f"privateAccounts/{uid}"
@@ -79,6 +81,7 @@ class Worker:
             raise Stopped()
         return private
 
+    @observed("worker", "fenced_update")
     def fenced_update(self, uid, kind, item_id, token, private_values, public_values=None, require_voice=None):
         private_path, public_path = self.paths(uid, kind, item_id)
         account_path = f"privateAccounts/{uid}"
@@ -115,6 +118,7 @@ class Worker:
         self.fenced_update(uid, kind, item_id, token,
                            {"leaseUntil": now() + dt.timedelta(seconds=LEASE_SECONDS)}, require_voice=require_voice)
 
+    @observed("worker", "release_lease")
     def release(self, uid, kind, item_id, token):
         private_path, _ = self.paths(uid, kind, item_id)
         def operation(documents):
@@ -136,6 +140,7 @@ class Worker:
             marker = "bedtime-" + uuid.uuid4().hex
             self.fenced_update(uid, "enroll", voice_id, token, {"providerMarker": marker})
         existing = self.provider.find_voices(marker)
+        event(LOGGER, logging.DEBUG, "voice_reconciliation_completed", matching_voices=len(existing), renewal=renewal)
         if len(existing) > 1:
             raise SafeError("voice_reconciliation_required")
         if existing:
@@ -161,6 +166,7 @@ class Worker:
             self.fenced_update(uid, "enroll", voice_id, token,
                                {"providerVoice": encrypted, "providerCreatedAt": now(), "creationAttemptStarted": None})
         except Stopped:
+            event(LOGGER, logging.DEBUG, "voice_creation_cancelled", recovery="delete_unattached_voice")
             self.provider.delete_voice(provider_voice)
             raise
         return provider_voice
@@ -178,6 +184,7 @@ class Worker:
             if self.provider.get_voice(provider_voice) is not None:
                 return provider_voice
         token = self.claim(uid, "enroll", voice_id, renewal=True)
+        event(LOGGER, logging.WARNING, "voice_renewal_started", recovery="retained_recordings")
         try:
             voice = self.live_voice(uid, voice_id, preview)
             # Expired stored voices are recreated only from retained, consented recordings.
@@ -219,10 +226,12 @@ class Worker:
         provider_voice = self.ensured_voice(uid, voice_id, preview)
         expected_voice = (voice_id, preview)
         total = sum(len(chunks) for _, chunks in planned)
+        event(LOGGER, logging.DEBUG, "narration_plan_validated", chapter_count=len(planned), chunk_count=total, preview=preview)
         checkpoints = dict(job.get("checkpoints") or {})
         completed = 0
         outputs = []
-        for chapter, chunks in planned:
+        for chapter_index, (chapter, chunks) in enumerate(planned):
+            event(LOGGER, logging.DEBUG, "narration_chapter_started", chapter_index=chapter_index, chunk_count=len(chunks))
             for index, chunk in enumerate(chunks):
                 self.heartbeat(uid, "narrate", job_id, token, expected_voice)
                 key = f"{chapter['id']}:{index}"
@@ -232,16 +241,22 @@ class Worker:
                     clip = None
                 if clip is None:
                     if self.monotonic() - started >= WORK_SECONDS:
+                        event(LOGGER, logging.DEBUG, "narration_continuation_requested", completed_chunks=completed, chunk_count=total)
                         raise SafeError("job_continuing", retryable=True)
+                    event(LOGGER, logging.DEBUG, "narration_chunk_started", chapter_index=chapter_index, chunk_index=index)
                     clip = self.provider.generate(provider_voice, chunk["text"], chunk["style"])
                     self.heartbeat(uid, "narrate", job_id, token, expected_voice)
                     self.objects.checkpoint(uid, job_id, chapter["id"], index, clip)
                     checkpoints[key] = chunk_hash(chunk)
+                else:
+                    event(LOGGER, logging.DEBUG, "narration_checkpoint_reused", chapter_index=chapter_index, chunk_index=index)
                 wav_pcm(clip)
                 completed += 1
                 self.fenced_update(uid, "narrate", job_id, token,
                                    {"checkpoints": checkpoints, "progress": completed / total},
                                    {"progress": completed / total}, expected_voice)
+                event(LOGGER, logging.DEBUG, "narration_chunk_completed", chapter_index=chapter_index, chunk_index=index,
+                      completed_chunks=completed, chunk_count=total)
             self.heartbeat(uid, "narrate", job_id, token, expected_voice)
             # Read one validated checkpoint at a time; slow long-form delivery can otherwise
             # accumulate gigabytes of WAV clips before the chapter duration check runs.
@@ -252,6 +267,7 @@ class Worker:
             self.heartbeat(uid, "narrate", job_id, token, expected_voice)
             outputs.append({"chapterId": chapter["id"], "path": path, "sha256": hashlib.sha256(encoded).hexdigest(),
                             "duration": duration, "bytes": len(encoded)})
+            event(LOGGER, logging.DEBUG, "narration_chapter_published", chapter_index=chapter_index, audio_bytes=len(encoded), duration_seconds=round(duration, 3))
         self.fenced_update(uid, "narrate", job_id, token,
                            {"state": "ready", "outputs": outputs, "progress": 1, "chapters": [], "checkpoints": {}},
                            {"state": "ready", "outputs": outputs, "progress": 1, "errorCode": None}, expected_voice)
@@ -429,22 +445,25 @@ class Worker:
             return writes, None
         self.repo.atomic([account_path, private_path, public_path], operation)
 
+    @observed("worker", "cleanup")
     def cleanup(self):
         self.objects.cleanup_expired_objects()
         # Single-field collection-group scan: no manuscript or provider ID enters logs.
-        for snapshot in self.repo.db.collection_group("jobs").where("expiresAt", "<=", now()).stream():
-            path = snapshot.reference.path
-            parts = path.split("/")
-            if len(parts) != 4 or parts[0] != "privateAccounts":
-                continue
-            uid, job_id = identity(parts[1]), identity(parts[3])
-            self.expire_job(uid, job_id)
-        for snapshot in self.repo.db.collection_group("enrollments").where("expiresAt", "<=", now()).stream():
-            parts = snapshot.reference.path.split("/")
-            if len(parts) != 4 or parts[0] != "privateAccounts":
-                continue
-            uid, enrollment_id = identity(parts[1]), identity(parts[3])
-            self.expire_enrollment(uid, enrollment_id)
+        with connection(LOGGER, "firestore", "scan_expired_jobs"):
+            for snapshot in self.repo.db.collection_group("jobs").where("expiresAt", "<=", now()).stream():
+                path = snapshot.reference.path
+                parts = path.split("/")
+                if len(parts) != 4 or parts[0] != "privateAccounts":
+                    continue
+                uid, job_id = identity(parts[1]), identity(parts[3])
+                self.expire_job(uid, job_id)
+        with connection(LOGGER, "firestore", "scan_expired_enrollments"):
+            for snapshot in self.repo.db.collection_group("enrollments").where("expiresAt", "<=", now()).stream():
+                parts = snapshot.reference.path.split("/")
+                if len(parts) != 4 or parts[0] != "privateAccounts":
+                    continue
+                uid, enrollment_id = identity(parts[1]), identity(parts[3])
+                self.expire_enrollment(uid, enrollment_id)
         self.cleanup_orphan_recordings()
         self.cleanup_pending_deletions()
         self.cleanup_deleted_accounts()
@@ -478,17 +497,20 @@ class Worker:
             if self.monotonic() - started >= WORK_SECONDS:
                 break
             self.repo.put(DELETION_CURSOR_PATH, {"lastKey": key, "updatedAt": now()})
-            try:
-                if voice_id is None:
-                    self.delete_account(uid)
-                else:
-                    self.delete_voice(uid, voice_id)
-            except SafeError as error:
-                # Keep the deletion tombstone/intent intact for a future cleanup attempt.
-                LOGGER.warning("voice_cleanup_delete_code=%s", error.code)
-            except Exception:
-                # Storage/Auth/Firestore errors can contain sensitive details. Never log them.
-                LOGGER.warning("voice_cleanup_delete_code=internal_retry")
+            kind, item_id = ("deleteAccount", uid) if voice_id is None else ("deleteVoice", voice_id)
+            with operation_context(task_kind=kind, task_key=task_key(kind, uid, item_id)):
+                event(LOGGER, logging.DEBUG, "voice_cleanup_delete_started")
+                try:
+                    if voice_id is None:
+                        self.delete_account(uid)
+                    else:
+                        self.delete_voice(uid, voice_id)
+                    event(LOGGER, logging.DEBUG, "voice_cleanup_delete_completed")
+                except SafeError as error:
+                    # The durable tombstone remains available for a future cleanup attempt.
+                    event(LOGGER, logging.WARNING, "voice_cleanup_delete_deferred", error=error, code=error.code)
+                except Exception as error:
+                    event(LOGGER, logging.WARNING, "voice_cleanup_delete_deferred", error=error, code="internal_retry")
 
     def cleanup_deleted_accounts(self):
         for uid, account in self.repo.collection("privateAccounts"):
@@ -500,6 +522,7 @@ class Worker:
                 self.repo.delete_tree(f"users/{uid}")
                 self.repo.clear_children(f"privateAccounts/{uid}")
 
+    @observed("worker", "handle_task")
     def handle(self, payload, retry_count=0):
         kind, uid, item_id = validate_task(payload)
         if kind == "deleteVoice":
@@ -512,6 +535,7 @@ class Worker:
         try:
             token = self.claim(uid, kind, item_id)
             if token is None:
+                event(LOGGER, logging.DEBUG, "voice_task_already_terminal")
                 return {"status": "complete"}
             if kind == "enroll":
                 self.enroll(uid, item_id, token)
@@ -519,6 +543,7 @@ class Worker:
                 self.narrate(uid, item_id, token)
             return {"status": "complete"}
         except Stopped:
+            event(LOGGER, logging.DEBUG, "voice_task_cancelled")
             if kind == "narrate":
                 self.objects.delete_job(uid, item_id)
                 self.stopped_job(uid, item_id, token)
@@ -527,6 +552,7 @@ class Worker:
             if error.retryable and retry_count >= 29 and error.code in {"provider_quota", "provider_unavailable", "job_continuing"}:
                 # A exhausted provider retry must become an observable terminal state.
                 error.retryable = False
+                event(LOGGER, logging.DEBUG, "voice_task_retries_exhausted", queue_retry_count=retry_count, code=error.code)
             if token and not error.retryable:
                 try:
                     field = "status" if kind == "enroll" else "state"
@@ -536,7 +562,7 @@ class Worker:
                         private_values.update({"chapters": [], "checkpoints": {}, "outputs": []})
                     self.fenced_update(uid, kind, item_id, token, private_values, {field: "failed", "errorCode": error.code, "outputs": []} if kind == "narrate" else {field: "failed", "errorCode": error.code})
                 except Stopped:
-                    pass
+                    event(LOGGER, logging.DEBUG, "voice_failure_state_cancelled")
             raise
         finally:
             if token:

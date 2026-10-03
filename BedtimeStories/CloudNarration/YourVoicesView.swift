@@ -36,7 +36,7 @@ struct YourVoicesView: View {
                             if voice.status == "awaitingApproval" {
                                 Text("Listen to a preview, then choose whether to keep this voice.").font(.footnote).foregroundStyle(.secondary)
                                 Button("Use This Voice", systemImage: "checkmark.circle") {
-                                    Task { do { try await cloud.approveVoice(profileID: voice.id) } catch { message = error.localizedDescription } }
+                                    Task { do { try await cloud.approveVoice(profileID: voice.id) } catch { reportFailure("Voice approval failed", error: error) } }
                                 }.disabled(auditionedVoiceID != voice.id || cloud.isWorking)
                             }
                             Button("Delete Voice", systemImage: "trash", role: .destructive) { deletingVoice = voice }
@@ -70,12 +70,12 @@ struct YourVoicesView: View {
             Button("Delete Voice", role: .destructive) {
                 guard let voice = deletingVoice else { return }
                 deletingVoice = nil
-                Task { do { try await cloud.deleteVoice(profileID: voice.id) } catch { message = error.localizedDescription } }
+                Task { do { try await cloud.deleteVoice(profileID: voice.id) } catch { reportFailure("Voice deletion failed", error: error) } }
             }
         } message: { Text("Its samples and reusable voice will be removed. Narration already saved in your books remains.") }
         .confirmationDialog("Delete your voice account?", isPresented: $deleteAccount, titleVisibility: .visible) {
             Button("Delete Voice Account", role: .destructive) {
-                Task { do { try await cloud.deleteAccount() } catch { message = error.localizedDescription } }
+                Task { do { try await cloud.deleteAccount() } catch { reportFailure("Voice account deletion failed", error: error) } }
             }
         } message: { Text("Your saved voices, recordings, and cloud narration will be removed. Books already saved to your library remain.") }
         .onChange(of: cloud.jobs.map { $0.id + $0.state }) { _, _ in receivePreview() }
@@ -106,8 +106,11 @@ struct YourVoicesView: View {
                 guard owner == cloud.userID, active, !Task.isCancelled else { return }
                 previewVoiceID = voice.id; previewJobID = id
                 receivePreview()
-            } catch is CancellationError { previewLoading = false }
-            catch { previewLoading = false; message = error.localizedDescription }
+            } catch is CancellationError {
+                AppLog.trace("Voice preview request cancelled", category: "cloud_narration")
+                previewLoading = false
+            }
+            catch { previewLoading = false; reportFailure("Voice preview request failed", error: error) }
         }
     }
 
@@ -123,8 +126,8 @@ struct YourVoicesView: View {
                     let urls = try await cloud.download(job: job)
                     guard owner == cloud.userID, active, !Task.isCancelled, let url = urls.values.first else { return }
                     previewVoiceID = voiceID; preview.toggle(url)
-                } catch is CancellationError { }
-                catch { message = error.localizedDescription }
+                } catch is CancellationError { AppLog.trace("Voice preview download cancelled", category: "cloud_narration") }
+                catch { reportFailure("Voice preview download failed", error: error) }
             }
         } else if job.state == "failed" || job.state == "cancelled" || job.state == "expired" || job.expiresAt <= Date().timeIntervalSince1970 {
             previewJobID = nil; previewLoading = false
@@ -132,5 +135,10 @@ struct YourVoicesView: View {
                 ? CloudNarrationFailure.expired.localizedDescription
                 : String(localized: "This preview could not be created. Try again.")
         }
+    }
+
+    private func reportFailure(_ operation: String, error: any Error) {
+        CloudNarrationDiagnostics.reportIfNeeded(operation, error: error)
+        if !(error is CancellationError) { message = error.localizedDescription }
     }
 }

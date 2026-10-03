@@ -1,21 +1,25 @@
 import Foundation
+import MZAppFoundation
 
 @MainActor
 final class CloudLibraryObserver: NSObject {
     private let query = NSMetadataQuery()
     private let root: URL
     private let changed: @MainActor ([URL]) -> Void
+    private let logger: any AppLogging
 
-    init(root: URL, changed: @escaping @MainActor ([URL]) -> Void) {
+    init(root: URL, logger: any AppLogging = AppLog.logger, changed: @escaping @MainActor ([URL]) -> Void) {
         self.root = root
         self.changed = changed
+        self.logger = logger
         super.init()
         query.searchScopes = [NSMetadataQueryUbiquitousDocumentsScope]
         query.predicate = NSPredicate(format: "%K == %@", NSMetadataItemFSNameKey, "book.json")
         query.notificationBatchingInterval = 1
         NotificationCenter.default.addObserver(self, selector: #selector(updated), name: .NSMetadataQueryDidFinishGathering, object: query)
         NotificationCenter.default.addObserver(self, selector: #selector(updated), name: .NSMetadataQueryDidUpdate, object: query)
-        query.start()
+        if query.start() { logger.trace("iCloud library observation started", category: "library") }
+        else { logger.warning("iCloud library observation could not start", category: "library") }
     }
 
     @objc private func updated() {

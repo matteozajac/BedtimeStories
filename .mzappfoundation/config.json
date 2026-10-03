@@ -6,11 +6,12 @@
   "url_scheme": "bedtimestories",
   "platform": "iOS",
   "deployment_target": "27.0",
-  "package_version": "0.3.1",
+  "package_version": "0.5.0",
   "bug_reporting": false,
   "analytics_enabled": false,
   "diagnostics_enabled": false,
   "events": {},
   "products": [],
-  "providers": {}
+  "providers": {},
+  "developer_link_host": "com.matteozajac.bedtimestories"
 }

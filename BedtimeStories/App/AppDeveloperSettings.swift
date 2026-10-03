@@ -4,12 +4,17 @@ import SwiftUI
 
 /// UI composition stays outside the app's feature models.
 struct AppDeveloperSettings: View {
+    let services: AppServices
     @Environment(DeveloperOptions.self) private var options
 
     var body: some View {
         Section {
             Toggle("Developer Mode", isOn: Binding(get: { options.isEnabled }, set: options.setEnabled))
                 .accessibilityIdentifier("developer.mode")
+            FoundationSettingsLink(
+                services: services,
+                pages: FoundationDeveloperTools.pages(services: services)
+            )
             if options.isEnabled {
                 NavigationLink {
                     AppDeveloperConsole(options: options)

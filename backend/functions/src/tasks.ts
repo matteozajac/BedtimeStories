@@ -1,6 +1,6 @@
-import { createHash } from "node:crypto";
 import { CloudTasksClient, protos } from "@google-cloud/tasks";
 import { TaskDispatcher, WorkerTask } from "./contracts";
+import { connection, diagnostic, taskKey } from "./diagnostics";
 
 export interface QueueConfig { project: string; location: string; queue: string; workerURL: string; serviceAccount: string }
 export class CloudTaskDispatcher implements TaskDispatcher {
@@ -12,9 +12,9 @@ export class CloudTaskDispatcher implements TaskDispatcher {
     if (serviceURL.pathname !== "/" || serviceURL.search || serviceURL.hash || serviceURL.username || serviceURL.password) throw new Error("Worker URL must be the Cloud Run service base URL");
     const audience = serviceURL.origin;
     const parent = this.client.queuePath(project, location, queue);
-    const taskId = createHash("sha256").update(`${task.kind}:${task.uid}:${task.id}`).digest("hex");
+    const taskId = taskKey(task);
     try {
-      await this.client.createTask({
+      await connection("cloud_tasks", "enqueue", () => this.client.createTask({
         parent,
         task: {
           name: `${parent}/tasks/${taskId}`,
@@ -27,9 +27,10 @@ export class CloudTaskDispatcher implements TaskDispatcher {
             oidcToken: { serviceAccountEmail: serviceAccount, audience },
           },
         },
-      });
+      }), { task_key: taskId, task_kind: task.kind });
     } catch (error) {
       if ((error as { code?: number }).code !== 6) throw error; // ALREADY_EXISTS: same durable operation.
+      diagnostic("debug", "cloud_task_already_enqueued", { task_key: taskId, task_kind: task.kind });
     }
   }
 }

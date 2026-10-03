@@ -1,8 +1,26 @@
 import Foundation
+import MZAppFoundation
 
-enum CloudNarrationFailure: LocalizedError {
+enum CloudNarrationFailure: LocalizedError, LoggableError {
     case unavailable, signInRequired, accountChanged, invalidResponse, invalidAudio, expired, staleVoice
     case limitReached, retryLater, permissionDenied, confirmWithApple, invalidRecording
+
+    var logMessage: String {
+        switch self {
+        case .unavailable: "Cloud narration is unavailable in the current configuration."
+        case .signInRequired: "Cloud narration requires an authenticated account."
+        case .accountChanged: "The cloud narration account changed during the operation."
+        case .invalidResponse: "Cloud narration returned an invalid response shape."
+        case .invalidAudio: "Cloud narration audio failed integrity or format validation."
+        case .expired: "The narration or enrollment is no longer valid."
+        case .staleVoice: "The selected voice is not eligible for this narration."
+        case .limitReached: "The cloud narration service reported an exhausted limit."
+        case .retryLater: "The cloud narration operation requires a retry."
+        case .permissionDenied: "The cloud narration service rejected access."
+        case .confirmWithApple: "The cloud narration operation requires Apple confirmation."
+        case .invalidRecording: "The voice enrollment recording did not meet validation requirements."
+        }
+    }
 
     var errorDescription: String? {
         switch self {

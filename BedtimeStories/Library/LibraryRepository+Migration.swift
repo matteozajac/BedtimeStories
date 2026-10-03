@@ -14,7 +14,7 @@ extension LibraryRepository {
         for book in sourceScan.books {
             try Task.checkCancellation()
             let archive = try await share(book, root: source)
-            defer { try? FileManager.default.removeItem(at: archive) }
+            defer { removeIfPresent(archive, operation: "migration_archive") }
             var staged = try await stageImport(archive)
             defer { discardImport(staged) }
             let fingerprint = try migrationFingerprint(staged)
@@ -22,7 +22,7 @@ extension LibraryRepository {
             guard receipts[key] != fingerprint else { continue }
             if let existing = destinationBooks.first(where: { $0.id == book.id }) {
                 let existingArchive = try await share(existing, root: destination)
-                defer { try? FileManager.default.removeItem(at: existingArchive) }
+                defer { removeIfPresent(existingArchive, operation: "migration_existing_archive") }
                 let comparison = try await stageImport(existingArchive)
                 defer { discardImport(comparison) }
                 if try migrationFingerprint(comparison) == fingerprint {

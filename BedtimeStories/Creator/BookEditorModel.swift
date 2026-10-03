@@ -75,8 +75,10 @@ final class BookEditorModel {
         saved = false
         draft.modifiedAt = Date()
         let snapshot = draft
+        logger.trace("Draft persistence started", category: "creator")
         try await store.save(snapshot)
         if draft == snapshot { saved = true }
+        logger.log(LogEntry("Draft persistence completed", level: .debug, category: "creator"))
     }
 
     func discardAndClose() async -> Bool {
@@ -228,7 +230,9 @@ final class BookEditorModel {
             return true
         } catch {
             await store.removeMedia(copied.values.map(\.path), draftID: previous.id)
-            if !(error is CancellationError) {
+            if ErrorSnapshot.isCancellation(error) {
+                logger.trace("Generated narration save cancelled", category: "creator")
+            } else {
                 logger.error("Generated narration save failed", error: error, category: "creator")
                 message = String(localized: "Narration could not be added. Your previous recordings and text are still saved. Try again.")
             }
@@ -250,14 +254,19 @@ final class BookEditorModel {
             catch { await library.repository.discardImport(book); throw error }
             closing = true
             autosave?.cancel()
-            try? await store.remove(draft.id)
+            do { try await store.remove(draft.id) }
+            catch { logger.warning("Published draft cleanup failed", error: error, category: "creator") }
             logger.log(LogEntry("Book saved to library", category: "creator", metadata: ["as_copy": .bool(asCopy)]))
             return true
-        } catch BookError.editConflict {
-            logger.log(LogEntry("Book editing conflict", level: .warning, category: "creator"))
-            conflict = true
+        } catch is CancellationError {
+            logger.trace("Book publication cancelled", category: "creator")
             return false
         } catch {
+            if case BookError.editConflict = error {
+                logger.warning("Book editing conflict", error: error, category: "creator")
+                conflict = true
+                return false
+            }
             logger.error("Book publication failed", error: error, category: "creator")
             message = String(localized: "The book could not be saved to your library. Your edits are safe on this device. Check iCloud Drive and available storage, then try again.")
             return false

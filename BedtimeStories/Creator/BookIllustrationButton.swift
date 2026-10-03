@@ -1,3 +1,4 @@
+import CoreGraphics
 import ImagePlayground
 import SwiftUI
 
@@ -24,8 +25,18 @@ struct BookIllustrationButton: View {
             guard preparationID != nil else { return }
             preparing = true
             defer { preparing = false }
+            AppLog.trace("Illustration preparation started", category: "creator", metadata: ["chapter_artwork": .bool(chapterID != nil)])
             let snapshot = editor.draft
-            let scene = try? await IllustrationPromptBuilder.prepare(snapshot, chapterID: chapterID)
+            let scene: String?
+            do { scene = try await IllustrationPromptBuilder.prepare(snapshot, chapterID: chapterID) }
+            catch is CancellationError {
+                AppLog.trace("Illustration preparation cancelled", category: "creator")
+                return
+            }
+            catch {
+                AppLog.warning("Illustration scene generation failed; using story context", error: error, category: "creator")
+                scene = nil
+            }
             guard !Task.isCancelled else { return }
             let current = editor.draft
             concepts = [.text(IllustrationPromptBuilder.style)]
@@ -36,26 +47,44 @@ struct BookIllustrationButton: View {
             sourceImage = nil
             // The cover provides a visual reference for the rest of the book.
             let path = chapterID.flatMap { id in current.chapters.first(where: { $0.id == id })?.image } ?? current.cover
-            if let path, let url = try? await editor.store.mediaURL(path, draftID: current.id),
-               let data = try? await editor.store.imageData(at: url), let image = await ArtworkDecoder.thumbnail(data) {
+            if let path, let image = await loadReference(path, from: current) {
                 sourceImage = Image(uiImage: UIImage(cgImage: image))
             }
             if let cover = current.cover, chapterID != nil, cover != path,
-               let url = try? await editor.store.mediaURL(cover, draftID: current.id),
-               let data = try? await editor.store.imageData(at: url), let image = await ArtworkDecoder.thumbnail(data) {
+               let image = await loadReference(cover, from: current) {
                 concepts.append(.image(image))
             }
             guard !Task.isCancelled else { return }
             presented = true
+            AppLog.debug("Illustration preparation completed", category: "creator", metadata: ["has_generated_scene": .bool(scene != nil), "has_reference": .bool(sourceImage != nil)])
         }
         .imagePlaygroundSheet(isPresented: $presented, concepts: concepts, sourceImage: sourceImage) { url in
             Task {
                 do {
                     let data = try await editor.store.imageData(at: url)
                     await editor.setImage(data, chapterID: chapterID)
-                } catch { editor.message = String(localized: "The generated picture could not be saved. Try creating it again.") }
+                } catch is CancellationError { AppLog.trace("Generated illustration loading cancelled", category: "creator") }
+                catch {
+                    AppLog.error("Generated illustration loading failed", error: error, category: "creator")
+                    editor.message = String(localized: "The generated picture could not be saved. Try creating it again.")
+                }
             }
         }
         .imagePlaygroundGenerationStyle(.illustration, in: [.illustration])
+    }
+
+    private func loadReference(_ path: String, from draft: BookDraft) async -> CGImage? {
+        do {
+            let url = try await editor.store.mediaURL(path, draftID: draft.id)
+            let data = try await editor.store.imageData(at: url)
+            let image = await ArtworkDecoder.thumbnail(data)
+            guard !Task.isCancelled else { return nil }
+            if image == nil { AppLog.warning("Illustration reference could not be decoded", category: "creator") }
+            return image
+        } catch is CancellationError { return nil }
+        catch {
+            AppLog.warning("Illustration reference unavailable", error: error, category: "creator")
+            return nil
+        }
     }
 }

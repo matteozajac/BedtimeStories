@@ -54,7 +54,7 @@ final class LibraryModel {
         let namespace = defaults.string(forKey: "libraryNamespace") ?? UUID().uuidString
         defaults.set(namespace, forKey: "libraryNamespace")
         progress = LocalProgress(namespace: namespace, defaults: defaults)
-        repository = LibraryRepository(cacheRoot: Self.cacheURL(namespace))
+        repository = LibraryRepository(cacheRoot: Self.cacheURL(namespace), logDestination: FeatureLogDestination(logger: logger))
     }
 
     var filteredBooks: [LibraryBook] {
@@ -114,7 +114,7 @@ final class LibraryModel {
             }
             await refresh(allowWhilePreparing: true)
             if let url = pendingImport { pendingImport = nil; preparingLibrary = false; importBook(url) }
-        } catch is CancellationError { }
+        } catch is CancellationError { logger.trace("Library setup cancelled", category: "library") }
         catch {
             logger.error("Library setup failed", error: error, category: "library")
             message = String(localized: "Your library could not be opened. Check available storage and iCloud Drive in Settings, then try again.")
@@ -132,13 +132,13 @@ final class LibraryModel {
         let namespace = namespaces[next.account] ?? (namespaces.isEmpty || (namespaces.count == 1 && namespaces["device"] != nil) ? defaults.string(forKey: "libraryNamespace") ?? UUID().uuidString : UUID().uuidString)
         namespaces[next.account] = namespace
         defaults.set(namespaces, forKey: "defaultLibraryNamespaces")
-        repository = LibraryRepository(cacheRoot: Self.cacheURL(namespace))
+        repository = LibraryRepository(cacheRoot: Self.cacheURL(namespace), logDestination: FeatureLogDestination(logger: logger))
         progress = LocalProgress(namespace: namespace, defaults: defaults)
         books = []; images = [:]; selectedBook = nil; restoredPlayback = false; refreshing = false; warnings = []; offline = false; discoveredFolders = []
         observe(next.root)
         if next.isCloud {
             let token = session
-            cloudObserver = CloudLibraryObserver(root: next.root) { [weak self] folders in
+            cloudObserver = CloudLibraryObserver(root: next.root, logger: logger) { [weak self] folders in
                 guard let self, self.session == token else { return }
                 self.discoveredFolders = folders
                 self.scheduleRefresh()
@@ -169,7 +169,7 @@ final class LibraryModel {
                     player.restore(book: book, repository: repo, root: root, progress: progress)
                 }
             }
-        } catch is CancellationError { }
+        } catch is CancellationError { logger.trace("Library scan cancelled", category: "library") }
         catch {
             logger.error("Library scan failed", error: error, category: "library")
             message = error.localizedDescription
@@ -185,6 +185,7 @@ final class LibraryModel {
             let data = try await repository.imageData(url)
             guard !Task.isCancelled else { return nil }
             let decoded = await ArtworkDecoder.thumbnail(data)
+            if decoded == nil { logger.warning("Book artwork could not be decoded", category: "library") }
             let image = decoded.map { UIImage(cgImage: $0) }
             images[key] = image
             return image
@@ -310,12 +311,13 @@ final class LibraryModel {
     private func perform(_ label: String, phase: String, operation: @escaping @MainActor () async throws -> Void) {
         guard activity == nil, !preparingLibrary else { return }
         activity = NSLocalizedString(label, comment: "")
+        logger.trace("Library operation started", category: "library", metadata: ["phase": .string(phase)])
         operationTask = Task {
             do {
                 try await operation()
                 logger.log(LogEntry("Library operation completed", category: "library", metadata: ["phase": .string(phase)]))
             }
-            catch is CancellationError { }
+            catch is CancellationError { logger.trace("Library operation cancelled", category: "library", metadata: ["phase": .string(phase)]) }
             catch {
                 logger.error("Library operation failed", error: error, category: "library", metadata: ["phase": .string(phase)])
                 message = error.localizedDescription
@@ -349,10 +351,12 @@ final class LibraryModel {
 
     private static func cacheURL(_ namespace: String) -> URL {
         let base = URL.applicationSupportDirectory.appendingPathComponent("LibraryCache/" + namespace, isDirectory: true)
-        try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+        do { try FileManager.default.createDirectory(at: base, withIntermediateDirectories: true) }
+        catch { AppLog.warning("Library cache directory preparation failed", error: error, category: "library") }
         var url = base
         var values = URLResourceValues(); values.isExcludedFromBackup = true
-        try? url.setResourceValues(values)
+        do { try url.setResourceValues(values) }
+        catch { AppLog.warning("Library cache backup exclusion failed", error: error, category: "library") }
         return base
     }
 

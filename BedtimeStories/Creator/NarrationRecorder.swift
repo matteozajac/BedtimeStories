@@ -43,6 +43,7 @@ final class NarrationRecorder: NSObject, AVAudioRecorderDelegate, AVAudioPlayerD
         })
         observers.append(center.addObserver(forName: AVAudioSession.mediaServicesWereResetNotification, object: nil, queue: .main) { [weak self] _ in
             Task { @MainActor [weak self] in
+                self?.logger.warning("Recording audio services reset", category: "recording")
                 self?.cancel()
                 self?.message = String(localized: "Audio was interrupted. Start a new take when you’re ready.")
             }
@@ -56,6 +57,7 @@ final class NarrationRecorder: NSObject, AVAudioRecorderDelegate, AVAudioPlayerD
         guard !busy, !recording else { return }
         resetTake()
         preparing = true; message = nil; permissionDenied = false
+        logger.trace("Microphone permission requested", category: "recording")
         let token = generation
         let previous = operation
         operation = Task { [weak self] in
@@ -76,6 +78,7 @@ final class NarrationRecorder: NSObject, AVAudioRecorderDelegate, AVAudioPlayerD
     func pause() {
         guard recording else { return }
         recorder?.pause(); recording = false; paused = true
+        logger.log(LogEntry("Recording paused", level: .debug, category: "recording"))
         meter?.cancel(); level = 0
         releaseSession()
     }
@@ -83,6 +86,7 @@ final class NarrationRecorder: NSObject, AVAudioRecorderDelegate, AVAudioPlayerD
     func resume() {
         guard paused, !busy else { return }
         preparing = true; message = nil
+        logger.trace("Recording resume requested", category: "recording")
         let token = generation
         let previous = operation
         operation = Task { [weak self] in await previous?.value; await self?.activateRecording(token: token, resuming: true) }
@@ -91,6 +95,7 @@ final class NarrationRecorder: NSObject, AVAudioRecorderDelegate, AVAudioPlayerD
     func finish() {
         guard (recording || paused), !busy else { return }
         meter?.cancel(); recording = false; paused = false; finishing = true; level = 0
+        logger.trace("Recording completion requested", category: "recording")
         recorder?.stop()
         releaseSession()
         // An interruption can suppress the recorder delegate callback. Explicit
@@ -122,7 +127,12 @@ final class NarrationRecorder: NSObject, AVAudioRecorderDelegate, AVAudioPlayerD
                 player.delegate = self
                 guard player.play() else { throw BookError.unavailable("Audio is unavailable.") }
                 self.preview = player; self.playing = true
-            } catch {
+                self.logger.log(LogEntry("Recording preview started", level: .debug, category: "recording"))
+            } catch is CancellationError {
+                self.logger.trace("Recording preview cancelled", category: "recording")
+                self.releaseSession()
+            }
+            catch {
                 self.logger.error("Recording preview failed", error: error, category: "recording")
                 self.message = String(localized: "The take could not be played. Try again."); self.releaseSession()
             }
@@ -131,6 +141,7 @@ final class NarrationRecorder: NSObject, AVAudioRecorderDelegate, AVAudioPlayerD
     }
 
     func pauseForInterruption() {
+        logger.trace("Recording audio interruption received", category: "recording", metadata: ["preparing": .bool(preparing), "recording": .bool(recording), "previewing": .bool(playing)])
         if preparing {
             generation = UUID(); operation?.cancel(); preparing = false
             releaseSession()
@@ -164,6 +175,7 @@ final class NarrationRecorder: NSObject, AVAudioRecorderDelegate, AVAudioPlayerD
             }
             guard recorder?.record() == true else { throw BookError.unavailable("The microphone is unavailable.") }
             recording = true; paused = false; preparing = false
+            logger.log(LogEntry("Microphone recording started", level: .debug, category: "recording", metadata: ["resuming": .bool(resuming)]))
             meter = Task { [weak self] in
                 while !Task.isCancelled {
                     guard let self, self.recording, let audio = self.recorder else { return }
@@ -173,7 +185,12 @@ final class NarrationRecorder: NSObject, AVAudioRecorderDelegate, AVAudioPlayerD
                     do { try await Task.sleep(for: .milliseconds(100)) } catch { return }
                 }
             }
-        } catch {
+        } catch is CancellationError {
+            logger.trace("Microphone session cancelled", category: "recording")
+            preparing = false
+            releaseSession()
+        }
+        catch {
             logger.error("Microphone session failed", error: error, category: "recording")
             preparing = false
             message = String(localized: "The microphone could not start. Close other recording apps, then try again. Your saved narration is unchanged.")
@@ -186,7 +203,7 @@ final class NarrationRecorder: NSObject, AVAudioRecorderDelegate, AVAudioPlayerD
         operation?.cancel(); meter?.cancel()
         recorder?.delegate = nil; recorder?.stop(); recorder = nil
         preview?.stop(); preview = nil
-        if let url { try? FileManager.default.removeItem(at: url) }
+        removeTakeIfPresent()
         url = nil; recording = false; paused = false; finishing = false; preparing = false
         playing = false; ready = false; elapsed = 0; level = 0
         recordingFailed = false
@@ -194,9 +211,11 @@ final class NarrationRecorder: NSObject, AVAudioRecorderDelegate, AVAudioPlayerD
 
     private func releaseSession() {
         let previous = sessionRelease
-        sessionRelease = Task {
+        sessionRelease = Task { [logger] in
             await previous?.value
-            _ = try? await AVAudioSession.sharedInstance().deactivate(options: [.notifyOthersOnDeactivation])
+            do { _ = try await AVAudioSession.sharedInstance().deactivate(options: [.notifyOthersOnDeactivation]) }
+            catch is CancellationError { logger.trace("Recording audio session release cancelled", category: "recording") }
+            catch { logger.warning("Recording audio session release failed", error: error, category: "recording") }
         }
     }
 
@@ -212,11 +231,23 @@ final class NarrationRecorder: NSObject, AVAudioRecorderDelegate, AVAudioPlayerD
     private func complete(file: URL, successfully: Bool) async {
         guard url == file, finishing || recording || paused else { return }
         recording = false; paused = false; meter?.cancel()
-        let duration = try? await AVURLAsset(url: file).load(.duration).seconds
+        let duration: Double
+        do { duration = try await AVURLAsset(url: file).load(.duration).seconds }
+        catch {
+            guard url == file else { return }
+            finishing = false; preparing = false; ready = false
+            if ErrorSnapshot.isCancellation(error) { logger.trace("Recording validation cancelled", category: "recording") }
+            else {
+                logger.error("Recording duration validation failed", error: error, category: "recording")
+                message = String(localized: "The take could not be finished. Try recording again.")
+            }
+            return
+        }
         guard url == file else { return }
         finishing = false; preparing = false
-        if successfully, !recordingFailed, let duration, duration.isFinite, duration > 0 {
+        if successfully, !recordingFailed, duration.isFinite, duration > 0 {
             elapsed = duration; ready = true
+            logger.log(LogEntry("Recording validated", level: .debug, category: "recording"))
         } else {
             logger.log(LogEntry("Recording did not complete", level: .warning, category: "recording"))
             ready = false; message = String(localized: "The take could not be finished. Try recording again.")
@@ -237,14 +268,32 @@ final class NarrationRecorder: NSObject, AVAudioRecorderDelegate, AVAudioPlayerD
         let id = ObjectIdentifier(player)
         Task { @MainActor [weak self] in
             guard let self, self.preview.map(ObjectIdentifier.init) == id else { return }
+            if !flag { self.logger.warning("Recording preview did not finish successfully", category: "recording") }
             self.playing = false; self.releaseSession()
         }
+    }
+
+    nonisolated func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: (any Error)?) {
+        let id = ObjectIdentifier(player)
+        let snapshot = error.map { ErrorSnapshot($0) }
+        Task { @MainActor [weak self] in
+            guard let self, self.preview.map(ObjectIdentifier.init) == id else { return }
+            self.logger.log(LogEntry("Recording preview decoding failed", level: .error, category: "recording", error: snapshot))
+            self.preview?.stop(); self.playing = false; self.releaseSession()
+            self.message = String(localized: "The take could not be played. Try again.")
+        }
+    }
+
+    private func removeTakeIfPresent() {
+        guard let url, FileManager.default.fileExists(atPath: url.path) else { return }
+        do { try FileManager.default.removeItem(at: url) }
+        catch { logger.warning("Temporary recording cleanup failed", error: error, category: "recording") }
     }
 
     isolated deinit {
         operation?.cancel(); meter?.cancel()
         recorder?.delegate = nil; recorder?.stop(); preview?.stop()
-        if let url { try? FileManager.default.removeItem(at: url) }
+        removeTakeIfPresent()
         for observer in observers { NotificationCenter.default.removeObserver(observer) }
     }
 }

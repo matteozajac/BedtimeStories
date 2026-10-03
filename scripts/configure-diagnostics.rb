@@ -8,9 +8,16 @@ app = project.targets.find { |target| target.name == 'BedtimeStories' }
 local = project.targets.find { |target| target.name == 'BedtimeStoriesLocal' }
 raise 'Run the MZAppFoundation setup apply command first' unless app && local
 
-# MZAppFoundation 0.3.1 and the existing backend share the app's Firebase pin.
+# MZAppFoundation 0.5.0 and the existing backend share the app's Firebase pin.
 firebase = project.root_object.package_references.find { |ref| ref.respond_to?(:repositoryURL) && ref.repositoryURL.include?('firebase-ios-sdk') }
 firebase.requirement = { 'kind' => 'exactVersion', 'version' => '12.19.2' }
+
+# Keep app-owned Firebase inspection separate from the generated provider composition.
+bootstrap_path = File.join(root, '.mzappfoundation', 'Generated', 'MZBootstrap.swift')
+bootstrap = File.read(bootstrap_path)
+bootstrap = bootstrap.sub('var inventory = FoundationDiagnostics()', 'var inventory = AppFoundationDiagnostics.make()')
+raise 'Generated bootstrap has no app-owned diagnostics hook' unless bootstrap.include?('var inventory = AppFoundationDiagnostics.make()')
+File.write(bootstrap_path, bootstrap)
 
 local.file_system_synchronized_groups.clear
 local.file_system_synchronized_groups.concat(app.file_system_synchronized_groups)

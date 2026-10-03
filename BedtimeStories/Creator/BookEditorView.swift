@@ -157,7 +157,9 @@ struct BookEditorView: View {
         .fileImporter(isPresented: $importingFullAudio, allowedContentTypes: [.audio]) { result in
             switch result {
             case .success(let url): Task { _ = await editor.setFullAudio(url) }
-            case .failure(let error): editor.message = error.localizedDescription
+            case .failure(let error):
+                AppLog.error("Book recording selection failed", error: error, category: "creator")
+                editor.message = error.localizedDescription
             }
         }
         .confirmationDialog("Remove this chapter?", isPresented: Binding(get: { removingChapter != nil }, set: { if !$0 { removingChapter = nil } }), titleVisibility: .visible) {
@@ -171,10 +173,23 @@ struct BookEditorView: View {
             loadingPhoto = true
             defer { loadingPhoto = false }
             do { if let data = try await photo.loadTransferable(type: Data.self) { await editor.setImage(data) } }
-            catch { editor.message = String(localized: "The photo could not be opened. Try another photo.") }
+            catch is CancellationError { AppLog.trace("Cover photo loading cancelled", category: "creator") }
+            catch {
+                AppLog.error("Cover photo loading failed", error: error, category: "creator")
+                editor.message = String(localized: "The photo could not be opened. Try another photo.")
+            }
         }
         .onChange(of: phase) { _, new in
-            if new != .active { Task { do { try await editor.persist() } catch { editor.message = String(localized: "Your draft could not be saved. Keep the editor open and try again.") } } }
+            if new != .active {
+                Task {
+                    do { try await editor.persist() }
+                    catch is CancellationError { AppLog.trace("Background draft save cancelled", category: "creator") }
+                    catch {
+                        AppLog.error("Background draft save failed", error: error, category: "creator")
+                        editor.message = String(localized: "Your draft could not be saved. Keep the editor open and try again.")
+                    }
+                }
+            }
         }
         .alert("Unable to complete", isPresented: Binding(get: { editor.message != nil }, set: { if !$0 { editor.message = nil } })) { } message: { Text(editor.message ?? "") }
         .alert("Book Changed", isPresented: $editor.conflict) {

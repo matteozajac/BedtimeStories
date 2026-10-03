@@ -29,8 +29,13 @@ struct DraftImageView: View {
             let data = try await store.imageData(at: url)
             let thumbnail = await ArtworkDecoder.thumbnail(data)
             guard !Task.isCancelled else { return nil }
+            if thumbnail == nil { AppLog.warning("Draft artwork could not be decoded", category: "creator") }
             return thumbnail.map { UIImage(cgImage: $0) }
-        } catch { return nil }
+        } catch is CancellationError { return nil }
+        catch {
+            AppLog.warning("Draft artwork unavailable", error: error, category: "creator")
+            return nil
+        }
     }
 }
 

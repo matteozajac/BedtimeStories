@@ -37,6 +37,8 @@ final class StoryGenerationModel {
         retrying = false
         saving = false
         logger.log(LogEntry("Story creation started", category: "creator", metadata: ["mode": .string(mode.rawValue)]))
+        let started = ContinuousClock.now
+        var phase = "validation"
         defer { working = false; saving = false }
 
         do {
@@ -49,15 +51,19 @@ final class StoryGenerationModel {
             for attempt in 0..<2 {
                 try Task.checkCancellation()
                 retrying = attempt > 0
+                phase = "generation"
+                logger.trace("Story generation request started", category: "creator", metadata: ["mode": .string(mode.rawValue), "attempt": .integer(attempt + 1)])
                 do {
                     let generated = try await generator.book(for: attemptRequest, mode: mode)
+                    logger.trace("Story generation response received", category: "creator", metadata: ["mode": .string(mode.rawValue), "attempt": .integer(attempt + 1), "chapter_count": .integer(generated.chapters.count)])
                     try Task.checkCancellation()
                     attemptRequest.previousWordCount = generated.chapters.reduce(0) { $0 + StoryReadingLength.wordCount($1.text) }
+                    phase = "response_validation"
                     result = try StoryOutputValidator.validate(generated, request: request)
                     break
                 } catch {
                     guard !Task.isCancelled, attempt == 0, Self.canRetry(error) else { throw error }
-                    logger.log(LogEntry("Story creation retry", level: .warning, category: "creator", error: ErrorSnapshot(error)))
+                    logger.warning("Story creation retry", error: error, category: "creator", metadata: ["mode": .string(mode.rawValue), "phase": .string(phase), "attempt": .integer(attempt + 1)])
                 }
             }
             guard let book = result else { throw StoryGenerationFailure.invalidResponse }
@@ -73,18 +79,20 @@ final class StoryGenerationModel {
                 return chapter
             }
             saving = true
+            phase = "draft_save"
             try await save(snapshot)
             draft = snapshot
             completedChapterCount = snapshot.chapters.count
             try Task.checkCancellation()
             completed = true
-            logger.log(LogEntry("Story draft created", category: "creator", metadata: ["chapter_count": .integer(snapshot.chapters.count)]))
+            logger.log(LogEntry("Story draft created", category: "creator", metadata: ["chapter_count": .integer(snapshot.chapters.count), "mode": .string(mode.rawValue), "elapsed_ms": .integer(Self.elapsedMilliseconds(since: started))]))
         } catch {
-            if error is CancellationError || Task.isCancelled {
+            if ErrorSnapshot.isCancellation(error) || Task.isCancelled {
+                logger.trace("Story creation cancelled", category: "creator", metadata: ["mode": .string(mode.rawValue), "phase": .string(phase), "elapsed_ms": .integer(Self.elapsedMilliseconds(since: started))])
                 message = String(localized: "Creation stopped. Your previous drafts are safe. Try again when you are ready.")
             } else {
                 if case StoryGenerationFailure.saveFailed = error { /* Already recorded with its underlying error. */ }
-                else { logger.error("Story creation failed", error: error, category: "creator") }
+                else { logger.error("Story creation failed", error: error, category: "creator", metadata: ["mode": .string(mode.rawValue), "phase": .string(phase), "elapsed_ms": .integer(Self.elapsedMilliseconds(since: started))]) }
                 message = Self.message(for: error)
             }
         }
@@ -100,10 +108,16 @@ final class StoryGenerationModel {
 
     private func save(_ snapshot: BookDraft) async throws {
         do { try await store.save(snapshot) }
+        catch is CancellationError { throw CancellationError() }
         catch {
             logger.error("Generated draft save failed", error: error, category: "creator")
             throw StoryGenerationFailure.saveFailed
         }
+    }
+
+    private static func elapsedMilliseconds(since started: ContinuousClock.Instant) -> Int {
+        let elapsed = started.duration(to: .now).components
+        return Int(elapsed.seconds * 1_000 + elapsed.attoseconds / 1_000_000_000_000_000)
     }
 
     static func message(for error: Error) -> String {

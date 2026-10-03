@@ -3,12 +3,16 @@ import { Firestore, DocumentSnapshot, Timestamp, Transaction, FieldValue } from 
 import { HttpsError } from "firebase-functions/v2/https";
 import { CONSENT_STATEMENTS, CONSENT_VERSION, LIMITS, Principal, RecordingKind, RecordingStore, TaskDispatcher, WorkerTask } from "./contracts";
 import { contentHash, decodeRecording, enrollmentInput, exactKeys, identifier, narrationInput, object, requireApple } from "./validation";
+import { connection, diagnostic, preserveCause, taskKey, withDiagnosticContext } from "./diagnostics";
 
 interface ServiceOptions { enabled: () => boolean; now?: () => number }
 export class CloudVoiceService {
   private now: () => number;
   constructor(private db: Firestore, private recordings: RecordingStore, private dispatcher: TaskDispatcher, private options: ServiceOptions) {
     this.now = options.now ?? (() => Date.now());
+  }
+  private transaction<T>(execute: (tx: Transaction) => Promise<T>): Promise<T> {
+    return connection("firestore", "transaction", () => this.db.runTransaction(execute));
   }
   private authenticated(principal: Principal | undefined, recent = false): Principal { return requireApple(principal, this.now() / 1000, recent); }
   private enabled(): void { if (!this.options.enabled()) throw new HttpsError("failed-precondition", "Cloud narration is not available yet."); }
@@ -40,19 +44,23 @@ export class CloudVoiceService {
     tx.set(this.account(uid), { state: "active", limits: current }, { merge: true });
   }
   private async dispatch(task: WorkerTask, reference: FirebaseFirestore.DocumentReference): Promise<void> {
-    try {
-      await this.dispatcher.enqueue(task);
-      await this.db.runTransaction(async (tx) => {
-        const current = await tx.get(reference);
-        // A concurrent delete can replace an enrollment outbox. Never clear that newer operation.
-        if (current.exists && current.get("taskKind") === task.kind) {
-          tx.update(reference, { dispatchPending: false, dispatchedAt: Timestamp.fromMillis(this.now()) });
-        }
-      });
-    } catch {
-      // The persisted outbox is retried by retryPendingDispatches. Do not log payloads or provider failures.
-      // Returning the accepted ID lets the client observe the durable job instead of submitting another chargeable request.
-    }
+    return withDiagnosticContext({ task_key: taskKey(task), task_kind: task.kind }, async () => {
+      diagnostic("debug", "cloud_dispatch_started");
+      try {
+        await this.dispatcher.enqueue(task);
+        await this.transaction(async (tx) => {
+          const current = await tx.get(reference);
+          // A concurrent delete can replace an enrollment outbox. Never clear that newer operation.
+          if (current.exists && current.get("taskKind") === task.kind) {
+            tx.update(reference, { dispatchPending: false, dispatchedAt: Timestamp.fromMillis(this.now()) });
+          }
+        });
+        diagnostic("debug", "cloud_dispatch_completed");
+      } catch (error) {
+        diagnostic("warn", "cloud_dispatch_deferred", { recovery: "durable_outbox_retry" }, error);
+        // Returning the accepted ID lets the client observe the durable outbox without another chargeable request.
+      }
+    });
   }
   async beginVoiceEnrollment(principal: Principal | undefined, raw: unknown) {
     const { uid } = this.authenticated(principal);
@@ -60,7 +68,7 @@ export class CloudVoiceService {
     const input = enrollmentInput(raw);
     const id = randomUUID();
     const expiresAt = Timestamp.fromMillis(this.now() + LIMITS.enrollmentTTLSeconds * 1000);
-    await this.db.runTransaction(async (tx) => {
+    await this.transaction(async (tx) => {
       const account = await tx.get(this.account(uid));
       this.active(account);
       const voices = await tx.get(this.db.collection(`privateAccounts/${uid}/voices`).where("status", "in", ["processing", "awaitingApproval", "ready", "failed", "deleting"]));
@@ -85,7 +93,7 @@ export class CloudVoiceService {
     const { audio, duration } = decodeRecording(data.audioBase64, kind);
     const hash = contentHash(audio.toString("base64"));
     const reservation = randomUUID();
-    const alreadySaved = await this.db.runTransaction(async (tx) => {
+    const alreadySaved = await this.transaction(async (tx) => {
       const [account, enrollment] = await tx.getAll(this.account(uid), this.enrollment(uid, id));
       this.active(account!);
       this.collecting(enrollment!, uid);
@@ -103,7 +111,7 @@ export class CloudVoiceService {
     let saved: Awaited<ReturnType<RecordingStore["save"]>> | undefined;
     try {
       saved = await this.recordings.save(uid, id, kind, audio);
-      await this.db.runTransaction(async (tx) => {
+      await this.transaction(async (tx) => {
         const [account, enrollment] = await tx.getAll(this.account(uid), this.enrollment(uid, id));
         this.active(account!);
         this.collecting(enrollment!, uid);
@@ -113,13 +121,17 @@ export class CloudVoiceService {
       return {};
     } catch (error) {
       // Deletion can race a KMS/storage write: remove any result that cannot be attached to its active owner.
-      if (saved) await this.recordings.remove(saved.path).catch(() => undefined);
-      await this.db.runTransaction(async (tx) => {
+      if (saved) await this.recordings.remove(saved.path).catch((cleanupError) => {
+        diagnostic("warn", "recording_rollback_object_delete_failed", { recovery: "scheduled_cleanup" }, cleanupError);
+      });
+      await this.transaction(async (tx) => {
         const enrollment = await tx.get(this.enrollment(uid, id));
         if (enrollment.exists && enrollment.get(`uploads.${kind}.reservation`) === reservation) tx.update(enrollment.ref, { [`uploads.${kind}`]: FieldValue.delete() });
+      }).catch((cleanupError) => {
+        diagnostic("warn", "recording_rollback_reservation_failed", { recovery: "reservation_expiry" }, cleanupError);
       });
       if (error instanceof HttpsError) throw error;
-      throw new HttpsError("unavailable", "The recording could not be saved. Try again.");
+      throw preserveCause(new HttpsError("unavailable", "The recording could not be saved. Try again."), error);
     } finally { audio.fill(0); }
   }
 
@@ -129,7 +141,7 @@ export class CloudVoiceService {
     const data = object(raw);
     exactKeys(data, ["enrollmentId"]);
     const id = identifier(data.enrollmentId);
-    await this.db.runTransaction(async (tx) => {
+    await this.transaction(async (tx) => {
       const [account, enrollment, profile] = await tx.getAll(this.account(uid), this.enrollment(uid, id), this.privateVoice(uid, id));
       this.active(account!);
       this.owned(enrollment!, uid);
@@ -161,7 +173,7 @@ export class CloudVoiceService {
     const input = narrationInput(raw);
     const jobId = input.requestId;
     const payloadHash = contentHash(input);
-    await this.db.runTransaction(async (tx) => {
+    await this.transaction(async (tx) => {
       const [account, profile, existing] = await tx.getAll(this.account(uid), this.privateVoice(uid, input.voiceProfileId), this.privateJob(uid, jobId));
       this.active(account!);
       this.owned(profile!, uid);
@@ -191,7 +203,7 @@ export class CloudVoiceService {
     const data = object(raw);
     exactKeys(data, ["profileId"]);
     const id = identifier(data.profileId);
-    await this.db.runTransaction(async (tx) => {
+    await this.transaction(async (tx) => {
       const [account, profile] = await tx.getAll(this.account(uid), this.privateVoice(uid, id));
       this.active(account!);
       this.owned(profile!, uid);
@@ -209,7 +221,7 @@ export class CloudVoiceService {
     const data = object(raw);
     exactKeys(data, ["jobId"]);
     const id = identifier(data.jobId);
-    await this.db.runTransaction(async (tx) => {
+    await this.transaction(async (tx) => {
       const [account, job] = await tx.getAll(this.account(uid), this.privateJob(uid, id));
       this.active(account!);
       this.owned(job!, uid);
@@ -226,7 +238,7 @@ export class CloudVoiceService {
     exactKeys(data, ["profileId"]);
     const id = identifier(data.profileId);
     let needsDispatch = false;
-    await this.db.runTransaction(async (tx) => {
+    await this.transaction(async (tx) => {
       const [account, profile] = await tx.getAll(this.account(uid), this.privateVoice(uid, id));
       this.active(account!);
       this.owned(profile!, uid);
@@ -249,7 +261,7 @@ export class CloudVoiceService {
     const data = object(raw);
     exactKeys(data, []);
     let needsDispatch = false;
-    await this.db.runTransaction(async (tx) => {
+    await this.transaction(async (tx) => {
       const account = await tx.get(this.account(uid));
       if (account.get("state") === "deleted") return;
       tx.set(this.account(uid), { state: "deleting", deletionRequestedAt: Timestamp.fromMillis(this.now()), taskKind: "deleteAccount", dispatchPending: true }, { merge: true });
@@ -263,10 +275,11 @@ export class CloudVoiceService {
 
   async retryPendingDispatches(): Promise<void> {
     const pending = [
-      ...((await this.db.collectionGroup("voices").where("dispatchPending", "==", true).limit(100).get()).docs),
-      ...((await this.db.collectionGroup("jobs").where("dispatchPending", "==", true).limit(100).get()).docs),
-      ...((await this.db.collection("privateAccounts").where("dispatchPending", "==", true).limit(100).get()).docs),
+      ...((await connection("firestore", "pending_voices", () => this.db.collectionGroup("voices").where("dispatchPending", "==", true).limit(100).get())).docs),
+      ...((await connection("firestore", "pending_jobs", () => this.db.collectionGroup("jobs").where("dispatchPending", "==", true).limit(100).get())).docs),
+      ...((await connection("firestore", "pending_accounts", () => this.db.collection("privateAccounts").where("dispatchPending", "==", true).limit(100).get())).docs),
     ];
+    diagnostic("debug", "pending_dispatch_scan_completed", { pending_count: pending.length });
     for (const snapshot of pending) {
       const path = snapshot.ref.path.split("/");
       if (path[0] !== "privateAccounts") continue;

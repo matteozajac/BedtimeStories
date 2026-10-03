@@ -123,6 +123,7 @@ struct ReaderView: View {
 
     private func loadChapter() async {
         guard let chapter else { loading = false; return }
+        AppLog.trace("Chapter loading started", category: "reader", metadata: ["chapter_index": .integer(index)])
         content = nil; illustration = nil; error = nil; loading = true
         library.progress.saveReading(chapter.id, bookID: book.id)
         var loadedImage: UIImage?
@@ -134,10 +135,16 @@ struct ReaderView: View {
         }
         do {
             if let text = chapter.text { loadedText = try await library.text(text, book: book) }
-        } catch is CancellationError { return }
-        catch { failure = error.localizedDescription }
+        } catch is CancellationError {
+            AppLog.trace("Chapter loading cancelled", category: "reader")
+            return
+        }
+        catch {
+            AppLog.error("Chapter text loading failed", error: error, category: "reader", metadata: ["chapter_index": .integer(index)])
+            failure = error.localizedDescription
+        }
         guard !Task.isCancelled, self.chapter?.id == chapter.id else { return }
         illustration = loadedImage; content = loadedText; error = failure; loading = false
-
+        AppLog.debug("Chapter loading completed", category: "reader", metadata: ["has_text": .bool(loadedText != nil), "has_image": .bool(loadedImage != nil), "degraded": .bool(failure != nil)])
     }
 }

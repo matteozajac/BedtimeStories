@@ -91,8 +91,11 @@ struct VoiceEnrollmentView: View {
         operation = Task {
             defer { working = false }
             do { enrollment = try await cloud.beginEnrollment(name: name.trimmingCharacters(in: .whitespacesAndNewlines), language: language, retentionAccepted: retentionAccepted) }
-            catch is CancellationError { }
-            catch { message = error.localizedDescription }
+            catch is CancellationError { AppLog.trace("Voice enrollment screen operation cancelled", category: "cloud_narration", metadata: ["operation": .string("begin_enrollment")]) }
+            catch {
+                CloudNarrationDiagnostics.reportIfNeeded("Voice enrollment could not start", error: error)
+                message = error.localizedDescription
+            }
         }
     }
 
@@ -105,7 +108,11 @@ struct VoiceEnrollmentView: View {
             if take == .reference { referenceURL = prepared } else { consentURL = prepared }
             if let previous { await VoiceEnrollmentAudio.shared.remove([previous]) }
             return true
-        } catch is CancellationError { return false }
+        } catch is CancellationError {
+            AppLog.trace("Voice recording acceptance cancelled", category: "cloud_narration")
+            return false
+        }
+        // VoiceEnrollmentAudio owns diagnostics before it translates an audio SDK error.
         catch { message = error.localizedDescription; return false }
     }
 
@@ -118,8 +125,11 @@ struct VoiceEnrollmentView: View {
                 _ = try await cloud.uploadEnrollment(enrollment: enrollment, referenceURL: referenceURL, consentURL: consentURL)
                 await VoiceEnrollmentAudio.shared.remove([referenceURL, consentURL])
                 dismiss()
-            } catch is CancellationError { }
-            catch { message = error.localizedDescription }
+            } catch is CancellationError { AppLog.trace("Voice enrollment screen upload cancelled", category: "cloud_narration") }
+            catch {
+                CloudNarrationDiagnostics.reportIfNeeded("Voice enrollment upload failed", error: error)
+                message = error.localizedDescription
+            }
         }
     }
 

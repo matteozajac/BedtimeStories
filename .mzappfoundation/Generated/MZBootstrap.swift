@@ -3,10 +3,7 @@ import Foundation
 import MZAppFoundation
 import MZAppFoundationLocal
 #if !MZ_LOCAL && !targetEnvironment(simulator)
-import MZAppFoundationLive
-#if os(iOS)
-import MZAppFoundationFirebase
-#endif
+
 #endif
 
 @MainActor enum MZBootstrap {
@@ -26,24 +23,19 @@ import MZAppFoundationFirebase
             urlScheme: "bedtimestories", environment: environment,
             version: bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0",
             build: bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "0",
-            preferences: .init(analytics: false, diagnostics: false))
+            preferences: .init(analytics: false, diagnostics: false),
+            developerLinkHost: "com.matteozajac.bedtimestories")
         let schema = TelemetrySchema(events: [:])
         #if MZ_LOCAL || targetEnvironment(simulator)
         return LocalServices.make(configuration: configuration, schema: schema)
         #else
-        do {
-            let vendors = LiveConfiguration(revenueCatPublicKey: nil, sentryDSN: nil)
-            #if os(iOS)
-            return try FirebaseServices.make(configuration: configuration, vendors: vendors, schema: schema,
-                googleServiceInfoPath: nil)
-            #else
-            return try LiveServices.make(configuration: configuration, vendors: vendors, schema: schema)
-            #endif
-        } catch {
-            let fallback = LocalServices.make(configuration: configuration, schema: schema, purchases: UnavailablePurchases())
-            fallback.logger.error("Bootstrap configuration failed", error: error, category: "setup")
-            return fallback
-        }
+        var inventory = AppFoundationDiagnostics.make()
+        var purchases: any PurchaseProviding = UnavailablePurchases()
+        var analytics: [any AnalyticsEngine] = []
+        var diagnostics: [any DiagnosticsEngine] = []
+        let remoteAllowed = RuntimeSafety.permitsRemote(environment: configuration.environment)
+        return LocalServices.make(configuration: configuration, schema: schema, purchases: purchases,
+            foundationDiagnostics: inventory, additionalAnalytics: analytics, additionalDiagnostics: diagnostics)
         #endif
     }
 }

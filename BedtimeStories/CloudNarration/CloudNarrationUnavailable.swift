@@ -14,7 +14,9 @@ final class CloudNarrationModel {
     private(set) var voices: [VoiceProfile] = []
     private(set) var jobs: [NarrationJob] = []
 
-    init(configureFirebase: Bool = true) {}
+    init(configureFirebase: Bool = true) {
+        AppLog.trace("Cloud narration configuration skipped", category: "cloud_narration", metadata: ["reason": .string("local_services")])
+    }
 
     func prepareAppleSignIn(_ request: ASAuthorizationAppleIDRequest) { message = CloudNarrationFailure.unavailable.localizedDescription }
     func handleAppleSignIn(_ result: Result<ASAuthorization, Error>) { message = CloudNarrationFailure.unavailable.localizedDescription }
@@ -26,7 +28,11 @@ final class CloudNarrationModel {
     func startNarration(draft: BookDraft, voiceID: String, styles: [UUID: [NarrationStyle]],
                         defaultStyle: NarrationStyle, preview: Bool) async throws -> String { throw CloudNarrationFailure.unavailable }
     func snapshotHash(draft: BookDraft, styles: [UUID: [NarrationStyle]], defaultStyle: NarrationStyle) -> String {
-        (try? NarrationSnapshot(draft: draft, styles: styles, defaultStyle: defaultStyle).hash) ?? ""
+        do { return try NarrationSnapshot(draft: draft, styles: styles, defaultStyle: defaultStyle).hash }
+        catch {
+            AppLog.error("Narration snapshot hashing failed", error: error, category: "cloud_narration")
+            return ""
+        }
     }
     func cancel(jobID: String) async throws { throw CloudNarrationFailure.unavailable }
     func deleteVoice(profileID: String) async throws { throw CloudNarrationFailure.unavailable }

@@ -1,20 +1,44 @@
 # App diagnostics
 
-BedtimeStories uses MZAppFoundation **0.3.1**, resolved to
-`b538cb94bd853b3b88978ab713df0ff15121ed64`, with Firebase **12.19.2** and Pulse **5.2.1**.
-The shared 0.3.1 tag is published in the MZAppFoundation repository.
+BedtimeStories uses MZAppFoundation **0.5.0**, resolved to
+`888e5f6c2423109e99d4b4eab670cfebca9cb051`, with Firebase **12.19.2** and Pulse **5.2.1**.
+The app version and build number are unchanged by this package upgrade.
 
 ## Opening the console
 
 - Enable **Settings → Developer → Developer Mode**, then shake the device.
 - **Settings → Developer → Open Logs** provides a navigation fallback.
+- **Settings → Developer → App Foundation** opens the library's version,
+  provider details, build information, startup history, counters, and developer
+  tools pages. Both entries disappear when Developer Mode is disabled, and
+  disabling also dismisses the Foundation screen.
+- `mzappfoundation://com.matteozajac.bedtimestories/developer/enable` and
+  `mzappfoundation://com.matteozajac.bedtimestories/developer/disable` are the
+  canonical routes. The app-host routes also support the `bedtimestories` scheme.
 - `bedtimestories://developer/enable` and `bedtimestories://developer/disable`
   control the same persistent preference. Disabling also closes the console.
 - Local/Debug/Internal builds default to enabled; production defaults to disabled.
   A saved choice wins over the build default.
 
-Developer controls have English and Polish app translations. The console uses
-MZAppFoundation's scoped UIKit shake responder, without app-wide swizzling.
+Existing developer controls have English and Polish app translations. The new
+Foundation screens use the library's English presentation. The shared persistent
+developer key migrates the existing app-specific choice. Book file imports retain
+their existing handling. The console uses MZAppFoundation's scoped UIKit shake
+responder, without app-wide swizzling.
+
+## Provider inspection
+
+The device app retains Firebase Auth/App Check/Firestore/Functions/Storage for
+Cloud Narration. `AppFoundationDiagnostics` passively reads the bundled Firebase
+configuration, SDK version, and current project/app identity. Cloud Narration
+continues to own initialization; Foundation reports external ownership and does
+not add an Analytics adapter. Inspection does not initialize SDKs or send events;
+it reads current runtime state when a snapshot is requested.
+
+The local app bundles no Google configuration and links no remote SDKs. Firebase
+details report **Missing configuration** and **SDK not linked**. RevenueCat and
+Sentry remain unconfigured. Resolved versions in build information describe the
+project lockfile; they do not mean every package is linked or initialized locally.
 
 ## Logging and delivery
 
@@ -40,7 +64,11 @@ Functions/Storage ownership remains in the app's cloud narration adapter.
 | Scheme | Purpose |
 | --- | --- |
 | `BedtimeStoriesLocal` | Simulator app and app tests. Links the local Pulse composition; excludes the two Firebase adapter files and all remote SDKs. Cloud narration uses an unavailable adapter. |
-| `BedtimeStories` | Device app. Retains the existing backend SDKs and adds the live foundation composition. `Internal` enables developer mode by default. |
+| `BedtimeStories` | Device app. Retains app-owned backend SDKs and uses local Foundation services without remote telemetry adapters. `Internal` enables developer mode by default. |
+
+Both app targets generate `MZFoundationBuildMetadata.plist` after resources are
+copied, recording the resolved Foundation version/revision, package versions,
+build channel, and app source identity.
 
 Use the canonical setup script, then the app overlay, in this order:
 
@@ -51,10 +79,11 @@ ruby scripts/configure-diagnostics.rb
 
 The canonical script requires its Python requirements and the `xcodeproj` Ruby
 gem. The overlay preserves synchronized source-group membership, excludes
-app-owned Firebase adapters from the local target, and adds the local app-test
-scheme. Debug/Release/Internal test configurations retain the app host and mirror
-the corresponding app compilation flags. Two complete repeated applications
-produced no file changes, including after the build-9 version update.
+app-owned Firebase adapters from the local target, adds the local app-test scheme,
+and injects the app-owned passive inspector into the generated device inventory.
+Debug/Release/Internal test configurations retain the app host and mirror the
+corresponding app compilation flags. Two complete repeated applications after
+this upgrade produced no file changes.
 
 ```sh
 swift test
@@ -68,30 +97,37 @@ python3 scripts/audit-local-diagnostics.py \
   .build/mz-derived/Build/Products/Debug-iphonesimulator/BedtimeStoriesLocal.app
 ```
 
-## Verification on 2026-10-02
+## Verification on 2026-10-03
 
 - 8 standalone app core tests passed.
 - 39 local app tests in 6 suites passed on the iPad simulator. They cover original
   error identity, nested causes, privacy filtering, caller forwarding, logging
   once at failure boundaries, cancellation, local cloud isolation, and a live
   UIKit shake callback presenting/dismissing the console.
-- The device `Internal` build succeeded without signing.
-- All 39 app tests also passed in optimized `Internal` on the iPhone simulator,
-  including the PCC compilation gate and covered-book playback regression.
-  `ENABLE_TESTABILITY=YES` was an invocation-only test override.
-- The local dependency graph and every Mach-O in the app bundle were audited:
-  Pulse is present, and remote SDK matches are absent.
-- On the iPhone simulator, Settings opened Pulse, Developer Mode persisted,
-  enable/disable links worked, and disabling closed the Settings console.
-- A disposable invalid recording produced `AVFoundationErrorDomain` / `-11800`
-  with nested `NSOSStatusErrorDomain` / `1954115647`. Pulse displayed both causes,
-  `StoryPlayer.swift`, the caller line, and a reporting stack. The fixture was
-  removed after verification. Screenshot: `.build/mz-setup/pulse-error-details.png`.
-- Physical-device motion and provider delivery were not exercised.
+- The device `Internal` build succeeded without signing, including the passive
+  Firebase inspector and existing private cloud compute compilation gates.
+- Every Mach-O in the local app bundle was audited: Pulse is present, and remote
+  SDK matches are absent.
+- Built local and device metadata both report Foundation 0.5.0 and its exact
+  release revision. The device Firebase plist remains bundled; the local app has none.
+- A Maestro flow on the iPhone simulator verified the version screen, missing
+  Firebase configuration, shared enable/disable links, the app-scheme canonical
+  enable route, the legacy disable route, and dismissal/hiding on developer disable.
+  The simulator's original enabled developer preference was restored.
+- Setup apply plus the app overlay were repeated twice without changing files.
+- Physical-device motion, device Firebase runtime inspection, and provider delivery
+  were not exercised. This upgrade did not upload a TestFlight build.
+
+The subsequent logging release passed 47 native app tests and 8 core tests,
+verified readable Pulse error stacks, and shipped Foundation 0.5.0 in Internal
+1.0 (11). Backend logging deployment and smoke checks also passed. See
+[logging diagnostics](../docs/LOGGING.md) and [release receipt](../docs/TESTFLIGHT.md).
 
 The canonical source verifier flags direct vendor imports in the existing
 device-only adapters because it does not inspect native target membership. The
 canonical binary helper scans only the app executable and debug dylib; Xcode
 links Pulse dynamically for these app tests. The app's audit script also scans
-embedded frameworks and test bundles. Detailed checks are recorded in
-`validation.json`, with raw build/test/audit logs under `.build/mz-setup/`.
+embedded frameworks and test bundles. Current checks are in `validation.json`,
+with logs, the UI flow, metadata, and screenshots under `.build/mz-upgrade-0.5.0/`.
+The prior 0.3.1 validation, including its historical TestFlight receipt, is
+preserved in `validation-0.3.1.json`.

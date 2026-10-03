@@ -77,7 +77,9 @@ struct ChapterEditorView: View {
         .fileImporter(isPresented: $importAudio, allowedContentTypes: [.audio]) { result in
             switch result {
             case .success(let url): Task { _ = await editor.setAudio(url, chapterID: chapterID) }
-            case .failure(let error): editor.message = error.localizedDescription
+            case .failure(let error):
+                AppLog.error("Chapter recording selection failed", error: error, category: "creator")
+                editor.message = error.localizedDescription
             }
         }
         .task(id: photo) {
@@ -85,7 +87,11 @@ struct ChapterEditorView: View {
             loadingPhoto = true
             defer { loadingPhoto = false }
             do { if let data = try await photo.loadTransferable(type: Data.self) { await editor.setImage(data, chapterID: chapterID) } }
-            catch { editor.message = String(localized: "The photo could not be opened. Try another photo.") }
+            catch is CancellationError { AppLog.trace("Chapter photo loading cancelled", category: "creator") }
+            catch {
+                AppLog.error("Chapter photo loading failed", error: error, category: "creator")
+                editor.message = String(localized: "The photo could not be opened. Try another photo.")
+            }
         }
         .onDisappear { preview.stop() }
         .alert("Unable to play", isPresented: Binding(get: { preview.message != nil }, set: { if !$0 { preview.message = nil } })) { } message: { Text(preview.message ?? "") }

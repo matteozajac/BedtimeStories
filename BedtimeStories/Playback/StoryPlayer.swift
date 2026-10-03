@@ -62,6 +62,7 @@ final class StoryPlayer {
         interruptions.append(center.addObserver(forName: AVAudioSession.routeChangeNotification, object: nil, queue: .main) { [weak self] note in
             let reason = note.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt
             Task { @MainActor [weak self] in
+                if let reason { self?.logger.trace("Playback audio route changed", category: "playback", metadata: ["reason_code": .integer(Int(reason))]) }
                 if reason == AVAudioSession.RouteChangeReason.oldDeviceUnavailable.rawValue { self?.pause() }
             }
         })
@@ -123,16 +124,19 @@ final class StoryPlayer {
         if duration > 0, elapsed >= duration - 0.2 { seek(0) }
         let token = generation
         let previous = sessionTask
+        logger.trace("Playback audio session activation requested", category: "playback")
         sessionTask = Task { [weak self] in
             await previous?.value
             guard let self, self.generation == token, self.wantsPlayback else { return }
             do {
                 try AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio, options: [])
                 let activated = try await AVAudioSession.sharedInstance().activate(options: [])
-                guard activated, self.generation == token, self.wantsPlayback else { return }
+                guard self.generation == token, self.wantsPlayback else { return }
+                guard activated else { throw BookError.unavailable("Audio is unavailable.") }
                 self.audio.playImmediately(atRate: self.speed); self.playing = true; self.updateNowPlaying()
                 self.logger.log(LogEntry("Playback started", category: "playback", metadata: ["track_index": .integer(self.trackIndex)]))
-            } catch {
+            } catch is CancellationError { self.logger.trace("Playback audio session activation cancelled", category: "playback") }
+            catch {
                 guard self.generation == token else { return }
                 self.logger.error("Playback audio session failed", error: error, category: "playback")
                 self.error = error.localizedDescription; self.wantsPlayback = false; self.playing = false
@@ -153,9 +157,11 @@ final class StoryPlayer {
         book = nil; elapsed = 0; duration = 0; trackIndex = 0; artwork = nil; loading = false; error = nil
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
         let previous = sessionTask
-        sessionTask = Task {
+        sessionTask = Task { [logger] in
             await previous?.value
-            _ = try? await AVAudioSession.sharedInstance().deactivate(options: .notifyOthersOnDeactivation)
+            do { _ = try await AVAudioSession.sharedInstance().deactivate(options: .notifyOthersOnDeactivation) }
+            catch is CancellationError { logger.trace("Playback audio session release cancelled", category: "playback") }
+            catch { logger.warning("Playback audio session release failed", error: error, category: "playback") }
         }
     }
 
@@ -200,6 +206,7 @@ final class StoryPlayer {
         if let completionObserver { NotificationCenter.default.removeObserver(completionObserver) }; completionObserver = nil
         audio.replaceCurrentItem(with: nil)
         let track = tracks[index]
+        logger.trace("Recording load started", category: "playback", metadata: ["track_index": .integer(index), "autoplay": .bool(autoplay)])
         updateNowPlaying()
         loadTask = Task { [weak self] in
             do {
@@ -227,15 +234,26 @@ final class StoryPlayer {
                 self.logger.log(LogEntry("Recording loaded", level: .debug, category: "playback", metadata: ["track_index": .integer(index)]))
                 if self.wantsPlayback { self.resume() }
                 self.save(); self.updateNowPlaying()
-                if let cover = book.manifest.cover, let imageURL = try? await repository.asset(cover, book: book, root: root),
-                   let data = try? await repository.imageData(imageURL), let decoded = await ArtworkDecoder.thumbnail(data), self.generation == token {
-                    let image = UIImage(cgImage: decoded)
-                    // MediaPlayer requests artwork on background queues. A Sendable
-                    // callback must not inherit StoryPlayer's MainActor isolation.
-                    self.artwork = MPMediaItemArtwork(boundsSize: image.size) { @Sendable _ in image }
-                    self.updateNowPlaying()
+                if let cover = book.manifest.cover {
+                    do {
+                        let imageURL = try await repository.asset(cover, book: book, root: root)
+                        let data = try await repository.imageData(imageURL)
+                        let decoded = await ArtworkDecoder.thumbnail(data)
+                        guard self.generation == token, !Task.isCancelled else { return }
+                        if let decoded {
+                            let image = UIImage(cgImage: decoded)
+                            // MediaPlayer requests artwork on background queues. A Sendable
+                            // callback must not inherit StoryPlayer's MainActor isolation.
+                            self.artwork = MPMediaItemArtwork(boundsSize: image.size) { @Sendable _ in image }
+                            self.updateNowPlaying()
+                        } else { self.logger.warning("Playback artwork could not be decoded", category: "playback") }
+                    } catch is CancellationError { self.logger.trace("Playback artwork loading cancelled", category: "playback") }
+                    catch {
+                        guard self.generation == token else { return }
+                        self.logger.warning("Playback artwork unavailable", error: error, category: "playback")
+                    }
                 }
-            } catch is CancellationError { }
+            } catch is CancellationError { self?.logger.trace("Recording load cancelled", category: "playback", metadata: ["track_index": .integer(index)]) }
             catch {
                 guard let self, self.generation == token else { return }
                 self.logger.error("Recording load failed", error: error, category: "playback", metadata: ["track_index": .integer(index)])

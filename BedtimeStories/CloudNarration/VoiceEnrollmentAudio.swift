@@ -1,16 +1,31 @@
 import AVFoundation
 import CryptoKit
 import Foundation
+import MZAppFoundation
 
 /// Enrollment audio is private scratch data, separate from books and iCloud.
 actor VoiceEnrollmentAudio {
     static let shared = VoiceEnrollmentAudio()
 
-    func prepare(_ source: URL, userID: String, consent: Bool) throws -> URL {
-        do { return try convert(source, userID: userID, consent: consent) }
-        catch let error as CancellationError { throw error }
-        catch let error as BookError { throw error }
-        catch { throw BookError.invalid(String(localized: "This recording could not be prepared. Record another take.")) }
+    func prepare(_ source: URL, userID: String, consent: Bool) async throws -> URL {
+        let operation = CloudNarrationLogOperation(name: "prepare_enrollment_recording")
+        await AppLog.trace("Enrollment audio preparation started", category: "cloud_narration", metadata: operation.metadata.merging(["recording_kind": .string(consent ? "consent" : "reference")]) { _, new in new })
+        do {
+            let url = try convert(source, userID: userID, consent: consent)
+            await AppLog.debug("Enrollment audio preparation completed", category: "cloud_narration", metadata: operation.metadata)
+            return url
+        } catch {
+            let snapshot = ErrorSnapshot(error)
+            if ErrorSnapshot.isCancellation(error) {
+                await AppLog.trace("Enrollment audio preparation cancelled", category: "cloud_narration", metadata: operation.metadata)
+                throw error
+            }
+            await MainActor.run {
+                AppLog.logger.log(LogEntry("Enrollment audio preparation failed", level: .error, category: "cloud_narration", metadata: operation.metadata, error: snapshot, source: snapshot.source))
+            }
+            if let error = error as? BookError { throw error }
+            throw BookError.invalid(String(localized: "This recording could not be prepared. Record another take."))
+        }
     }
 
     private func convert(_ source: URL, userID: String, consent: Bool) throws -> URL {
@@ -62,7 +77,19 @@ actor VoiceEnrollmentAudio {
         return destination
     }
 
-    func remove(_ urls: [URL]) {
-        for url in urls { try? FileManager.default.removeItem(at: url) }
+    func remove(_ urls: [URL]) async {
+        let operation = CloudNarrationLogOperation(name: "remove_enrollment_recordings")
+        for url in urls {
+            do { try FileManager.default.removeItem(at: url) }
+            catch {
+                let nsError = error as NSError
+                guard nsError.domain != NSCocoaErrorDomain || nsError.code != NSFileNoSuchFileError else { continue }
+                let snapshot = ErrorSnapshot(error)
+                await MainActor.run {
+                    AppLog.logger.log(LogEntry("Enrollment recording cleanup failed", level: .warning, category: "cloud_narration", metadata: operation.metadata, error: snapshot, source: snapshot.source))
+                }
+            }
+        }
+        await AppLog.trace("Enrollment recording cleanup completed", category: "cloud_narration", metadata: operation.metadata.merging(["recording_count": .integer(urls.count)]) { _, new in new })
     }
 }

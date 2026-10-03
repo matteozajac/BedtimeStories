@@ -1,11 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
+import { HttpsError } from "firebase-functions/v2/https";
 import { CloudTasksClient, protos } from "@google-cloud/tasks";
 import { CONSENT_STATEMENTS, LIMITS } from "../contracts";
 import { decryptRecording, encryptRecording, recordingAAD } from "../encryption";
 import { decodeRecording, enrollmentInput, narrationInput, requireApple } from "../validation";
 import { CloudTaskDispatcher } from "../tasks";
+import { connection, diagnosticEntry, errorSnapshot, preserveCause, taskKey, withDiagnosticContext } from "../diagnostics";
 
 function wav(seconds = 10): Buffer {
   const dataBytes = seconds * 48000;
@@ -85,7 +87,66 @@ test("private worker task paths and OIDC audience remain separate and deduplicat
   assert.equal(requests[0]!.task!.dispatchDeadline!.seconds, 1800);
   assert.equal(requests[0]!.task!.name, requests[1]!.task!.name);
   assert.deepEqual(JSON.parse(Buffer.from(requests[0]!.task!.httpRequest!.body as Uint8Array).toString()), operation);
+  assert.equal(taskKey(operation), "be2ee9e0b465b7ce8f181c4a0930e921d715722103d392c5eaf9241830004a43");
   await assert.rejects(new CloudTaskDispatcher({ ...config, workerURL: `${config.workerURL}/tasks` }, client).enqueue(operation));
+});
+
+test("diagnostics preserve original type, signed code, causes and frames without private descriptions", () => {
+  const secret = "secret-recording-transcript-token";
+  const original = Object.assign(new TypeError(`${secret}\n    at leak (${secret}.js:123:4)`), { code: -7, response: { body: secret }, metadata: { authorization: secret } });
+  const outer = preserveCause(new HttpsError("unavailable", "safe-recovery-copy"), original);
+  const details = errorSnapshot(outer);
+  assert.deepEqual(details.causes.map((cause) => cause.type), ["HttpsError", "TypeError"]);
+  assert.equal(details.causes[0]!.code, "unavailable");
+  assert.equal(details.causes[1]!.code, -7);
+  assert.ok(details.causes.every((cause) => cause.stack_origin === "exception" && (cause.frames as unknown[]).length > 0));
+  const serialized = JSON.stringify(details);
+  assert.ok(!serialized.includes(secret));
+  assert.ok(!serialized.includes("safe-recovery-copy"));
+  assert.ok(!serialized.includes("/Users/"));
+  assert.ok(!serialized.includes("authorization"));
+});
+
+test("diagnostics bound nested and cyclic causes and omit arbitrary string codes", () => {
+  const root = Object.assign(new Error("secret"), { code: "secret-string-code" });
+  let current = root;
+  for (let index = 0; index < 10; index++) {
+    const next = new Error("secret");
+    preserveCause(current, next);
+    current = next as typeof root;
+  }
+  const bounded = errorSnapshot(root);
+  assert.equal(bounded.causes.length, 5);
+  assert.equal(bounded.cause_chain_truncated, true);
+  assert.equal(bounded.causes[0]!.code, undefined);
+  preserveCause(root, root);
+  assert.equal(errorSnapshot(root).causes.length, 1);
+  assert.equal(errorSnapshot(root).cause_chain_truncated, true);
+});
+
+test("connection instrumentation preserves the thrown error and provides safe owner phase", async () => {
+  const original = Object.assign(new Error("secret-provider-body"), { code: 14 });
+  let caught: unknown;
+  try {
+    await connection("kms", "wrap_recording_key", async () => { throw original; });
+  } catch (error) { caught = error; }
+  assert.equal(caught, original);
+  const details = errorSnapshot(caught);
+  assert.equal(details.causes[0]!.connection, "kms");
+  assert.equal(details.causes[0]!.phase, "wrap_recording_key");
+  assert.equal(details.causes[0]!.code, 14);
+  assert.ok(!JSON.stringify(details).includes("secret-provider-body"));
+});
+
+test("request correlation survives awaits and remains isolated across concurrent operations", async () => {
+  const results = await Promise.all(["first", "second"].map((operationId) => withDiagnosticContext({ operation_id: operationId }, async () => {
+    const before = diagnosticEntry("before");
+    await Promise.resolve();
+    const after = diagnosticEntry("after");
+    return [before.operation_id, after.operation_id];
+  })));
+  assert.deepEqual(results, [["first", "first"], ["second", "second"]]);
+  assert.equal(diagnosticEntry("outside").operation_id, undefined);
 });
 
 export { wav };

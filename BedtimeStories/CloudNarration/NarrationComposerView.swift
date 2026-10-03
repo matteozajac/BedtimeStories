@@ -93,7 +93,13 @@ struct NarrationComposerView: View {
             if job.state == "queued" || job.state == "processing" {
                 ProgressView(value: min(1, max(0, job.progress))) { Text(job.state == "queued" ? "Waiting to create narration…" : "Creating narration…") }
                 Button("Cancel Creation", role: .cancel) {
-                    Task { do { try await cloud.cancel(jobID: job.id) } catch { message = error.localizedDescription } }
+                    Task {
+                        do { try await cloud.cancel(jobID: job.id) }
+                        catch {
+                            CloudNarrationDiagnostics.reportIfNeeded("Narration cancellation failed", error: error)
+                            if !(error is CancellationError) { message = error.localizedDescription }
+                        }
+                    }
                 }.disabled(working || cloud.isWorking)
             } else if job.state == "ready", job.expiresAt > Date().timeIntervalSince1970 {
                 Button("Listen to Narration", systemImage: "play.circle") { listen(job) }.disabled(working)
@@ -120,7 +126,12 @@ struct NarrationComposerView: View {
         for chapter in chapters {
             // A title matching the first line is omitted during paragraph parsing, so it
             // belongs to the fingerprint alongside the text when retaining overrides.
-            let contents = (try? JSONEncoder().encode([chapter.title, chapter.text])) ?? Data()
+            let contents: Data
+            do { contents = try JSONEncoder().encode([chapter.title, chapter.text]) }
+            catch {
+                AppLog.error("Narration chapter fingerprint encoding failed", error: error, category: "cloud_narration")
+                contents = Data()
+            }
             let hash = SHA256.hash(data: contents).map { String(format: "%02x", $0) }.joined()
             if preferences.chapterTextHashes[chapter.id] != hash { preferences.styleOverrides[chapter.id] = nil }
             preferences.chapterTextHashes[chapter.id] = hash
@@ -130,7 +141,10 @@ struct NarrationComposerView: View {
     private func savePreferences() {
         guard let owner, owner == cloud.userID else { return }
         do { try preferences.save(userID: owner, draftID: editor.draft.id) }
-        catch { message = String(localized: "Narration settings could not be saved on this device. Keep this screen open and try again.") }
+        catch {
+            AppLog.error("Narration draft preferences save failed", error: error, category: "cloud_narration")
+            message = String(localized: "Narration settings could not be saved on this device. Keep this screen open and try again.")
+        }
     }
 
     private func start(previewOnly: Bool) {
@@ -142,8 +156,11 @@ struct NarrationComposerView: View {
             do {
                 _ = try await cloud.startNarration(draft: draft, voiceID: preferences.voiceID, styles: styles, defaultStyle: preferences.defaultStyle, preview: previewOnly)
                 guard owner == cloud.userID, !Task.isCancelled else { return }
-            } catch is CancellationError { }
-            catch { message = error.localizedDescription }
+            } catch is CancellationError { AppLog.trace("Narration composer submission cancelled", category: "cloud_narration") }
+            catch {
+                CloudNarrationDiagnostics.reportIfNeeded("Narration composer submission failed", error: error)
+                message = error.localizedDescription
+            }
         }
     }
 
@@ -157,8 +174,11 @@ struct NarrationComposerView: View {
                 guard owner == cloud.userID, !Task.isCancelled else { return }
                 guard let first = editor.draft.chapters.compactMap({ urls[$0.id] }).first else { throw BookError.invalid("The preview is unavailable.") }
                 preview.toggle(first)
-            } catch is CancellationError { }
-            catch { message = error.localizedDescription }
+            } catch is CancellationError { AppLog.trace("Narration composer preview cancelled", category: "cloud_narration") }
+            catch {
+                CloudNarrationDiagnostics.reportIfNeeded("Narration composer preview failed", error: error)
+                message = error.localizedDescription
+            }
         }
     }
 
@@ -174,8 +194,11 @@ struct NarrationComposerView: View {
                 guard owner == cloud.userID, !Task.isCancelled, hash == currentHash else { return }
                 if await editor.setGeneratedAudio(urls, expectedSnapshot: snapshot, authorized: { owner == cloud.userID && !Task.isCancelled }) { dismiss() }
                 else { message = editor.message }
-            } catch is CancellationError { }
-            catch { message = error.localizedDescription }
+            } catch is CancellationError { AppLog.trace("Narration attachment cancelled", category: "cloud_narration") }
+            catch {
+                CloudNarrationDiagnostics.reportIfNeeded("Narration attachment failed", error: error)
+                message = error.localizedDescription
+            }
         }
     }
 }
