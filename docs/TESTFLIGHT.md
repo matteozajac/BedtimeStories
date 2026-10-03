@@ -1,5 +1,24 @@
 # Internal TestFlight
 
+## 1.0 (10) — 3 October 2026
+
+Cloud narration is enabled for this Internal beta against shared **Always Near Stories** Firebase project `gen-lang-client-0154884984`. Apple sign-in/code-flow credentials are configured, App Attest is registered, and all nine Functions are ACTIVE with narration enabled. Exact readback confirms **VALID / INTERNAL_ONLY / IN_BETA_TESTING**, complete effective Internal Testers access and matching English What to Test notes. Safari independently shows build 10 Testing with two invites and no installs yet.
+
+- Build ID: `54d844e5-c515-461b-927b-0f70d323216c`.
+- App ID: `6818278413`; bundle `com.matteozajac.bedtimestories`; team `4TCJLR98Y5`.
+- Group: `20328e88-9f9c-4c47-be78-c33a809d1a71` (**Internal Testers**, explicit and all-build access).
+- English notes: `82a62a3e-8ffa-4268-92a5-05ecba33ebe4`.
+- Minimum OS: iOS/iPadOS 27.0; compatible Mac/Vision minimums also read back as 27.0.
+- IPA SHA256: `6e7f214832f466b585fe246be4adf0b1a63d7fec392a78fbc2d4267c1af05e32`.
+- Release input fingerprint: `cf6b78473b50fac39e4a5308c04f9a8149ac80b6b88563f4ee193a080a3e7c2e`, 125 matching inputs including ignored public Firebase client configuration.
+- Signed Internal archive/export and strict signature/configuration verification passed. Exported entitlements include Apple sign-in, production App Attest, PCC and Production CloudDocuments for the existing iCloud container. Profile `5abe4610-98c2-404b-89ee-2d87f303e113` expires 9 August 2027.
+
+Validation: 39 native tests on the isolated Local target's optimized Internal simulator configuration, 8 Swift Testing core tests, 3 snapshot XCTest tests, 6 Python authoring tests and Local binary isolation passed. The main app's device archive/export compiled the Firebase implementation. The actual worker identity generated mono 24 kHz prebuilt Kore audio using fixed `gemini-3.8-flash-tts` (HTTP 200); public worker and unauthenticated narration requests returned 403/401.
+
+Install this build and test Settings → Your Voices: genuine Apple sign-in/App Attest, consenting parent's recordings and voice approval, chapter/book generation and styles, cancellation/relaunch, deletion and switching between two accounts. Real parent likeness/emotion, physical microphone, Apple/App Attest and deployed two-user denial are still acceptance checks. Both existing tester records remain INSTALLED; this does not establish installation of build 10. Administrative/Gemini/Apple credentials are absent from the app and Git. No tester membership or external/App Review submission changed.
+
+[Detailed activation receipt](CLOUD_NARRATION_INTERNAL_ENABLEMENT.md). Raw release evidence remains in ignored `.build/pti/1.0-10/`. [Open TestFlight](https://appstoreconnect.apple.com/apps/6818278413/testflight/ios).
+
 ## 1.0 (9) — 2 October 2026
 
 The MZAppFoundation 0.3.1 logging integration and playback artwork crash fix are

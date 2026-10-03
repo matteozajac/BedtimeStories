@@ -41,7 +41,9 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>CloudNarrationEnabled</key>
-	<false/>
+	<string>$(BEDTIME_CLOUD_NARRATION_ENABLED)</string>
+	<key>CloudNarrationOutputBucket</key>
+	<string>gen-lang-client-0154884984-audio</string>
 	<key>FIREBASE_ANALYTICS_COLLECTION_ENABLED</key>
 	<false/>
 	<key>FirebaseAutomaticScreenReportingEnabled</key>

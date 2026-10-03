@@ -16,6 +16,7 @@
 		5E4D8BD24AA5B76266BF97B1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D12C0E93DC1642D6D9289F8 /* Foundation.framework */; };
 		6BEB7820448C63E740B21355 /* MZAppFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 96540A75C1ECADF8137B91CD /* MZAppFoundation */; };
 		92ACC9018693EDBCE6898AED /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 312991D5AD08568E2246239A /* FirebaseFunctions */; };
+		AA2F9B238DF6FCF96FC693C8 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B54B86C81076392C72D564C9 /* GoogleService-Info.plist */; };
 		B247302611BB02169A13A5B6 /* MZAppFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 6635A88F20CBA2D6CBFCEFF3 /* MZAppFoundation */; };
 		D7988E3066A69F3A73352AF2 /* MZAppFoundationFirebase in Frameworks */ = {isa = PBXBuildFile; productRef = B3805C9CE106044038711549 /* MZAppFoundationFirebase */; };
 		E251A974DFCE2898205FF51F /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = EC7B3F92A4E1EE4A7838E307 /* FirebaseFirestore */; };
@@ -46,6 +47,7 @@
 		3D12C0E93DC1642D6D9289F8 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		61EC4C3A2DF195A20069B96B /* BedtimeStories.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BedtimeStories.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ABCDEF000000000000000002 /* BedtimeStoriesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = BedtimeStoriesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B54B86C81076392C72D564C9 /* GoogleService-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -136,6 +138,15 @@
 			name = .mzappfoundation;
 			sourceTree = "<group>";
 		};
+		49DC0CFA974A038E749F7342 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				B54B86C81076392C72D564C9 /* GoogleService-Info.plist */,
+			);
+			name = Config;
+			path = Config;
+			sourceTree = "<group>";
+		};
 		61EC4C312DF195A20069B96B = {
 			isa = PBXGroup;
 			children = (
@@ -144,6 +155,7 @@
 				61EC4C3B2DF195A20069B96B /* Products */,
 				1C8F7B57630FAB333142C07D /* Frameworks */,
 				35DA90F665342A6C9FAF66E5 /* .mzappfoundation */,
+				49DC0CFA974A038E749F7342 /* Config */,
 			);
 			sourceTree = "<group>";
 		};
@@ -331,6 +343,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2F9B238DF6FCF96FC693C8 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -403,9 +416,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
 				CODE_SIGN_ENTITLEMENTS = Config/BedtimeStories.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -439,6 +453,7 @@
 		57F40A0CB909DB04F48F0830 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
@@ -582,9 +597,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
 				CODE_SIGN_ENTITLEMENTS = Config/BedtimeStories.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -619,9 +635,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
 				CODE_SIGN_ENTITLEMENTS = Config/PrivateCloudCompute.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -654,6 +671,7 @@
 		857E7928C21A1F55B591CA9A /* Internal */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
@@ -676,9 +694,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
 				CODE_SIGN_ENTITLEMENTS = Config/PrivateCloudCompute.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -714,9 +733,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEDTIME_CLOUD_NARRATION_ENABLED = YES;
 				CODE_SIGN_ENTITLEMENTS = Config/PrivateCloudCompute.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -749,6 +769,7 @@
 		ABCDEF00000000000000000A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
@@ -767,6 +788,7 @@
 		ABCDEF00000000000000000B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
@@ -840,6 +862,7 @@
 		CF2D2720A0C12307C7BC82F2 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
@@ -862,9 +885,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
 				CODE_SIGN_ENTITLEMENTS = Config/PrivateCloudCompute.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;

@@ -39,16 +39,19 @@ final class CloudNarrationModel {
     init(configureFirebase: Bool = true, logger: any AppLogging = AppLog.logger) {
         self.logger = logger
         guard configureFirebase,
+              (Bundle.main.object(forInfoDictionaryKey: "CloudNarrationEnabled") as? NSString)?.boolValue == true,
               RuntimeSafety.permitsRemote(environment: MZBootstrap.services.configuration.environment),
               let url = Bundle.main.url(forResource: "GoogleService-Info", withExtension: "plist"),
               let options = FirebaseOptions(contentsOfFile: url.path),
+              options.projectID == "gen-lang-client-0154884984",
+              options.googleAppID == "1:280562253820:ios:eed3a08d4e7e6a6b677c79",
               options.bundleID == Bundle.main.bundleIdentifier else { return }
         if FirebaseApp.app() == nil {
             AppCheck.setAppCheckProviderFactory(CloudAppCheckProviderFactory())
             FirebaseApp.configure(options: options)
         }
         isConfigured = true
-        isEnabled = Bundle.main.object(forInfoDictionaryKey: "CloudNarrationEnabled") as? Bool == true
+        isEnabled = true
         auth = Auth.auth()
         let database = Firestore.firestore()
         let settings = database.settings
