@@ -1,94 +1,160 @@
 {
   "verified_on": "2026-10-03",
-  "previous_validation": "validation-0.3.1.json",
-  "scope": "BedtimeStories only; main branch; Foundation upgrade, logging deployment and Internal release",
+  "previous_validation": "validation-0.5.0.json",
+  "scope": "Foundation 0.5.1 integration and BedtimeStories Internal release; existing app-owned backend unchanged",
   "package": {
-    "version": "0.5.0",
-    "revision": "888e5f6c2423109e99d4b4eab670cfebca9cb051",
+    "version": "0.5.1",
+    "revision": "4c882c99e6c6aec87b7b8990f8ce711bef72744e",
     "firebase_version": "12.19.2",
     "pulse_version": "5.2.1"
   },
   "implemented": {
-    "foundation_settings_link": true,
-    "foundation_pages": true,
-    "shared_developer_links": true,
-    "build_metadata": true,
-    "app_owned_firebase_passive_inspection": true,
-    "existing_pulse_console_preserved": true
+    "package_keyboard_help": true,
+    "command_d_console": true,
+    "console_over_existing_sheets_and_alerts": true,
+    "reporting_console_and_ladybug": true,
+    "short_app_developer_links": true,
+    "shared_scheme_retired": true,
+    "app_owned_logging_and_firebase_inspection_preserved": true
   },
   "configured": {
     "remote_analytics_enabled": false,
     "remote_diagnostics_enabled": false,
-    "bug_reporting": false,
-    "provider_provisioning": "not requested",
-    "firebase_initialization_owner": "app-owned Cloud Narration; unchanged"
-  },
-  "builds": {
-    "local_simulator": "passed",
-    "device_internal_without_signing": "passed",
-    "device_build_log": ".build/mz-upgrade-0.5.0/device-build.log",
-    "build_metadata_readback": ".build/mz-upgrade-0.5.0/build-metadata-readback.json"
+    "bug_reporting": true,
+    "archive_prefix": "bedtimestories",
+    "provider_provisioning": "not performed",
+    "backend_deployment": "not performed"
   },
   "tests": {
-    "app_core_passed": 8,
-    "app_simulator_passed": 39,
-    "app_simulator_suites": 6,
-    "app_core_log": ".build/mz-upgrade-0.5.0/core-tests.log",
-    "app_simulator_log": ".build/mz-upgrade-0.5.0/app-tests.log",
-    "result_bundle": ".build/mz-upgrade-0.5.0/AppTestsFinal.xcresult"
+    "app_simulator_passed": 55,
+    "app_core_passed": 9,
+    "result_bundle": ".build/mz-upgrade-0.5.1/AppTests.xcresult",
+    "app_core_log": ".build/mz-upgrade-0.5.1/core-tests.log",
+    "shake_above_alert_and_original_alert_preserved": true,
+    "motion_evidence": "public UIKit motion callback forwarding; physical accelerometer not exercised"
   },
   "simulator_verified": {
-    "device": "309FEE2F-4881-44AE-9AA6-0A17A0B14EF8",
-    "foundation_version": "0.5.0",
-    "developer_disabled_hides_foundation_and_logs": true,
-    "developer_disable_closes_foundation_sheet": true,
-    "canonical_shared_enable_disable_links": true,
-    "app_scheme_canonical_enable_link": true,
-    "legacy_disable_link": true,
-    "local_firebase_missing_configuration_and_absent_sdk": true,
-    "developer_mode_restored_to_original_enabled_state": true,
-    "flow": ".build/mz-upgrade-0.5.0/developer-settings-flow.yaml",
-    "result": ".build/mz-upgrade-0.5.0/developer-settings-result.json",
+    "device": "DE70C744-6E83-4DE4-B906-C2D848B2581D",
+    "device_name": "MZ Foundation 0.5.1 iPad QA",
+    "os": "27.0",
+    "fixture_device_removed_after_validation": true,
+    "foundation_version": "0.5.1",
+    "short_enable_disable_links": true,
+    "help_available_with_developer_mode_off": true,
+    "mac_keyboard_command_d_from_app_search": true,
+    "mac_keyboard_command_d_above_settings_and_help": true,
+    "help_restored_after_console_done": true,
+    "ladybug_opens_draft": true,
+    "zip_share_sheet_presented": true,
+    "original_settings_preserved_on_disable": true,
+    "recording_preferences_visible": true,
+    "recording_disabled_for_automated_checks": true,
     "screenshots": [
-      ".build/mz-upgrade-0.5.0/foundation-overview.png",
-      ".build/mz-upgrade-0.5.0/firebase-missing-configuration.png"
+      ".build/mz-upgrade-0.5.1/command-d-over-help.png",
+      ".build/mz-upgrade-0.5.1/help-restored.png"
     ]
+  },
+  "report_archive": {
+    "zip_sha256": "e8124c5b9e3145e9c721e5c39c924dc5963bbea46b671fbd786ddbf33171aa28",
+    "schemaVersion": 2,
+    "foundationVersion": "0.5.1",
+    "entries": [
+      "bedtimestories-00ac07e4-eb9f-4112-9d8a-61be4320d9b3/report.json",
+      "bedtimestories-00ac07e4-eb9f-4112-9d8a-61be4320d9b3/screenshot.png",
+      "bedtimestories-00ac07e4-eb9f-4112-9d8a-61be4320d9b3/diagnostics.json",
+      "bedtimestories-00ac07e4-eb9f-4112-9d8a-61be4320d9b3/logs.pulse",
+      "bedtimestories-00ac07e4-eb9f-4112-9d8a-61be4320d9b3/report.txt"
+    ],
+    "attachmentStatus": {
+      "audio": "excluded",
+      "diagnostics": "included",
+      "logs": "included",
+      "screenshot": "included",
+      "video": "unavailable"
+    },
+    "zip_integrity_passed": true,
+    "recent_activity_recording": false,
+    "voice_message_recorded": false
   },
   "isolation": {
     "full_bundle_audit": "passed",
-    "full_bundle_audit_log": ".build/mz-upgrade-0.5.0/local-binary-audit.json",
+    "log": ".build/mz-upgrade-0.5.1/local-binary-audit.json",
     "forbidden_local_sdk_matches": [],
-    "pulse_symbols_present": true,
-    "device_backend_products_and_google_configuration_preserved": true
+    "device_firebase_configuration_and_backend_products_preserved": true
   },
   "repeat_apply": {
     "unchanged_runs": 2,
-    "log": ".build/mz-upgrade-0.5.0/idempotence.json"
+    "log": ".build/mz-upgrade-0.5.1/idempotence.json"
   },
+  "source_verifier": "Generic checker flags deliberate generated bootstrap overrides and app-owned vendor imports; hosted app tests and full-bundle native isolation audit pass.",
   "physical_device_verified": false,
   "provider_delivery_verified": false,
-  "device_firebase_runtime_inspection": "compiled; not exercised on physical device",
   "internal_testflight": {
     "version": "1.0",
-    "build": "11",
-    "build_id": "6fb981c9-1f28-451b-81ef-454d8b825146",
+    "build": "13",
+    "build_id": "9534afa3-2730-4fa3-ba75-bff2534f52a8",
     "processing_state": "VALID",
     "build_audience": "INTERNAL_ONLY",
     "internal_build_state": "IN_BETA_TESTING",
     "group": "Internal Testers",
+    "group_id": "20328e88-9f9c-4c47-be78-c33a809d1a71",
     "effective_group_access_verified": true,
     "test_notes_match": true,
+    "notes_id": "9f448edb-de2d-4b8e-bf5e-46e8ee25b3f2",
+    "minimum_os": "27.0",
+    "existing_testers": 2,
+    "existing_tester_states": [
+      "INSTALLED",
+      "INSTALLED"
+    ],
+    "installation_of_this_build_verified": false,
+    "artifact": {
+      "bundle_id": "com.matteozajac.bedtimestories",
+      "version": "1.0",
+      "build": "13",
+      "platform": "iphoneos",
+      "minimum_os": "27.0",
+      "schemes": [
+        "bedtimestories"
+      ],
+      "microphone_purpose_present": true,
+      "signature_verified": true,
+      "team": "4TCJLR98Y5",
+      "profile_uuid": "5abe4610-98c2-404b-89ee-2d87f303e113",
+      "profile_expiry": "2027-08-09T16:51:04",
+      "internal_only_export": true,
+      "ipa_sha256": "420fba8f4b318d9e2f4153146574201b2f118b420de99eefafd05c90f720368d",
+      "build_metadata": {
+        "appRevision": "118d5b236da99c057aa43c3b89f17dcb32537270",
+        "appWorkingTreeModified": true,
+        "buildChannel": "Internal",
+        "buildDate": "2026-10-03 20:30:06",
+        "foundationRevision": "4c882c99e6c6aec87b7b8990f8ce711bef72744e",
+        "foundationVersion": "0.5.1",
+        "provenance": "App Package.resolved and build source identities",
+        "resolvedPackageVersions": {
+          "abseil-cpp-binary": "1.2024072200.0",
+          "app-check": "11.3.2",
+          "firebase-ios-sdk": "12.19.2",
+          "google-ads-on-device-conversion-ios-sdk": "3.7.0",
+          "googleappmeasurement": "12.19.2",
+          "googledatatransport": "10.1.1",
+          "googleutilities": "8.1.4",
+          "grpc-binary": "1.69.1",
+          "gtm-session-fetcher": "5.3.1",
+          "interop-ios-for-google-sdks": "101.0.0",
+          "leveldb": "1.22.5",
+          "mzappfoundation": "0.5.1",
+          "nanopb": "2.30910.1",
+          "promises": "2.4.1",
+          "pulse": "5.2.1",
+          "purchases-ios": "5.88.0",
+          "sentry-cocoa": "9.27.0"
+        }
+      }
+    },
+    "release_input_sha256": "64784621d0c06fb5af7ad174743336572c79d56e577b9e4d2db9ce54413e0765",
+    "release_input_count": 131,
     "receipt": "docs/TESTFLIGHT.md"
-  },
-  "logging_validation": {
-    "app_core_passed": 8,
-    "app_simulator_passed": 47,
-    "worker_passed": 52,
-    "functions_passed": 10,
-    "readable_pulse_error_stacks": true,
-    "deployed_worker_exception_frames": true,
-    "deployed_functions_debug_connection_traces": true,
-    "local_binary_isolation": "passed",
-    "receipt": "docs/LOGGING.md"
   }
 }

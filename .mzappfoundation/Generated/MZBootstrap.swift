@@ -7,6 +7,9 @@ import MZAppFoundationLocal
 #endif
 
 @MainActor enum MZBootstrap {
+    #if os(iOS)
+    static let reporting = DeveloperReporting(services: services, archivePrefix: "bedtimestories")
+    #endif
     static let services: AppServices = make()
     private static func make() -> AppServices {
         let environment: AppEnvironment
@@ -23,8 +26,7 @@ import MZAppFoundationLocal
             urlScheme: "bedtimestories", environment: environment,
             version: bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0",
             build: bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "0",
-            preferences: .init(analytics: false, diagnostics: false),
-            developerLinkHost: "com.matteozajac.bedtimestories")
+            preferences: .init(analytics: false, diagnostics: false))
         let schema = TelemetrySchema(events: [:])
         #if MZ_LOCAL || targetEnvironment(simulator)
         return AppDiagnosticServices.make(configuration: configuration, schema: schema)

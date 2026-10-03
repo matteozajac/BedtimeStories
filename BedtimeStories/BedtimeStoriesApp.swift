@@ -10,6 +10,10 @@ struct BedtimeStoriesApp: App {
 
     init() {
         AppLog.logger = MZBootstrap.services.logger
+        // Hosted tests exercise console presentation without ReplayKit's consent UI.
+        if NSClassFromString("XCTestCase") != nil || ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil {
+            MZBootstrap.reporting.recordsRecentActivity = false
+        }
         Theme.applyNavigationBarAppearance()
         _library = State(initialValue: LibraryModel())
         _cloud = State(initialValue: CloudNarrationModel())
@@ -28,7 +32,7 @@ struct BedtimeStoriesApp: App {
                 .environment(services.developerOptions)
                 .tint(Theme.accent)
                 .fontDesign(.rounded)
-                .appDeveloperTools(services.developerOptions)
+                .appDeveloperTools(services.developerOptions, reporting: MZBootstrap.reporting)
         }
     }
 }

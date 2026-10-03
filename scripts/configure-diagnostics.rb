@@ -8,7 +8,7 @@ app = project.targets.find { |target| target.name == 'BedtimeStories' }
 local = project.targets.find { |target| target.name == 'BedtimeStoriesLocal' }
 raise 'Run the MZAppFoundation setup apply command first' unless app && local
 
-# MZAppFoundation 0.5.0 and the existing backend share the app's Firebase pin.
+# MZAppFoundation 0.5.1 and the existing backend share the app's Firebase pin.
 firebase = project.root_object.package_references.find { |ref| ref.respond_to?(:repositoryURL) && ref.repositoryURL.include?('firebase-ios-sdk') }
 firebase.requirement = { 'kind' => 'exactVersion', 'version' => '12.19.2' }
 

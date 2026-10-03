@@ -16,11 +16,12 @@ struct AppDeveloperSettings: View {
                 .accessibilityIdentifier("developer.mode")
             FoundationSettingsLink(
                 services: services,
-                pages: FoundationDeveloperTools.pages(services: services)
+                pages: FoundationDeveloperTools.pages(services: services, reporting: MZBootstrap.reporting)
             )
+            FoundationKeyboardShortcutsLink(options: options)
             if options.isEnabled {
-                NavigationLink {
-                    AppDeveloperConsole(options: options)
+                Button {
+                    options.requestConsole()
                 } label: {
                     Label("Open Logs", systemImage: "terminal")
                 }
@@ -29,21 +30,8 @@ struct AppDeveloperSettings: View {
         } header: {
             Text("Developer")
         } footer: {
-            Text("Shake your device to open the logs. Logs stay on this device.")
+            Text("Shake your device or press Command-D to open the logs and send a bug report. Logs stay on this device until you share them.")
         }
         .listRowBackground(Theme.surface)
-    }
-}
-
-private struct AppDeveloperConsole: View {
-    let options: DeveloperOptions
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        DeveloperConsole(options: options)
-            .navigationTitle("Logs")
-            .onChange(of: options.isEnabled) { _, enabled in
-                if !enabled { dismiss() }
-            }
     }
 }

@@ -1,6 +1,6 @@
 {
-  "configuration_sha256": "ae4562a5aa6b30e3edac72fc8704baf2e6d218258038941f90c74026421dd9c1",
-  "package_version": "0.5.0",
+  "configuration_sha256": "f96da720bc138781777f6db83d0d74c1054d4461c35a5e53bb0d1324c2c77019",
+  "package_version": "0.5.1",
   "local_wiring": "applied",
   "entrypoint": "Wire MZBootstrap.services and appDeveloperTools in app entrypoint; see integration.md",
   "remote_provisioning": "not performed by this command"

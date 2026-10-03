@@ -1,6 +1,6 @@
 # Diagnosing app and Gemini failures
 
-The app uses the resolved MZAppFoundation 0.5.0 logger and local Pulse store.
+The app uses the resolved MZAppFoundation 0.5.1 logger and local Pulse store.
 Open **Settings → Developer → Open Logs**, or enable Developer Mode and shake
 the device. Select a log entry, then tap **Info** to inspect its source and metadata. Keep the
 Debug level included in the console filters to see connection traces.
@@ -17,7 +17,7 @@ when the console is observing saves on the main thread.
 ## App evidence
 
 `AppLog` and injected `AppLogging` sinks support trace, debug, info, warning,
-and error calls. Foundation 0.5.0 has no separate trace severity, so trace entries
+and error calls. Foundation has no separate trace severity, so trace entries
 persist as **Debug** with `verbosity=trace`. They are stored without sampling.
 Recoverable retries, cleanup failures, and cached fallbacks are warnings;
 failed operations are errors. Expected cancellation is trace or is suppressed.

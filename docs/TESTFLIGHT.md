@@ -1,5 +1,49 @@
 # Internal TestFlight
 
+## 1.0 (13) — 3 October 2026
+
+MZAppFoundation 0.5.1, shared keyboard help, Command-D console access and the
+Ladybug ZIP reporter are processed and available to **Internal Testers**.
+Exact readback confirms **VALID / INTERNAL_ONLY / IN_BETA_TESTING**, effective
+all-build group access and matching English What to Test notes.
+
+- Build/upload ID: `9534afa3-2730-4fa3-ba75-bff2534f52a8`.
+- App ID: `6818278413`; bundle `com.matteozajac.bedtimestories`; team `4TCJLR98Y5`.
+- Group: `20328e88-9f9c-4c47-be78-c33a809d1a71` (**Internal Testers**, existing all-build access).
+- English notes: `9f448edb-de2d-4b8e-bf5e-46e8ee25b3f2`.
+- Minimum iOS/iPadOS, compatible Mac and Vision OS: 27.0.
+- Foundation: `0.5.1` at `4c882c99e6c6aec87b7b8990f8ce711bef72744e`.
+- IPA SHA256: `420fba8f4b318d9e2f4153146574201b2f118b420de99eefafd05c90f720368d`.
+- Release input fingerprint: `64784621d0c06fb5af7ad174743336572c79d56e577b9e4d2db9ce54413e0765`; 131 matching inputs,
+  including the ignored Firebase client configuration.
+- Signed archive and Internal-only export passed strict signature, identity,
+  Foundation metadata, app-specific scheme and entitlement checks. Production
+  iCloud, Apple sign-in, App Attest and Private Cloud Compute entitlements remain.
+
+Enable **Settings → Developer → Developer Mode**, then press **Command-D**, shake
+or select **Open Logs**. The package opens its console above app presentations.
+**Keyboard Shortcuts** remains available with developer mode off. Developer links
+are `bedtimestories://developer/enable` and `bedtimestories://developer/disable`;
+shared and bundle-host routes are retired. The Ladybug opens the report editor;
+recording preferences live in **App Foundation → Bug reporting and recording**.
+
+Validation: **55 hosted app tests and 9 core tests passed**, including forwarding
+shake above an alert while preserving the alert. Local SDK isolation and two
+repeatable setup applications passed. In the iPad simulator, a Mac keyboard
+opened the console from a text field and above both Settings and keyboard help;
+Done restored keyboard help. A real report export produced an intact schema-2
+ZIP with screenshot, Pulse logs and Foundation diagnostics, and developer disable
+closed reporting while preserving Settings. Recent capture was disabled for
+these automated checks. The package's macOS test runner could not establish its
+connection; its build passes, but macOS runtime validation remains open.
+
+Physical Magic Keyboard, accelerometer, ReplayKit, microphone, iCloud and provider
+acceptance remain open. The two existing tester records are INSTALLED; this does
+not establish installation of build 13. Existing backend configuration and
+logging deployment are retained. No provider setup or backend deployment occurred.
+Raw evidence is retained under `.build/mz-upgrade-0.5.1/` and `.build/pti/1.0-13/`.
+[Open TestFlight](https://appstoreconnect.apple.com/apps/6818278413/testflight/ios).
+
 ## 1.0 (12) — 3 October 2026
 
 The whole-app logging audit and readable Pulse text export are processed and

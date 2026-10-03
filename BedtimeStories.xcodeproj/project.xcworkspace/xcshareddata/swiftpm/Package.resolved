@@ -105,8 +105,8 @@
       "kind" : "remoteSourceControl",
       "location" : "git@github.com:matteozajac/MZAppFoundation.git",
       "state" : {
-        "revision" : "888e5f6c2423109e99d4b4eab670cfebca9cb051",
-        "version" : "0.5.0"
+        "revision" : "4c882c99e6c6aec87b7b8990f8ce711bef72744e",
+        "version" : "0.5.1"
       }
     },
     {
