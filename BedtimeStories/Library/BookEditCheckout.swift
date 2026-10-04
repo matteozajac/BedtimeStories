@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 import MZAppFoundation
 
 struct BookEditCheckout: Sendable {
@@ -37,6 +38,10 @@ nonisolated struct BookOperationDiagnostics: Sendable {
                       file: String = #fileID, function: String = #function, line: UInt = #line) -> LogEntry {
         let cancelled = ErrorSnapshot.isCancellation(error)
         var fields = metadata
+        if let failure = error as? BookOperationFailure {
+            fields.merge(failure.metadata) { _, captured in captured }
+            fields["operation_phase"] = .string(phase)
+        }
         if cancelled { fields["cancelled"] = .bool(true); fields["verbosity"] = .string("trace") }
         return LogEntry(message, level: cancelled ? .debug : level, category: category, metadata: fields,
                         error: cancelled ? nil : ErrorSnapshot(error, file: file, function: function, line: line),
@@ -58,6 +63,21 @@ nonisolated struct BookOperationDiagnostics: Sendable {
         default: "other"
         }
     }
+
+    mutating func identifyAsset(_ path: String, manifest: BookManifest? = nil) {
+        details["asset_kind"] = .string(Self.assetKind(path))
+        // Stable within a book without exposing user-authored filenames.
+        details["asset_key"] = .string(SHA256.hash(data: Data(path.utf8)).prefix(12).map { String(format: "%02x", $0) }.joined())
+        details["chapter_id"] = nil
+        details["chapter_reference_count"] = nil
+        details["asset_role"] = nil
+        if let manifest {
+            let chapters = manifest.orderedChapters.filter { [$0.text, $0.image, $0.audio].contains(path) }
+            details["chapter_reference_count"] = .integer(chapters.count)
+            if let chapter = chapters.first { details["chapter_id"] = .string(chapter.id.uuidString) }
+            details["asset_role"] = .string(path == manifest.cover ? "cover" : path == manifest.audio ? "book_audio" : "chapter")
+        }
+    }
 }
 
 /// Preserve a provider's identity and reporting frames at the failing phase.
@@ -66,6 +86,7 @@ nonisolated struct BookOperationFailure: LocalizedError, LoggableError, Underlyi
     let presentation: String
     let phase: String
     let operationID: String
+    let metadata: [String: TelemetryValue]
     let underlyingLogError: ErrorSnapshot?
     var errorDescription: String? { presentation }
     var logMessage: String { "Book operation failed during \(phase) (operation \(operationID))." }
@@ -79,6 +100,7 @@ nonisolated struct BookOperationFailure: LocalizedError, LoggableError, Underlyi
         if error is BookOperationFailure { return error }
         return BookOperationFailure(presentation: error.localizedDescription, phase: context.phase,
                                     operationID: context.operationID,
+                                    metadata: context.metadata,
                                     underlyingLogError: ErrorSnapshot(error, file: file, function: function, line: line))
     }
 }

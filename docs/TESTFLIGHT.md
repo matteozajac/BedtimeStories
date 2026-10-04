@@ -1,5 +1,38 @@
 # Internal TestFlight
 
+## 1.0 (16) — 4 October 2026
+
+The iCloud Edit Book repair and provider diagnostics are processed and available
+to **Internal Testers**. Exact readback confirms **VALID / INTERNAL_ONLY /
+IN_BETA_TESTING**, complete effective group access and matching English notes.
+
+- Build/upload ID: `edcabda0-71f9-4131-9195-7619f55960ea`.
+- App ID: `6818278413`; bundle `com.matteozajac.bedtimestories`; team `4TCJLR98Y5`.
+- Group: `20328e88-9f9c-4c47-be78-c33a809d1a71` (**Internal Testers**, explicit and all-build access).
+- English notes: `a1f7b536-d209-4e4f-853e-ba00d9777ef3`.
+- Minimum iOS/iPadOS, compatible Mac and Vision OS: 27.0.
+- IPA SHA256: `17aa5d78113fc570fad0927795ab71baab69bb49b441bda22c1b2562a6488663`.
+- Release input fingerprint: `b26630ed56f0c48080c383336a282cc4cf8734fe774ebf7b006c76c3f35f7a55`; all 136 inputs matched through final archive, export, upload and distribution.
+- Signed Internal archive/export passed strict signature, bundle/version/build, Firebase identity and entitlement checks. Production iCloud, Apple sign-in, App Attest and PCC remain enabled. Export is Internal-only; profile `5abe4610-98c2-404b-89ee-2d87f303e113` expires 9 August 2027.
+
+Every provider query now clears cached URL attributes, so a completed download
+can become visible to checkout. Failures retain the asset/chapter, failing phase,
+fresh provider state, quota/authentication/server codes and underlying errors.
+The shared download repair also applies to asset loading, offline preparation,
+import and sharing. See [diagnosis and regression evidence](ICLOUD_EDIT_VALIDATION.md).
+
+Validation: **63 optimized Internal app tests passed on each iPhone and iPad
+simulator**, plus **9 core tests**, **6 Python authoring tests**, and the full
+Local binary SDK isolation audit. The checkout regression failed before the
+repair and passed afterward. Stale local copies remain protected, and nested
+provider errors and cancellation are preserved.
+
+Both existing tester records are INSTALLED; this does not establish installation
+of build 16. Retest the affected book on the physical device. Real iCloud downloads
+and cross-device edits remain device acceptance checks. No external beta or App
+Store review was submitted. Raw evidence remains in ignored `.build/pti/1.0-16/`.
+[Open TestFlight](https://appstoreconnect.apple.com/apps/6818278413/testflight/ios).
+
 ## 1.0 (15) — 4 October 2026
 
 Gemini story generation for Polish and English is processed and available to

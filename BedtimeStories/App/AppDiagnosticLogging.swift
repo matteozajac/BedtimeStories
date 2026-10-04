@@ -71,6 +71,13 @@ nonisolated enum AppDiagnosticText {
             case NSFileWriteNoPermissionError: "The file cannot be written because access was denied."
             case NSFileWriteOutOfSpaceError: "There is not enough free storage to write the file."
             case NSFileWriteVolumeReadOnlyError: "The destination storage is read-only."
+            case NSFileLockingError: "The file is locked by another operation."
+            case NSFileReadTooLargeError: "The file is too large to read."
+            case NSFileReadUnknownStringEncodingError, NSFileReadInapplicableStringEncodingError: "The text file could not be decoded with the requested encoding."
+            case NSFileWriteFileExistsError: "A file already occupies the save destination."
+            case NSUbiquitousFileUnavailableError: "The requested iCloud file is unavailable."
+            case NSUbiquitousFileNotUploadedDueToQuotaError: "iCloud storage quota prevented this file from being uploaded."
+            case NSUbiquitousFileUbiquityServerNotAvailable: "The iCloud file server is unavailable."
             default: nil
             }
         case NSPOSIXErrorDomain:
@@ -79,6 +86,20 @@ nonisolated enum AppDiagnosticText {
             case 13: "Filesystem access was denied."
             case 20: "A required directory is a regular file."
             case 28: "The storage device has no free space."
+            default: nil
+            }
+        case "NSFileProviderErrorDomain":
+            switch code {
+            case -1000: "The file provider requires account authentication."
+            case -1001: "Another item already uses this filename in the provider."
+            case -1002: "The file provider needs to refresh its synchronization state."
+            case -1003: "The file provider account has insufficient storage quota."
+            case -1004: "The file provider server could not be reached."
+            case -1005: "The requested item no longer exists in the file provider."
+            case -2005: "The file provider cannot synchronize this item; inspect its underlying cause."
+            case -2007: "The item has local changes that have not synchronized."
+            case -2011: "The file provider domain is disabled."
+            case -2012: "The file provider domain is temporarily unavailable."
             default: nil
             }
         case "com.firebase.functions":

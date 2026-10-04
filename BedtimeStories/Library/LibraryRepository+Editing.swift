@@ -26,7 +26,7 @@ extension LibraryRepository {
             for (index, path) in paths.enumerated() {
                 try Task.checkCancellation()
                 context.details["asset_index"] = .integer(index + 1)
-                context.details["asset_kind"] = .string(BookOperationDiagnostics.assetKind(path))
+                context.identifyAsset(path, manifest: current)
                 diagnosticLog.trace("Book edit asset preparation started", category: "library", metadata: context.metadata)
                 try await download(try SafeBookPath.resolve(path, inside: book.folder), context: context)
                 diagnosticLog.trace("Book edit asset preparation completed", category: "library", metadata: context.metadata)
@@ -49,7 +49,7 @@ extension LibraryRepository {
                 for (index, path) in Set(["book.json"] + manifest.assetPaths).sorted().enumerated() {
                     try Task.checkCancellation()
                     context.details["asset_index"] = .integer(index + 1)
-                    context.details["asset_kind"] = .string(BookOperationDiagnostics.assetKind(path))
+                    context.identifyAsset(path, manifest: manifest)
                     let destination = try SafeBookPath.resolve(path, inside: copy)
                     try files.createDirectory(at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
                     diagnosticLog.trace("Book edit asset copy started", category: "library", metadata: context.metadata)

@@ -5,10 +5,13 @@ actor LibraryRepository {
     private let files = FileManager.default
     var diagnosticLog: FeatureLogBuffer
     let cacheRoot: URL
+    private let downloadProvider: LibraryDownloadProvider
 
-    init(cacheRoot: URL, logDestination: FeatureLogDestination? = nil) {
+    init(cacheRoot: URL, logDestination: FeatureLogDestination? = nil,
+         downloadProvider: LibraryDownloadProvider = .init()) {
         self.cacheRoot = cacheRoot
         diagnosticLog = FeatureLogBuffer(destination: logDestination)
+        self.downloadProvider = downloadProvider
     }
 
     func flushDiagnosticLogs() async { await diagnosticLog.flush() }
@@ -70,7 +73,7 @@ actor LibraryRepository {
 
     func asset(_ path: String, book: LibraryBook, root: URL, operationID: String = UUID().uuidString) async throws -> URL {
         var context = BookOperationDiagnostics(operationID: operationID, bookID: book.id, phase: "asset_prepare")
-        context.details["asset_kind"] = .string(BookOperationDiagnostics.assetKind(path))
+        context.identifyAsset(path, manifest: book.manifest)
         let destination = try SafeBookPath.resolve(path, inside: bookCache(book.id))
         let access = root.startAccessingSecurityScopedResource()
         defer { if access { root.stopAccessingSecurityScopedResource() } }
@@ -79,7 +82,9 @@ actor LibraryRepository {
             context.phase = "asset_download"
             try await download(source, context: context)
             context.phase = "asset_cache_validate"
-            let sourceValues = try source.resourceValues(forKeys: [.contentModificationDateKey, .fileSizeKey, .isRegularFileKey])
+            var freshSource = source
+            freshSource.removeAllCachedResourceValues()
+            let sourceValues = try freshSource.resourceValues(forKeys: [.contentModificationDateKey, .fileSizeKey, .isRegularFileKey])
             let destinationValues = try? destination.resourceValues(forKeys: [.contentModificationDateKey, .fileSizeKey])
             if files.fileExists(atPath: destination.path), sourceValues.contentModificationDate == destinationValues?.contentModificationDate,
                sourceValues.fileSize == destinationValues?.fileSize {
@@ -286,14 +291,17 @@ actor LibraryRepository {
 
     func download(_ url: URL, knownUbiquitous: Bool = false,
                   context suppliedContext: BookOperationDiagnostics? = nil) async throws {
+        try Task.checkCancellation()
         var context = suppliedContext ?? BookOperationDiagnostics(phase: "asset_download")
         context.details["asset_kind"] = .string(BookOperationDiagnostics.assetKind(url.lastPathComponent))
         let placeholder = url.deletingLastPathComponent().appendingPathComponent("." + url.lastPathComponent + ".icloud")
         let exists = files.fileExists(atPath: url.path)
         let resource = !exists && files.fileExists(atPath: placeholder.path) ? placeholder : url
-        var values: URLResourceValues?
-        do { values = try resource.resourceValues(forKeys: [.isUbiquitousItemKey, .ubiquitousItemDownloadingStatusKey]) }
+        var values: LibraryDownloadState?
+        var attributeFailure: ErrorSnapshot?
+        do { values = try downloadProvider.readState(resource) }
         catch {
+            attributeFailure = ErrorSnapshot(error)
             if files.fileExists(atPath: resource.path) {
                 diagnosticLog.warning("Book asset provider attributes unavailable; continuing availability check", error: error, category: "library", metadata: context.metadata)
             } else if suppliedContext != nil || knownUbiquitous {
@@ -306,7 +314,8 @@ actor LibraryRepository {
         context.details["local_file_present"] = .bool(exists)
         context.details["placeholder_present"] = .bool(resource != url)
         context.details["icloud_item"] = .bool(knownUbiquitous || values?.isUbiquitousItem == true)
-        context.details["download_status"] = .string(Self.downloadStatus(values?.ubiquitousItemDownloadingStatus))
+        captureProviderState(values, context: &context)
+        if let error = values?.downloadError { throw BookOperationFailure.preserving(error, context: context) }
         if exists, values?.isUbiquitousItem != true {
             if suppliedContext != nil { diagnosticLog.trace("Book asset already available locally", category: "library", metadata: context.metadata) }
             return
@@ -315,25 +324,28 @@ actor LibraryRepository {
             if suppliedContext != nil { diagnosticLog.trace("Book asset has no iCloud download provider", category: "library", metadata: context.metadata) }
             return
         }
-        if values?.ubiquitousItemDownloadingStatus == .current {
+        if values?.status == "current" {
             if suppliedContext != nil { diagnosticLog.trace("Book iCloud asset already current", category: "library", metadata: context.metadata) }
             return
         }
-        context.details["timeout_seconds"] = .integer(45)
+        context.details["timeout_ms"] = .integer(Int(downloadProvider.timeout.components.seconds * 1_000 + downloadProvider.timeout.components.attoseconds / 1_000_000_000_000_000))
+        context.details["metadata_refreshed"] = .bool(true)
         diagnosticLog.trace("iCloud asset download requested", category: "library", metadata: context.metadata)
         let started = ContinuousClock.now
         var nextProgress = started.advanced(by: .seconds(5))
-        let deadline = started.advanced(by: .seconds(45))
+        let deadline = started.advanced(by: downloadProvider.timeout)
         var lastStatus = context.details["download_status"]
-        var lastStatusName = Self.downloadStatus(values?.ubiquitousItemDownloadingStatus)
+        var lastStatusName = values?.status ?? "unknown"
         var reportedAttributeFailure = false
         do {
-            try files.startDownloadingUbiquitousItem(at: resource)
+            try downloadProvider.requestDownload(resource)
+            diagnosticLog.trace("iCloud provider accepted download request", category: "library", metadata: context.metadata)
             while ContinuousClock.now < deadline {
                 try Task.checkCancellation()
-                var status: URLResourceValues?
-                do { status = try url.resourceValues(forKeys: [.ubiquitousItemDownloadingStatusKey, .ubiquitousItemDownloadingErrorKey, .ubiquitousItemIsDownloadingKey]) }
+                var status: LibraryDownloadState?
+                do { status = try downloadProvider.readState(url) }
                 catch {
+                    attributeFailure = ErrorSnapshot(error)
                     if !reportedAttributeFailure {
                         reportedAttributeFailure = true
                         if files.fileExists(atPath: url.path) {
@@ -346,14 +358,14 @@ actor LibraryRepository {
                         }
                     }
                 }
-                let statusName = Self.downloadStatus(status?.ubiquitousItemDownloadingStatus)
+                let statusName = status?.status ?? "unknown"
+                values = status
                 lastStatusName = statusName
-                context.details["download_status"] = .string(statusName)
-                context.details["provider_is_downloading"] = .bool(status?.ubiquitousItemIsDownloading == true)
+                captureProviderState(status, context: &context)
                 context.details["local_file_present"] = .bool(files.fileExists(atPath: url.path))
                 context.details["download_elapsed_ms"] = .integer(BookOperationDiagnostics.milliseconds(since: started))
-                if let error = status?.ubiquitousItemDownloadingError { throw error }
-                if status?.ubiquitousItemDownloadingStatus == .current {
+                if let error = status?.downloadError { throw error }
+                if status?.status == "current" {
                     diagnosticLog.trace("iCloud asset download completed", category: "library", metadata: context.metadata)
                     return
                 }
@@ -364,22 +376,39 @@ actor LibraryRepository {
                     lastStatus = .string(statusName)
                     nextProgress = ContinuousClock.now.advanced(by: .seconds(5))
                 }
-                try await Task.sleep(for: .milliseconds(250))
+                try await Task.sleep(for: downloadProvider.pollInterval)
             }
             diagnosticLog.trace("iCloud asset download timed out", category: "library", metadata: context.metadata)
-            throw LibraryDownloadTimeout(status: lastStatusName)
+            throw LibraryDownloadTimeout(status: lastStatusName,
+                                         providerIsDownloading: context.details["provider_is_downloading"] == .bool(true),
+                                         underlyingLogError: values?.uploadError.map { ErrorSnapshot($0) } ?? attributeFailure)
         } catch {
             diagnosticLog.trace(ErrorSnapshot.isCancellation(error) ? "iCloud asset download cancelled" : "iCloud asset download interrupted", category: "library", metadata: context.metadata)
             throw BookOperationFailure.preserving(error, context: context)
         }
     }
 
-    private static func downloadStatus(_ status: URLUbiquitousItemDownloadingStatus?) -> String {
-        switch status {
-        case .current: "current"
-        case .downloaded: "downloaded"
-        case .notDownloaded: "not_downloaded"
-        default: "unknown"
+    private func captureProviderState(_ state: LibraryDownloadState?, context: inout BookOperationDiagnostics) {
+        context.details["download_status"] = .string(state?.status ?? "unknown")
+        context.details["provider_is_downloading"] = state.map { .bool($0.isDownloading) }
+        context.details["file_size_bytes"] = state?.fileSize.map { .integer($0) }
+        context.details["regular_file"] = state?.isRegularFile.map { .bool($0) }
+        context.details["provider_is_uploaded"] = state?.isUploaded.map { .bool($0) }
+        context.details["provider_is_uploading"] = state?.isUploading.map { .bool($0) }
+        context.details["provider_has_conflicts"] = state?.hasConflicts.map { .bool($0) }
+        context.details["upload_error_domain"] = nil
+        context.details["upload_error_code"] = nil
+        context.details["download_error_domain"] = nil
+        context.details["download_error_code"] = nil
+        if let error = state?.uploadError {
+            let cause = ErrorSnapshot(error).causes.first
+            context.details["upload_error_domain"] = cause.map { .string($0.domain) }
+            context.details["upload_error_code"] = cause.map { .integer($0.code) }
+        }
+        if let error = state?.downloadError {
+            let cause = ErrorSnapshot(error).causes.first
+            context.details["download_error_domain"] = cause.map { .string($0.domain) }
+            context.details["download_error_code"] = cause.map { .integer($0.code) }
         }
     }
 
@@ -422,8 +451,12 @@ extension LibraryRepository {
 }
 
 /// A technical timeout explanation safe to show in copied diagnostic errors.
-private nonisolated struct LibraryDownloadTimeout: LocalizedError, LoggableError, Sendable {
+nonisolated struct LibraryDownloadTimeout: LocalizedError, LoggableError, UnderlyingErrorSnapshotProviding, CustomNSError, Sendable {
+    static var errorDomain: String { "BedtimeStories.LibraryDownloadTimeout" }
+    var errorCode: Int { 1 }
     let status: String
+    let providerIsDownloading: Bool
+    let underlyingLogError: ErrorSnapshot?
     var errorDescription: String? { "iCloud has not finished downloading this file. Check your connection and try again." }
-    var logMessage: String { "iCloud file provider did not make the requested asset current within 45 seconds (last status: \(status))." }
+    var logMessage: String { "iCloud file provider did not make the requested asset current before the download deadline (last status: \(status); provider downloading: \(providerIsDownloading)). Fresh provider metadata was checked; local file presence alone does not establish that the latest bytes are available." }
 }
