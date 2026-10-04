@@ -124,6 +124,14 @@ test("diagnostics bound nested and cyclic causes and omit arbitrary string codes
   assert.equal(errorSnapshot(root).cause_chain_truncated, true);
 });
 
+test("messaging diagnostics expose bounded APNs failure codes without provider responses or tokens", () => {
+  const secret = "private-apns-token-and-provider-response";
+  const error = Object.assign(new Error(secret), { code: "messaging/third-party-auth-error", response: { body: secret }, token: secret });
+  const snapshot = errorSnapshot(error);
+  assert.equal(snapshot.causes[0]!.code, "messaging/third-party-auth-error");
+  assert.ok(!JSON.stringify(snapshot).includes(secret));
+});
+
 test("connection instrumentation preserves the thrown error and provides safe owner phase", async () => {
   const original = Object.assign(new Error("secret-provider-body"), { code: 14 });
   let caught: unknown;

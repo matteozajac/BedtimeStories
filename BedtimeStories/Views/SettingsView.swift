@@ -1,9 +1,13 @@
 import SwiftUI
+import UserNotifications
 
 struct SettingsView: View {
     @Environment(LibraryModel.self) private var library
+    @Environment(OperationCenter.self) private var operations
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
     var body: some View {
+        @Bindable var operations = operations
         Form {
             Section {
                 VStack(spacing: 12) {
@@ -14,6 +18,38 @@ struct SettingsView: View {
                 .frame(maxWidth: .infinity).padding(.vertical, 4)
             }
             .listRowBackground(Color.clear)
+            Section {
+                NavigationLink {
+                    OperationsView()
+                } label: {
+                    HStack {
+                        row("Ongoing Operations", systemImage: "sparkles")
+                        Spacer()
+                        if !operations.activeOperations.isEmpty {
+                            Text(operations.activeOperations.count, format: .number)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Theme.accent)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 4)
+                                .background(Theme.accentSoft, in: .capsule)
+                        }
+                    }
+                }
+                .accessibilityIdentifier("settings-ongoing-operations")
+                Toggle("Completion notifications", isOn: $operations.completionAlertsEnabled)
+                    .onChange(of: operations.completionAlertsEnabled) { _, enabled in
+                        if enabled { Task { await enableNotifications() } }
+                    }
+                if operations.completionAlertsEnabled && !operations.notificationsEnabled {
+                    Button("Enable Notifications", systemImage: "bell.badge") {
+                        Task { await enableNotifications() }
+                    }
+                    .font(.subheadline.weight(.semibold))
+                }
+            } header: { Text("Background Activity") } footer: {
+                Text("Follow your stories, voices, and downloads here. Updates appear in the app; notifications let you know when work finishes while you’re away.")
+            }
+            .listRowBackground(Theme.surface)
             Section {
                 LabeledContent {
                     Text(library.cloudStorage ? String(localized: "iCloud Drive") : String(localized: "On This Device"))
@@ -61,6 +97,15 @@ struct SettingsView: View {
 
     private func row(_ title: LocalizedStringKey, systemImage: String, color: Color = Theme.ink) -> some View {
         Label { Text(title).foregroundStyle(color) } icon: { IconTile(systemName: systemImage, size: 30) }
+    }
+
+    private func enableNotifications() async {
+        await operations.requestNotificationAuthorization()
+        guard !operations.notificationsEnabled else { return }
+        let settings = await UNUserNotificationCenter.current().notificationSettings()
+        if settings.authorizationStatus == .denied, let url = URL(string: UIApplication.openSettingsURLString) {
+            openURL(url)
+        }
     }
 }
 

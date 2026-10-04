@@ -1,4 +1,7 @@
 import { CloudTasksClient, protos } from "@google-cloud/tasks";
+import { getFunctions } from "firebase-admin/functions";
+import { contentHash } from "./validation";
+import { StoryTask, StoryTaskDispatcher } from "./storyJobs";
 import { TaskDispatcher, WorkerTask } from "./contracts";
 import { connection, diagnostic, taskKey } from "./diagnostics";
 
@@ -31,6 +34,18 @@ export class CloudTaskDispatcher implements TaskDispatcher {
     } catch (error) {
       if ((error as { code?: number }).code !== 6) throw error; // ALREADY_EXISTS: same durable operation.
       diagnostic("debug", "cloud_task_already_enqueued", { task_key: taskId, task_kind: task.kind });
+    }
+  }
+}
+
+export class FirebaseStoryTaskDispatcher implements StoryTaskDispatcher {
+  async enqueue(task: StoryTask): Promise<void> {
+    try {
+      await connection("cloud_tasks", "enqueue_story", () => getFunctions().taskQueue<StoryTask>("locations/europe-west1/functions/processStoryGeneration").enqueue(task,
+        { id: contentHash(`${task.uid}:${task.id}`), dispatchDeadlineSeconds: 420 }));
+    } catch (error) {
+      if ((error as { code?: string }).code !== "functions/task-already-exists") throw error;
+      diagnostic("debug", "story_task_already_enqueued");
     }
   }
 }

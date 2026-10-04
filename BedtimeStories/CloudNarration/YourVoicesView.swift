@@ -2,6 +2,7 @@ import AuthenticationServices
 import SwiftUI
 
 struct YourVoicesView: View {
+    @Environment(OperationCenter.self) private var operations
     @Environment(CloudNarrationModel.self) private var cloud
     @Environment(\.colorScheme) private var colorScheme
     @State private var enrolling = false
@@ -136,7 +137,7 @@ struct YourVoicesView: View {
         }
         .storyFormStyle()
         .navigationTitle("Your Voices").navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $enrolling) { NavigationStack { VoiceEnrollmentView() } }
+        .sheet(isPresented: $enrolling) { NavigationStack { VoiceEnrollmentView() }.operationFeedback() }
         .confirmationDialog("Delete this voice?", isPresented: Binding(get: { deletingVoice != nil }, set: { if !$0 { deletingVoice = nil } }), titleVisibility: .visible) {
             Button("Delete Voice", role: .destructive) {
                 guard let voice = deletingVoice else { return }
@@ -166,25 +167,18 @@ struct YourVoicesView: View {
     }
 
     private func audition(_ voice: VoiceProfile) {
-        guard let owner = cloud.userID, active else {
-            AppLog.warning("Private voice preview requires an active signed-in screen", category: "cloud_narration")
-            return
-        }
-        AppLog.debug("Private voice preview requested by user", category: "cloud_narration")
-        operation?.cancel()
+        guard let owner = cloud.userID, active else { return }
         preview.stop(); previewLoading = true; message = nil
-        operation = Task {
-            do {
-                let id = try await cloud.startVoicePreview(profileID: voice.id)
-                guard owner == cloud.userID, active, !Task.isCancelled else { return }
-                previewVoiceID = voice.id; previewJobID = id
-                AppLog.debug("Private voice preview waiting for worker output", category: "cloud_narration")
-                receivePreview()
-            } catch is CancellationError {
-                AppLog.trace("Voice preview request cancelled", category: "cloud_narration")
-                previewLoading = false
-            }
-            catch { previewLoading = false; reportFailure("Voice preview request failed", error: error) }
+        previewVoiceID = voice.id
+        if let job = cloud.jobs.first(where: { $0.preview && $0.voiceProfileId == voice.id && $0.state == "ready" && $0.expiresAt > Date().timeIntervalSince1970 }) {
+            previewJobID = job.id; receivePreview(); return
+        }
+        operations.start(kind: .voicePreview, title: voice.displayName, subtitle: String(localized: "Creating your voice preview…"), destination: .voices, ownerID: owner) { id in
+            let jobID = try await cloud.startVoicePreview(profileID: voice.id, operationID: id)
+            operations.attachRemote(id, remoteID: jobID)
+            guard owner == cloud.userID else { return }
+            if active { previewJobID = jobID; receivePreview() }
+            cloud.refreshOperations()
         }
     }
 
@@ -194,7 +188,7 @@ struct YourVoicesView: View {
             previewJobID = nil
             guard let owner = cloud.userID, active else { return }
             let voiceID = previewVoiceID
-            operation = Task {
+            operations.start(kind: .download, title: String(localized: "Voice Preview"), subtitle: String(localized: "Downloading narration…"), destination: .voices, ownerID: owner) { _ in
                 defer { previewLoading = false }
                 do {
                     let urls = try await cloud.download(job: job)
@@ -205,8 +199,7 @@ struct YourVoicesView: View {
                     guard let url = urls.values.first else { throw CloudNarrationFailure.invalidAudio }
                     AppLog.debug("Private voice preview ready to play", category: "cloud_narration")
                     previewVoiceID = voiceID; preview.toggle(url)
-                } catch is CancellationError { AppLog.trace("Voice preview download cancelled", category: "cloud_narration") }
-                catch { reportFailure("Voice preview download failed", error: error) }
+                } catch { reportFailure("Voice preview download failed", error: error); throw error }
             }
         } else if job.state == "failed" || job.state == "cancelled" || job.state == "expired" || job.expiresAt <= Date().timeIntervalSince1970 {
             AppLog.trace("Private voice preview stopped before audio became available", category: "cloud_narration", metadata: ["expired": .bool(job.expiresAt <= Date().timeIntervalSince1970 || job.state == "expired"), "worker_failed": .bool(job.state == "failed"), "cancelled": .bool(job.state == "cancelled")])

@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { HttpsError } from "firebase-functions/v2/https";
-import { parseStoryResponse, storyInput, validateStory, wordCount, STORY_CONSENT_VERSION, StoryOutputError, storyPrompt, storySchema } from "../story";
+import { GoogleAuth } from "google-auth-library";
+import { parseStoryResponse, storyInput, validateStory, wordCount, STORY_CONSENT_VERSION, StoryOutputError, storyPrompt, storySchema, VertexStoryProvider } from "../story";
 
 const raw = { description: "Mały lis wraca do domu pod gwiazdami.", language: "polish", readerAge: "3–5", readingMinutes: 1, wordsPerMinute: 80, consentVersion: STORY_CONSENT_VERSION, cloudProcessingAccepted: true };
 const prose = Array.from({ length: 80 }, (_, i) => i === 79 ? "zasnął." : "księżyc").join(" ");
@@ -64,4 +65,64 @@ test("long-story expansion keeps its writing budget inside the accepted upper bo
   const expanded = storySchema(input, true);
   assert.match(expanded.properties.chapters.items.properties.text.description, /513 words/);
   assert.match(storyPrompt(input, 3611, book()), /6155 prose words/);
+});
+
+test("Polish expansion leaves room for both observed thinking and complete story JSON", async (context) => {
+  const complete = { ...book(), chapters: [{ title: "Pod gwiazdami", text: Array(359).fill("księżyc").join(" ") + " zasnął." }] };
+  context.mock.method(GoogleAuth.prototype, "getClient", async () => ({
+    request: async ({ data }: { data: { generationConfig: { maxOutputTokens: number } } }) => {
+      // The live three-minute repro spent 3,302 tokens thinking. Its initial
+      // complete JSON used 907 more; the old 3,440-token cap truncated the retry.
+      const fits = data.generationConfig.maxOutputTokens >= 3302 + 907;
+      return { data: { candidates: [{ finishReason: fits ? "STOP" : "MAX_TOKENS", content: { parts: [{ text: JSON.stringify(complete) }] } }] } };
+    },
+  }));
+  const input = storyInput({ ...raw, readingMinutes: 3, wordsPerMinute: 120 });
+  const provider = new VertexStoryProvider("gen-lang-client-0154884984");
+  assert.deepEqual(validateStory(await provider.generate(input, 253, book()), input), complete);
+});
+
+test("short-book repair stays within the word budget and preserves the final paragraph or sentence", async (context) => {
+  const scene = Array(106).fill("cisza").join(" ") + " zapadła.";
+  const ending = "Lis zasnął w swoim łóżku.";
+  const opening = Array(247).fill("księżyc").join(" ") + " świecił.";
+  const prompts: string[] = [];
+  context.mock.method(GoogleAuth.prototype, "getClient", async () => ({
+    request: async ({ data }: { data: { contents: { parts: { text: string }[] }[] } }) => {
+      prompts.push(data.contents[0]!.parts[0]!.text);
+      return { data: { candidates: [{ finishReason: "STOP", content: { parts: [{ text: JSON.stringify({ paragraph: scene }) }] } }] } };
+    },
+  }));
+  const input = storyInput({ ...raw, readingMinutes: 3, wordsPerMinute: 120 });
+  const provider = new VertexStoryProvider("gen-lang-client-0154884984");
+  for (const separator of [" ", "\n\n"]) {
+    const short = { ...book(), chapters: [{ title: "Pod gwiazdami", text: opening + separator + ending }] };
+    const result = validateStory(await provider.supplement(input, short, 35), input);
+    assert.equal(result.chapters[0]!.text, `${opening}\n\n${scene}\n\n${ending}`);
+    assert.equal(wordCount(result.chapters[0]!.text), 360);
+    assert.deepEqual(short.chapters[0]!.text, opening + separator + ending);
+  }
+  for (const prompt of prompts) assert.match(prompt, /about 107 words \(35–179 words allowed\)/);
+  assert.match(prompts[0]!, /BEFORE its final sentence/);
+  assert.match(prompts[1]!, /BEFORE its final paragraph/);
+});
+
+test("repair rejects prose outside its budget and leaves a multi-chapter ending untouched", async (context) => {
+  let additionWords = 107;
+  context.mock.method(GoogleAuth.prototype, "getClient", async () => ({
+    request: async () => ({ data: { candidates: [{ finishReason: "STOP", content: { parts: [{ text: JSON.stringify({ paragraph: Array(additionWords).fill("cisza").join(" ") + "." }) }] } }] } }),
+  }));
+  const input = storyInput({ ...raw, readingMinutes: 3, wordsPerMinute: 120 });
+  const short = { ...book(), chapters: [
+    { title: "Pod gwiazdami", text: Array(127).fill("księżyc").join(" ") + "." },
+    { title: "W domu", text: Array(125).fill("sen").join(" ") + " zasnął." },
+  ] };
+  const provider = new VertexStoryProvider("gen-lang-client-0154884984");
+  const result = validateStory(await provider.supplement(input, short, 35), input);
+  assert.deepEqual(result.chapters[1], short.chapters[1]);
+  assert.ok(result.chapters[0]!.text.startsWith(short.chapters[0]!.text + "\n\n"));
+  for (const [words, reason] of [[34, "supplement_too_short"], [180, "supplement_too_long"]] as const) {
+    additionWords = words;
+    await assert.rejects(provider.supplement(input, short, 35), (error: unknown) => error instanceof StoryOutputError && error.reason === reason);
+  }
 });

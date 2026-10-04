@@ -1,0 +1,11 @@
+{
+  "draftID": "0DE9E942-82FF-4733-B2FB-47A28DF0CFA0",
+  "bookID": "22222222-2222-4222-8222-222222222222",
+  "checks": [
+    "Zamknij preserves real editing draft",
+    "Narration remains running after Zamknij",
+    "Otw\u00f3rz szkic reopens the same editing draft",
+    "Explicit Odrzu\u0107 zmiany is separate and explains cancellation"
+  ],
+  "scope": "Seeded simulator UI; no cloud completion or physical-device claim."
+}

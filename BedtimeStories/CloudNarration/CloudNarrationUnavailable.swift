@@ -11,6 +11,7 @@ final class CloudNarrationModel {
     private(set) var userID: String?
     private(set) var isWorking = false
     var message: String?
+    private(set) var hasLoadedVoices = false
     private(set) var voices: [VoiceProfile] = []
     private(set) var jobs: [NarrationJob] = []
 
@@ -18,6 +19,12 @@ final class CloudNarrationModel {
         AppLog.trace("Cloud narration configuration skipped", category: "cloud_narration", metadata: ["reason": .string("local_services")])
     }
 
+    func startStory(request: StoryGenerationRequest, requestID: String) async throws -> String { throw CloudNarrationFailure.unavailable }
+    func cancelStory(jobID: String) async throws { throw CloudNarrationFailure.unavailable }
+    func registerDevice(token: String) async throws {}
+    func unregisterDevice() async throws {}
+    func registerActivity(operation: AppOperation, token: String) async throws {}
+    func refreshOperations() {}
     func generateStory(_ request: StoryGenerationRequest) async throws -> GeneratedStoryBook { throw StoryGenerationFailure.geminiUnavailable }
 
     func prepareAppleSignIn(_ request: ASAuthorizationAppleIDRequest) { message = CloudNarrationFailure.unavailable.localizedDescription }
@@ -26,9 +33,9 @@ final class CloudNarrationModel {
     func beginEnrollment(name: String, language: String, retentionAccepted: Bool) async throws -> VoiceEnrollment { throw CloudNarrationFailure.unavailable }
     func uploadEnrollment(enrollment: VoiceEnrollment, referenceURL: URL, consentURL: URL) async throws -> String { throw CloudNarrationFailure.unavailable }
     func approveVoice(profileID: String) async throws { throw CloudNarrationFailure.unavailable }
-    func startVoicePreview(profileID: String) async throws -> String { throw CloudNarrationFailure.unavailable }
+    func startVoicePreview(profileID: String, operationID: String? = nil) async throws -> String { throw CloudNarrationFailure.unavailable }
     func startNarration(draft: BookDraft, voiceID: String, styles: [UUID: [NarrationStyle]],
-                        defaultStyle: NarrationStyle, preview: Bool) async throws -> String { throw CloudNarrationFailure.unavailable }
+                        defaultStyle: NarrationStyle, preview: Bool, operationID: String? = nil) async throws -> String { throw CloudNarrationFailure.unavailable }
     func snapshotHash(draft: BookDraft, styles: [UUID: [NarrationStyle]], defaultStyle: NarrationStyle) -> String {
         do { return try NarrationSnapshot(draft: draft, styles: styles, defaultStyle: defaultStyle).hash }
         catch {

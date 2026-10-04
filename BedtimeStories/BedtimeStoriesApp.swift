@@ -4,6 +4,8 @@ import SwiftUI
 
 @main
 struct BedtimeStoriesApp: App {
+    @UIApplicationDelegateAdaptor(OperationNotifications.self) private var notifications
+    @Environment(\.scenePhase) private var scenePhase
     private let services = MZBootstrap.services
     @State private var library: LibraryModel
     @State private var cloud: CloudNarrationModel
@@ -16,7 +18,9 @@ struct BedtimeStoriesApp: App {
         }
         Theme.applyNavigationBarAppearance()
         _library = State(initialValue: LibraryModel())
-        _cloud = State(initialValue: CloudNarrationModel())
+        let cloud = CloudNarrationModel()
+        _cloud = State(initialValue: cloud)
+        OperationCenter.shared.configure(cloud: cloud)
         AppLog.info("Application started", category: "app", metadata: [
             "version": .string(services.configuration.version),
             "build": .string(services.configuration.build),
@@ -29,6 +33,12 @@ struct BedtimeStoriesApp: App {
             RootView()
                 .environment(library)
                 .environment(cloud)
+                .environment(OperationCenter.shared)
+                .onAppear { notifications.connect(cloud) }
+                .onChange(of: scenePhase) { _, phase in
+                    OperationCenter.shared.sceneChanged(active: phase == .active)
+                    if phase == .active { cloud.refreshOperations() }
+                }
                 .environment(services.developerOptions)
                 .tint(Theme.accent)
                 .fontDesign(.rounded)

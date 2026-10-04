@@ -10,7 +10,7 @@ import uuid
 
 from cloud import now
 from core import (SafeError, Stopped, assert_owner, assemble_m4a, chapter_chunks,
-                  chunk_hash, identity, provider_identity, validate_task, wav_pcm)
+                  BUILT_IN_VOICES, built_in_voice, chunk_hash, identity, provider_identity, validate_task, wav_pcm)
 from provider import ProviderError
 from diagnostics import connection, event, observed, operation_context, task_key
 
@@ -86,7 +86,7 @@ class Worker:
         private_path, public_path = self.paths(uid, kind, item_id)
         account_path = f"privateAccounts/{uid}"
         paths = [account_path, private_path, public_path]
-        if require_voice:
+        if require_voice and require_voice[0] not in BUILT_IN_VOICES:
             voice_id, preview = require_voice
             voice_private, voice_public = self.paths(uid, "enroll", voice_id)
             paths += [voice_private, voice_public]
@@ -102,12 +102,18 @@ class Worker:
             if not public or public.get("uid") != uid:
                 raise SafeError("ownership_mismatch")
             if require_voice:
+                voice_id, preview = require_voice
                 if private.get("expiresAt", now()) <= now():
                     raise SafeError("job_expired")
-                voice = assert_owner(documents[voice_private], uid, voice_id, "voiceId")
-                permitted = {"ready", "awaitingApproval"} if preview else {"ready"}
-                if voice.get("status") not in permitted or not documents[voice_public] or documents[voice_public].get("status") not in permitted:
+                if private.get("voiceProfileId") != voice_id or bool(private.get("preview")) != preview:
                     raise Stopped()
+                if voice_id in BUILT_IN_VOICES:
+                    built_in_voice(voice_id, private.get("language"))
+                else:
+                    voice = assert_owner(documents[voice_private], uid, voice_id, "voiceId")
+                    permitted = {"ready", "awaitingApproval"} if preview else {"ready"}
+                    if voice.get("status") not in permitted or not documents[voice_public] or documents[voice_public].get("status") not in permitted:
+                        raise Stopped()
             writes = {private_path: {**private_values, "updatedAt": now()}}
             if public_values is not None:
                 writes[public_path] = {**public_values, "updatedAt": now()}
@@ -177,7 +183,11 @@ class Worker:
                            {"status": "awaitingApproval", "lastUsedAt": now()},
                            {"status": "awaitingApproval", "errorCode": None})
 
-    def ensured_voice(self, uid, voice_id, preview):
+    def ensured_voice(self, uid, voice_id, preview, language=None):
+        built_in = built_in_voice(voice_id, language)
+        if built_in:
+            self.account_active(uid)
+            return built_in
         voice = self.live_voice(uid, voice_id, preview)
         if voice.get("providerVoice"):
             provider_voice = provider_identity(self.envelope.decrypt(voice["providerVoice"], uid, voice_id, "providerVoice").decode())
@@ -223,7 +233,7 @@ class Worker:
         words = sum(len(paragraph["text"].split()) for chapter in chapters for paragraph in chapter["paragraphs"])
         if characters > (1500 if preview else 50_000) or (not preview and words > 5400):
             raise SafeError("snapshot_too_large")
-        provider_voice = self.ensured_voice(uid, voice_id, preview)
+        provider_voice = self.ensured_voice(uid, voice_id, preview, job.get("language"))
         expected_voice = (voice_id, preview)
         total = sum(len(chunks) for _, chunks in planned)
         event(LOGGER, logging.DEBUG, "narration_plan_validated", chapter_count=len(planned), chunk_count=total, preview=preview)
@@ -244,7 +254,7 @@ class Worker:
                         event(LOGGER, logging.DEBUG, "narration_continuation_requested", completed_chunks=completed, chunk_count=total)
                         raise SafeError("job_continuing", retryable=True)
                     event(LOGGER, logging.DEBUG, "narration_chunk_started", chapter_index=chapter_index, chunk_index=index)
-                    clip = self.provider.generate(provider_voice, chunk["text"], chunk["style"])
+                    clip = self.provider.generate(provider_voice, chunk["text"], chunk["style"], language=job.get("language"))
                     self.heartbeat(uid, "narrate", job_id, token, expected_voice)
                     self.objects.checkpoint(uid, job_id, chapter["id"], index, clip)
                     checkpoints[key] = chunk_hash(chunk)

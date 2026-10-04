@@ -41,6 +41,7 @@ final class LibraryModel {
     @ObservationIgnored private var refreshPending = false
     @ObservationIgnored private var pendingImport: URL?
     @ObservationIgnored private var restoredPlayback = false
+    @ObservationIgnored private var trackedOperationID: String?
     @ObservationIgnored private var operationTask: Task<Void, Never>?
     @ObservationIgnored private var currentOperation: BookOperationDiagnostics?
     @ObservationIgnored private var images: [String: UIImage] = [:]
@@ -70,7 +71,7 @@ final class LibraryModel {
 
     func start() async {
         guard !preparingLibrary, activity == nil else { return }
-        #if DEBUG
+        #if DEBUG || MZ_INTERNAL
         let arguments = ProcessInfo.processInfo.arguments
         if arguments.contains("--qa-library") {
             let fixture = URL.documentsDirectory.appendingPathComponent("QA Library", isDirectory: true)
@@ -308,6 +309,9 @@ final class LibraryModel {
         guard let root, activity == nil, !preparingLibrary else { throw BookError.unavailable("Your library is still opening. Try again in a moment.") }
         if let account = source?.libraryAccount, account != location?.account { throw BookError.editConflict }
         activity = String(localized: "Saving book…")
+        let center = OperationCenter.shared
+        let trackedID = center.begin(kind: .saveBook, title: book.manifest.title, subtitle: String(localized: "Saving book…"), destination: .book(book.id), id: operationID)
+        center.update(trackedID, state: .running)
         let operationRepo = repository
         var context = BookOperationDiagnostics(operationID: operationID, bookID: book.id, phase: source == nil ? "publish_new_book" : "publish_book_edit")
         context.details["icloud"] = .bool(cloudStorage)
@@ -321,6 +325,7 @@ final class LibraryModel {
             let failure = BookOperationFailure.preserving(error, context: context)
             await operationRepo.flushDiagnosticLogs()
             logger.trace("Library book save interrupted", category: "library", metadata: context.metadata)
+            center.update(trackedID, state: .failed, message: failure.localizedDescription)
             activity = nil; throw failure
         }
         await operationRepo.flushDiagnosticLogs()
@@ -328,6 +333,7 @@ final class LibraryModel {
         context.phase = "publish_library_refresh"
         logger.trace("Library book save completed; refreshing catalog", category: "library", metadata: context.metadata)
         await refresh()
+        center.update(trackedID, state: .ready, progress: 1)
         selectedBook = books.first { $0.id == book.id }
         context.details["book_visible_after_refresh"] = .bool(selectedBook != nil)
         logger.trace("Library published book selection completed", category: "library", metadata: context.metadata)
@@ -335,7 +341,8 @@ final class LibraryModel {
 
     func cancelOperation() {
         if let currentOperation { logger.trace("Library operation cancellation requested", category: "library", metadata: currentOperation.metadata) }
-        operationTask?.cancel()
+        if let trackedOperationID { OperationCenter.shared.cancel(id: trackedOperationID) }
+        else { operationTask?.cancel() }
     }
 
     private func perform(_ label: String, phase: String, bookID: UUID? = nil,
@@ -350,7 +357,12 @@ final class LibraryModel {
         currentOperation = context
         activity = NSLocalizedString(label, comment: "")
         logger.trace("Library operation started", category: "library", metadata: context.metadata)
-        operationTask = Task {
+        let center = OperationCenter.shared
+        let destination: OperationDestination = bookID.map { .book($0) } ?? (phase == "stage_import" ? .importReview : .operations)
+        let kind: AppOperation.Kind = phase == "keep_offline" ? .download : phase == "share" ? .shareBook : phase.contains("import") ? .importBook : .saveBook
+        let title = bookID.flatMap { id in books.first(where: { $0.id == id })?.manifest.title } ?? NSLocalizedString(label, comment: "")
+        trackedOperationID = center.start(kind: kind, title: title, subtitle: NSLocalizedString(label, comment: ""), destination: destination, id: context.operationID) { [self] id in
+            defer { activity = nil; if currentOperation?.operationID == context.operationID { currentOperation = nil; trackedOperationID = nil } }
             do {
                 try await operation(context.operationID)
                 await operationRepo.flushDiagnosticLogs()
@@ -359,6 +371,7 @@ final class LibraryModel {
             catch is CancellationError {
                 await operationRepo.flushDiagnosticLogs()
                 logger.trace("Library operation cancelled", category: "library", metadata: context.metadata)
+                throw CancellationError()
             }
             catch {
                 let failureEntry = context.failureEntry("Library operation failed", error: error, category: "library")
@@ -366,10 +379,12 @@ final class LibraryModel {
                 await BookDraftStore.shared.flushDiagnosticLogs()
                 logger.log(failureEntry)
                 message = error.localizedDescription
+                throw error
             }
-            if currentOperation?.operationID == context.operationID { currentOperation = nil }
             activity = nil
             await refresh()
+            if let editingDraft, phase == "edit" { center.update(id, destination: .draft(editingDraft.id)) }
+            if phase == "commit_import", importCandidate != nil { center.update(id, destination: .importReview) }
         }
     }
 

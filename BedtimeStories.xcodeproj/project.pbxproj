@@ -21,6 +21,13 @@
 		B247302611BB02169A13A5B6 /* MZAppFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 6635A88F20CBA2D6CBFCEFF3 /* MZAppFoundation */; };
 		E251A974DFCE2898205FF51F /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = EC7B3F92A4E1EE4A7838E307 /* FirebaseFirestore */; };
 		E8D993D9C30C9D651A98B24F /* MZBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36FFFE7796703E53912C9C90 /* MZBootstrap.swift */; };
+
+        A10000000000000000000001 /* FirebaseMessaging */ = {isa = PBXBuildFile; productRef = A10000000000000000000002; };
+        A10000000000000000000003 /* Activity attributes app */ = {isa = PBXBuildFile; fileRef = A10000000000000000000004; };
+        A10000000000000000000005 /* Activity attributes local */ = {isa = PBXBuildFile; fileRef = A10000000000000000000004; };
+        A10000000000000000000006 /* Activity attributes widget */ = {isa = PBXBuildFile; fileRef = A10000000000000000000004; };
+        A10000000000000000000007 /* OperationsWidget.swift */ = {isa = PBXBuildFile; fileRef = A10000000000000000000008; };
+        A10000000000000000000009 /* Embed OperationsWidget */ = {isa = PBXBuildFile; fileRef = A1000000000000000000000A; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,7 +45,14 @@
 			remoteGlobalIDString = 61EC4C392DF195A20069B96B;
 			remoteInfo = BedtimeStories;
 		};
+
+        A1000000000000000000000C = {isa = PBXContainerItemProxy; containerPortal = 61EC4C322DF195A20069B96B; proxyType = 1; remoteGlobalIDString = A1000000000000000000000D; remoteInfo = OperationsWidget; };
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+
+        A1000000000000000000000B = {isa = PBXCopyFilesBuildPhase; buildActionMask = 2147483647; dstPath = ""; dstSubfolderSpec = 13; files = (A10000000000000000000009, ); name = "Embed App Extensions"; runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		0AB347E907A5D39F6355E610 /* BedtimeStoriesLocal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BedtimeStoriesLocal.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -48,6 +62,10 @@
 		61EC4C3A2DF195A20069B96B /* BedtimeStories.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BedtimeStories.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ABCDEF000000000000000002 /* BedtimeStoriesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = BedtimeStoriesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B54B86C81076392C72D564C9 /* GoogleService-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+
+        A10000000000000000000004 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared/OperationActivityAttributes.swift; sourceTree = SOURCE_ROOT; };
+        A10000000000000000000008 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperationsWidget/OperationsWidget.swift; sourceTree = SOURCE_ROOT; };
+        A1000000000000000000000A = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; path = OperationsWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -84,6 +102,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+                A10000000000000000000001,
 				3E94A54C17E503BFEC0DEB4B /* FirebaseAuth in Frameworks */,
 				035A3A0B0A0A203F0BD17B23 /* FirebaseAppCheck in Frameworks */,
 				E251A974DFCE2898205FF51F /* FirebaseFirestore in Frameworks */,
@@ -119,6 +138,8 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+
+        A10000000000000000000010 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -150,6 +171,8 @@
 		61EC4C312DF195A20069B96B = {
 			isa = PBXGroup;
 			children = (
+                A10000000000000000000004,
+                A10000000000000000000008,
 				ABCDEF000000000000000001 /* Tests/AppTests */,
 				61EC4C3C2DF195A20069B96B /* BedtimeStories */,
 				61EC4C3B2DF195A20069B96B /* Products */,
@@ -162,6 +185,7 @@
 		61EC4C3B2DF195A20069B96B /* Products */ = {
 			isa = PBXGroup;
 			children = (
+                A1000000000000000000000A,
 				ABCDEF000000000000000002 /* BedtimeStoriesTests.xctest */,
 				61EC4C3A2DF195A20069B96B /* BedtimeStories.app */,
 				0AB347E907A5D39F6355E610 /* BedtimeStoriesLocal.app */,
@@ -194,6 +218,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 61EC4C452DF195A30069B96B /* Build configuration list for PBXNativeTarget "BedtimeStories" */;
 			buildPhases = (
+                A1000000000000000000000B,
 				61EC4C362DF195A20069B96B /* Sources */,
 				61EC4C372DF195A20069B96B /* Frameworks */,
 				61EC4C382DF195A20069B96B /* Resources */,
@@ -202,12 +227,14 @@
 			buildRules = (
 			);
 			dependencies = (
+                A1000000000000000000000E,
 			);
 			fileSystemSynchronizedGroups = (
 				61EC4C3C2DF195A20069B96B /* BedtimeStories */,
 			);
 			name = BedtimeStories;
 			packageProductDependencies = (
+                A10000000000000000000002,
 				E025CE269033CE410DB6587F /* FirebaseAuth */,
 				ACDD52B62FA697CC2D1473F9 /* FirebaseAppCheck */,
 				EC7B3F92A4E1EE4A7838E307 /* FirebaseFirestore */,
@@ -291,6 +318,8 @@
 			productReference = ABCDEF000000000000000002 /* BedtimeStoriesTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+
+        A1000000000000000000000D = {isa = PBXNativeTarget; buildConfigurationList = A10000000000000000000012; buildPhases = (A1000000000000000000000F, A10000000000000000000010, A10000000000000000000011, ); buildRules = (); dependencies = (); name = OperationsWidget; productName = OperationsWidget; productReference = A1000000000000000000000A; productType = "com.apple.product-type.app-extension"; };
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -325,6 +354,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+                A1000000000000000000000D,
 				ABCDEF000000000000000008 /* BedtimeStoriesTests */,
 				61EC4C392DF195A20069B96B /* BedtimeStories */,
 				620E663E73037FDD49C5AB6D /* BedtimeStoriesLocal */,
@@ -363,6 +393,8 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+
+        A10000000000000000000011 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -411,6 +443,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+                A10000000000000000000003,
 				E8D993D9C30C9D651A98B24F /* MZBootstrap.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -433,10 +466,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+                A10000000000000000000005,
 				2647D774EB40CA537097BF25 /* MZBootstrap.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+
+        A1000000000000000000000F = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000006, A10000000000000000000007, ); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -451,6 +487,8 @@
 			target = 620E663E73037FDD49C5AB6D /* BedtimeStoriesLocal */;
 			targetProxy = 145544B6474A5F7FD2DEC783 /* PBXContainerItemProxy */;
 		};
+
+        A1000000000000000000000E = {isa = PBXTargetDependency; target = A1000000000000000000000D; targetProxy = A1000000000000000000000C; };
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -462,7 +500,7 @@
 				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
 				CODE_SIGN_ENTITLEMENTS = Config/BedtimeStories.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 18;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -644,7 +682,7 @@
 				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
 				CODE_SIGN_ENTITLEMENTS = Config/BedtimeStories.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 18;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -683,7 +721,7 @@
 				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
 				CODE_SIGN_ENTITLEMENTS = Config/PrivateCloudCompute.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 18;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -743,7 +781,7 @@
 				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
 				CODE_SIGN_ENTITLEMENTS = Config/PrivateCloudCompute.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 18;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -783,7 +821,7 @@
 				BEDTIME_CLOUD_NARRATION_ENABLED = YES;
 				CODE_SIGN_ENTITLEMENTS = Config/PrivateCloudCompute.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 18;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -936,7 +974,7 @@
 				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
 				CODE_SIGN_ENTITLEMENTS = Config/PrivateCloudCompute.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 18;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -968,6 +1006,9 @@
 			};
 			name = Internal;
 		};
+        A10000000000000000000013 = {isa = XCBuildConfiguration; buildSettings = { APPLICATION_EXTENSION_API_ONLY = YES; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 18; DEVELOPMENT_TEAM = 4TCJLR98Y5; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = OperationsWidget/Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 27.0; MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories.operations; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SKIP_INSTALL = YES; SWIFT_VERSION = 6.0; SWIFT_STRICT_CONCURRENCY = complete; TARGETED_DEVICE_FAMILY = "1,2"; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@executable_path/../../Frameworks", ); }; name = Debug; };
+        A10000000000000000000014 = {isa = XCBuildConfiguration; buildSettings = { APPLICATION_EXTENSION_API_ONLY = YES; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 18; DEVELOPMENT_TEAM = 4TCJLR98Y5; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = OperationsWidget/Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 27.0; MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories.operations; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SKIP_INSTALL = YES; SWIFT_VERSION = 6.0; SWIFT_STRICT_CONCURRENCY = complete; TARGETED_DEVICE_FAMILY = "1,2"; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@executable_path/../../Frameworks", ); }; name = Release; };
+        A10000000000000000000015 = {isa = XCBuildConfiguration; buildSettings = { APPLICATION_EXTENSION_API_ONLY = YES; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 18; DEVELOPMENT_TEAM = 4TCJLR98Y5; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = OperationsWidget/Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 27.0; MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories.operations; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SKIP_INSTALL = YES; SWIFT_VERSION = 6.0; SWIFT_STRICT_CONCURRENCY = complete; TARGETED_DEVICE_FAMILY = "1,2"; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@executable_path/../../Frameworks", ); }; name = Internal; };
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1020,6 +1061,8 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+
+        A10000000000000000000012 = {isa = XCConfigurationList; buildConfigurations = (A10000000000000000000013, A10000000000000000000014, A10000000000000000000015, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -1087,6 +1130,7 @@
 			package = 41380ABFC1B8187E6B42AC19 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseStorage;
 		};
+        A10000000000000000000002 = {isa = XCSwiftPackageProductDependency; package = 41380ABFC1B8187E6B42AC19; productName = FirebaseMessaging; };
 /* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 61EC4C322DF195A20069B96B /* Project object */;

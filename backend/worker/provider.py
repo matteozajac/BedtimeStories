@@ -7,7 +7,7 @@ import logging
 import time
 from urllib.parse import quote
 
-from core import MODEL, STYLES, SafeError, provider_identity, wav_pcm
+from core import MODEL, STYLES, SafeError, provider_identity, synthesis_voice, wav_pcm
 from diagnostics import connection, event, observed
 
 LOGGER = logging.getLogger(__name__)
@@ -138,13 +138,18 @@ class Gemini:
             event(LOGGER, logging.DEBUG, "gemini_voice_delete_already_complete", http_status=404)
 
     @observed("gemini", "generate_audio")
-    def generate(self, voice: str, text: str, style: str) -> bytes:
+    def generate(self, voice: str, text: str, style: str, language: str | None = None) -> bytes:
         if style not in STYLES:
             raise SafeError("invalid_style")
+        direction = STYLES[style]
+        if language is not None:
+            if language not in {"en-US", "pl-PL"}:
+                raise SafeError("invalid_voice_language")
+            direction += "; " + ("fluent Polish with natural Polish pronunciation" if language == "pl-PL" else "fluent English with natural American English pronunciation")
         response = self._request("POST", self.generate_url, operation="generate_audio", json={
-            "contents": [{"role": "user", "parts": [{"text": text, "speechMetadata": {"style": STYLES[style]}}]}],
+            "contents": [{"role": "user", "parts": [{"text": text, "speechMetadata": {"style": direction}}]}],
             "generationConfig": {"responseModalities": ["AUDIO"],
-                                 "speechConfig": {"voiceConfig": {"voice": provider_identity(voice)}}},
+                                 "speechConfig": {"voiceConfig": {"voice": synthesis_voice(voice)}}},
         })
         candidates = response.get("candidates", [])
         if not candidates or candidates[0].get("finishReason") not in {None, "STOP"}:

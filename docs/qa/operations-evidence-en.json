@@ -1,0 +1,51 @@
+{
+  "simulator": "60901470-F0F1-4211-A016-D6EAC59529C4",
+  "language": "en",
+  "bookID": "22222222-2222-4222-8222-222222222222",
+  "bookTitle": "A story for tomorrow",
+  "checks": [
+    "completion_banner",
+    "ongoing_operations",
+    "banner_book_navigation",
+    "list_book_navigation",
+    "operation_url",
+    "settings_operations_link"
+  ],
+  "snapshot": {
+    "rs": "1",
+    "ok": true,
+    "data": {
+      "age_ms": 18,
+      "count": 20,
+      "keyboard": "hidden",
+      "mode": "nav",
+      "rows": [
+        "3|button|A story for tomorrow, Mateusz Zając",
+        "7|button|Now Playing, Lisek i księżyc, Mateusz Zając, Audiobook, Readable book",
+        "14|button|Moonlight Lullaby, Mateusz Zając, Audiobook",
+        "19|button|The Quiet Forest, Mateusz Zając, Readable book",
+        "27|heading|Library",
+        "28|button|Create a Book",
+        "29|popUpButton|Library actions",
+        "31|button|Hide Sidebar",
+        "33|textField|",
+        "36|heading|A story for tomorrow",
+        "38|popUpButton|Book actions",
+        "48|button|In progress, 1 in progress, You can keep exploring",
+        "54|button|Lisek i księżyc, Spokojny sen",
+        "57|button|Play",
+        "59|button|Settings",
+        "60|heading|Ongoing Operations",
+        "71|button|Open Book",
+        "73|button|Cancel",
+        "77|button|Clear History",
+        "82|button|Open Book",
+        "!ambiguous|button|Open Book|71@652,780;82@713,1035"
+      ],
+      "screen": "a4b4a842",
+      "seq": 312,
+      "udid": "60901470-F0F1-4211-A016-D6EAC59529C4"
+    }
+  },
+  "scope": "Seeded simulator UI; no remote notification or physical-device claim."
+}

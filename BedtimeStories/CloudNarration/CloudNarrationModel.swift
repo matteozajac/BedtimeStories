@@ -18,8 +18,11 @@ final class CloudNarrationModel {
     private(set) var userID: String?
     private(set) var isWorking = false
     var message: String?
+    private(set) var hasLoadedVoices = false
     private(set) var voices: [VoiceProfile] = []
     private(set) var jobs: [NarrationJob] = []
+    private(set) var storyJobs: [CloudStoryJob] = []
+    @ObservationIgnored private var savingStoryJobs = Set<String>()
     @ObservationIgnored private var auth: Auth?
     @ObservationIgnored private var database: Firestore?
     @ObservationIgnored private var functions: Functions?
@@ -27,6 +30,7 @@ final class CloudNarrationModel {
     @ObservationIgnored private var authListener: AuthStateDidChangeListenerHandle?
     @ObservationIgnored private var voiceListener: (any ListenerRegistration)?
     @ObservationIgnored private var jobListener: (any ListenerRegistration)?
+    @ObservationIgnored private var storyListener: (any ListenerRegistration)?
     @ObservationIgnored private var nonce: String?
     @ObservationIgnored private var appleAuthorizationCode: String?
     @ObservationIgnored private var accountGeneration = UUID()
@@ -194,6 +198,17 @@ final class CloudNarrationModel {
     }
 
     func signOut() {
+        let owner = userID
+        Task {
+            if owner != nil {
+                do { try await unregisterDevice() }
+                catch { logger.warning("Completion alert device removal failed", error: error, category: "operations") }
+            }
+            guard owner == userID else { return }
+            finishSignOut()
+        }
+    }
+    private func finishSignOut() {
         let operation = CloudNarrationLogOperation(name: "sign_out")
         logger.debug("Cloud sign-out started", category: "cloud_narration", metadata: operation.metadata)
         signInAttempt = UUID()
@@ -248,7 +263,7 @@ final class CloudNarrationModel {
         try await withOperation("approve_voice") { operation in _ = try await call("approveVoice", payload: ["profileId": profileID], parent: operation) }
     }
 
-    func startVoicePreview(profileID: String) async throws -> String {
+    func startVoicePreview(profileID: String, operationID: String? = nil) async throws -> String {
         try await withOperation("start_voice_preview") { _ in
             guard let voice = voices.first(where: { $0.id == profileID }) else { throw CloudNarrationFailure.staleVoice }
             let text = voice.language == "pl-PL"
@@ -257,15 +272,15 @@ final class CloudNarrationModel {
             var draft = BookDraft()
             draft.title = String(localized: "Voice Preview")
             draft.chapters = [DraftChapter(title: "", text: text)]
-            return try await startNarration(draft: draft, voiceID: profileID, styles: [:], defaultStyle: .gentle, preview: true)
+            return try await startNarration(draft: draft, voiceID: profileID, styles: [:], defaultStyle: .gentle, preview: true, operationID: operationID)
         }
     }
 
     func startNarration(draft: BookDraft, voiceID: String, styles: [UUID: [NarrationStyle]],
-                        defaultStyle: NarrationStyle, preview: Bool) async throws -> String {
+                        defaultStyle: NarrationStyle, preview: Bool, operationID: String? = nil) async throws -> String {
         try await withOperation("start_narration", metadata: ["preview": .bool(preview), "chapter_count": .integer(draft.chapters.count), "default_style": .string(defaultStyle.rawValue)]) { operation in
             let session = try currentSession()
-            guard let voice = voices.first(where: { $0.id == voiceID }),
+            guard let voice = voices.first(where: { $0.id == voiceID }) ?? VoiceProfile.builtInVoices.first(where: { $0.id == voiceID }),
                   voice.status == "ready" || (preview && voice.status == "awaitingApproval") else {
                 throw CloudNarrationFailure.staleVoice
             }
@@ -291,6 +306,7 @@ final class CloudNarrationModel {
             } catch {
                 throw failure(error, presenting: .retryLater)
             }
+            if let operationID { OperationCenter.shared.trackRemoteSubmission(operationID, remoteID: requestID) }
             let response = try await call("startNarration", payload: ["requestId": requestID,
                        "voiceProfileId": voiceID, "draftId": draft.id.uuidString, "snapshotHash": hash,
                        "language": voice.language, "preview": preview, "chapters": wireChapters], parent: operation)
@@ -334,7 +350,10 @@ final class CloudNarrationModel {
             try validate(session)
             appleAuthorizationCode = nil
             _ = try await call("deleteAccount", payload: [:], parent: operation)
-            signOut()
+            OperationCenter.shared.cancelPendingVoiceUploads(ownerID: session.uid)
+            finishSignOut()
+            do { try PendingVoiceUpload.removePrivateData(ownerID: session.uid) }
+            catch { logger.error("Deleted voice account staged recording cleanup failed", error: error, category: "cloud_narration", metadata: operation.metadata) }
         }
     }
 
@@ -369,7 +388,7 @@ final class CloudNarrationModel {
                           SHA256.hash(data: data).map({ String(format: "%02x", $0) }).joined() == output.sha256 else {
                         throw CloudNarrationFailure.invalidAudio
                     }
-                    try FileManager.default.setAttributes([.protectionKey: FileProtectionType.complete], ofItemAtPath: url.path)
+                    try FileManager.default.setAttributes([.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication], ofItemAtPath: url.path)
                     results[chapterID] = url
                     logger.trace("Narration output verified", category: "cloud_narration", metadata: operation.metadata.merging(["output_index": .integer(index), "bytes": .integer(data.count)]) { _, new in new })
                 }
@@ -416,6 +435,109 @@ final class CloudNarrationModel {
             default: presentation = .geminiUnavailable
             }
             throw CloudNarrationFailureContext(presentation: presentation, underlyingLogError: ErrorSnapshot(error))
+        }
+    }
+
+    func startStory(request: StoryGenerationRequest, requestID: String) async throws -> String {
+        try request.validate(mode: .gemini)
+        let data = try await call("startStoryGeneration", payload: [
+            "requestId": requestID.lowercased(), "description": request.description, "language": request.language.rawValue,
+            "readerAge": request.readerAge.rawValue, "readingMinutes": request.readingMinutes,
+            "wordsPerMinute": request.wordsPerMinute, "cloudProcessingAccepted": request.cloudProcessingAccepted,
+            "consentVersion": "2026-10-04"
+        ], parent: CloudNarrationLogOperation(name: "start_story"))
+        guard let id = data["jobId"] as? String else { throw CloudNarrationFailure.invalidResponse }
+        return id
+    }
+    func cancelStory(jobID: String) async throws {
+        _ = try await call("cancelStoryGeneration", payload: ["jobId": jobID], parent: CloudNarrationLogOperation(name: "cancel_story"))
+    }
+    func registerDevice(token: String) async throws {
+        _ = try await call("registerOperationDevice", payload: ["deviceId": OperationNotifications.deviceID, "deviceToken": token,
+            "locale": Locale.current.language.languageCode?.identifier == "pl" ? "pl" : "en",
+            "alertsEnabled": OperationCenter.shared.completionAlertsEnabled], parent: CloudNarrationLogOperation(name: "register_operation_device"))
+    }
+    func unregisterDevice() async throws {
+        _ = try await call("unregisterOperationDevice", payload: ["deviceId": OperationNotifications.deviceID], parent: CloudNarrationLogOperation(name: "unregister_operation_device"))
+    }
+    func registerActivity(operation: AppOperation, token: String) async throws {
+        guard operation.ownerID == userID, let id = operation.remoteID else { return }
+        _ = try await call("registerOperationActivity", payload: ["deviceId": OperationNotifications.deviceID,
+            "kind": operation.kind == .voicePreview ? "narration" : operation.kind.rawValue,
+            "operationId": id, "activityToken": token], parent: CloudNarrationLogOperation(name: "register_operation_activity"))
+    }
+    func refreshOperations() { reconcileOperations() }
+    private func reconcileOperations() {
+        guard let uid = userID else { return }
+        let center = OperationCenter.shared
+        let generation = accountGeneration
+        for voice in voices {
+            let existing = center.operations.first { $0.ownerID == uid && $0.remoteID == voice.id && $0.kind == .voiceEnrollment }
+            guard existing != nil || voice.status == "processing" else { continue }
+            let id = existing?.id ?? center.begin(kind: .voiceEnrollment, title: voice.displayName,
+                subtitle: String(localized: "Creating your voice"), destination: .voices, ownerID: uid)
+            if existing == nil { center.attachRemote(id, remoteID: voice.id) }
+            guard center.shouldReconcileRemote(id, state: voice.status) else { continue }
+            let state: AppOperation.State = voice.status == "processing" || voice.status == "deleting" ? .running : voice.status == "failed" ? .failed : voice.status == "deleted" ? .cancelled : .ready
+            center.update(id, state: state, progress: state == .ready ? 1 : nil,
+                subtitle: state == .ready ? String(localized: "Your voice is ready to review") : String(localized: "Creating your voice"),
+                message: state == .failed ? String(localized: "Your voice could not be created. Open Your Voices to try again.") : nil)
+        }
+        for job in jobs {
+            let existing = center.operations.first { $0.ownerID == uid && $0.remoteID == job.id && ($0.kind == .narration || $0.kind == .voicePreview) }
+            guard existing != nil || job.state == "queued" || job.state == "processing" else { continue }
+            let destination: OperationDestination = UUID(uuidString: job.draftId).map { job.preview ? .draft($0) : .narration($0) } ?? .voices
+            let id = existing?.id ?? center.begin(kind: job.preview ? .voicePreview : .narration,
+                title: String(localized: "Book Narration"), subtitle: String(localized: "Creating narration"), destination: destination, ownerID: uid)
+            if existing == nil { center.attachRemote(id, remoteID: job.id) }
+            guard center.shouldReconcileRemote(id, state: job.state) else { continue }
+            let state: AppOperation.State = job.state == "processing" ? .running : job.state == "queued" ? .queued : job.state == "ready" ? .ready : job.state == "cancelled" ? .cancelled : .failed
+            center.setRemoteExpiry(id, timestamp: job.expiresAt)
+            center.update(id, state: state, progress: job.progress,
+                subtitle: state == .ready ? String(localized: "Narration is ready to listen to") : String(localized: "Creating narration"),
+                message: state == .failed ? String(localized: "Narration could not be completed. Your book is unchanged; try again.") : nil)
+        }
+        for job in storyJobs {
+            let existing = center.operations.first { $0.ownerID == uid && $0.remoteID == job.id && $0.kind == .storyGeneration }
+            guard existing != nil || job.state == "queued" || job.state == "processing" || job.state == "ready" else { continue }
+            let draftID = UUID(uuidString: job.id) ?? UUID()
+            let id = existing?.id ?? center.begin(kind: .storyGeneration, title: String(localized: "Writing your story"),
+                subtitle: String(localized: "Writing your complete story…"), destination: .draft(draftID), ownerID: uid)
+            if existing == nil { center.attachRemote(id, remoteID: job.id) }
+            center.setRemoteExpiry(id, timestamp: job.expiresAt)
+            guard center.shouldReconcileRemote(id, state: job.state) else { continue }
+            if job.state == "ready", let result = job.result {
+                guard existing?.state != .ready, savingStoryJobs.insert(job.id).inserted else { continue }
+                Task {
+                    defer { if accountGeneration == generation { savingStoryJobs.remove(job.id) } }
+                    do {
+                        guard userID == uid, accountGeneration == generation else { return }
+                        let targetID: UUID
+                        if case .draft(let id) = center.operations.first(where: { $0.id == id })?.destination { targetID = id } else { targetID = draftID }
+                        let saved = try await BookDraftStore.shared.list().contains { $0.id == targetID }
+                        if !saved {
+                            var draft = BookDraft(); draft.id = targetID; draft.title = result.title; draft.summary = result.summary
+                            draft.illustrationGuide = result.illustrationGuide.isEmpty ? nil : result.illustrationGuide
+                            draft.readingWordsPerMinute = existing?.readingWordsPerMinute ?? job.wordsPerMinute
+                            draft.chapters = result.chapters.map { DraftChapter(title: $0.title, text: $0.text) }
+                            guard userID == uid, accountGeneration == generation,
+                                  center.operations.first(where: { $0.id == id })?.state != .cancelled else { return }
+                            try await BookDraftStore.shared.save(draft)
+                            if center.operations.first(where: { $0.id == id })?.state == .cancelled {
+                                try await BookDraftStore.shared.remove(draft.id)
+                                return
+                            }
+                        }
+                        guard userID == uid, accountGeneration == generation,
+                              center.operations.first(where: { $0.id == id })?.state != .cancelled else { return }
+                        center.update(id, state: .ready, progress: 1, subtitle: String(localized: "Your story draft is ready"), title: result.title)
+                    } catch { guard userID == uid, accountGeneration == generation else { return }; center.update(id, state: .failed, message: String(localized: "Your story is ready, but could not be saved. Free some space and reopen the app to try again.")) }
+                }
+            } else {
+                let state: AppOperation.State = job.state == "queued" ? .queued : job.state == "processing" ? .running : job.state == "cancelled" ? .cancelled : .failed
+                center.update(id, state: state, progress: job.progress,
+                    message: state == .failed ? String(localized: "The story could not be completed. Try again with a shorter reading time or a simpler idea.") : nil)
+            }
         }
     }
 
@@ -523,15 +645,19 @@ final class CloudNarrationModel {
         logger.debug("Cloud narration account state changed", category: "cloud_narration", metadata: operation.metadata.merging(["signed_in": .bool(uid != nil), "active_download_count": .integer(downloads.count)]) { _, new in new })
         accountGeneration = UUID()
         logger.trace("Cloud narration listeners detached", category: "cloud_narration", metadata: operation.metadata.merging(["voice_listener": .bool(voiceListener != nil), "job_listener": .bool(jobListener != nil)]) { _, new in new })
-        voiceListener?.remove(); jobListener?.remove()
-        voiceListener = nil; jobListener = nil
+        voiceListener?.remove(); jobListener?.remove(); storyListener?.remove()
+        voiceListener = nil; jobListener = nil; storyListener = nil
         for task in downloads.values { task.cancel() }
         downloads.removeAll()
         observedVoiceStates.removeAll(); observedJobStates.removeAll()
         observedVoiceFailureCodes.removeAll(); observedJobFailureCodes.removeAll()
-        voices = []; jobs = []; message = nil
+        hasLoadedVoices = false
+        voices = []; jobs = []; storyJobs = []; savingStoryJobs = []; message = nil
         let oldUID = userID
         userID = uid
+        OperationCenter.shared.changedOwner(uid)
+        Task { await OperationNotifications.current?.registerDevice() }
+        PendingVoiceUpload.resume(cloud: self, center: OperationCenter.shared)
         if let oldUID {
             appleAuthorizationCode = nil
             NarrationDraftPreferences.removePrivateData(userID: oldUID)
@@ -564,7 +690,10 @@ final class CloudNarrationModel {
                 }
                 else {
                     self.logVoiceStateChanges(decoded.values, uid: uid, operation: voiceOperation)
+                    self.hasLoadedVoices = true
                     self.voices = decoded.values.sorted { $0.createdAt > $1.createdAt }
+                    self.reconcileOperations()
+                    PendingVoiceUpload.resume(cloud: self, center: OperationCenter.shared)
                     self.logger.debug("Voice profiles snapshot received", category: "cloud_narration", metadata: voiceOperation.metadata.merging(["document_count": .integer(decoded.values.count + decoded.failures.count), "decoded_count": .integer(decoded.values.count), "from_cache": .bool(fromCache), "pending_writes": .bool(pendingWrites)]) { _, new in new })
                 }
             }
@@ -593,11 +722,23 @@ final class CloudNarrationModel {
                 else {
                     self.logJobStateChanges(decoded.values, uid: uid, operation: jobOperation)
                     self.jobs = decoded.values.sorted { $0.createdAt > $1.createdAt }
+                    self.reconcileOperations()
                     NarrationRequestReceipt.confirm(uid: uid, requestIDs: Set(decoded.values.map(\.id)))
                     self.logger.debug("Narration jobs snapshot received", category: "cloud_narration", metadata: jobOperation.metadata.merging(["document_count": .integer(decoded.values.count + decoded.failures.count), "decoded_count": .integer(decoded.values.count), "from_cache": .bool(fromCache), "pending_writes": .bool(pendingWrites)]) { _, new in new })
                 }
             }
         }
+        storyListener = database.collection("users/\(uid)/storyJobs")
+            .whereField("expiresAt", isGreaterThan: Timestamp(date: Date()))
+            .addSnapshotListener { [weak self] snapshot, error in
+                let decoded = Self.decodeSnapshot(CloudStoryJob.self, snapshot: snapshot)
+                let failure = error.map { ErrorSnapshot($0) }
+                Task { @MainActor [weak self] in
+                    guard let self, self.userID == uid, self.accountGeneration == generation else { return }
+                    if let failure { self.logger.log(LogEntry("Story jobs listener failed", level: .error, category: "cloud_narration", error: failure)) }
+                    else { self.storyJobs = decoded.values; self.reconcileOperations() }
+                }
+            }
     }
 
     nonisolated private static func decodeDocument<T: Decodable>(_ type: T.Type, data: [String: Any]) throws -> T {

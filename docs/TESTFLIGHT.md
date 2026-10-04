@@ -1,5 +1,50 @@
 # Internal TestFlight
 
+## 1.0 (18) — 4 October 2026
+
+Background operations and the physical-device runtime follow-up are available to **Internal Testers**. Exact readback confirms **VALID / INTERNAL_ONLY / IN_BETA_TESTING**, complete effective group access, and matching saved English/Polish What to Test notes.
+
+- Build/upload ID: `b4c883fa-388e-458e-82cf-7c93c56d21e9`.
+- App: `6818278413`; bundle `com.matteozajac.bedtimestories`; team `4TCJLR98Y5`.
+- Group: `20328e88-9f9c-4c47-be78-c33a809d1a71` (**Internal Testers**, explicit and all-build access).
+- Notes: English `38f972e7-23df-4f70-9cd3-1e998ab110ee`; Polish `24eb7e2d-d22d-4f4e-9f00-299e5124c996`.
+- Minimum iOS/iPadOS, compatible Mac and visionOS: 27.0.
+- IPA SHA256: `b1ffe9ae53d52b107863ae25921c1a6b26dd51a840c2f791e8aaedb4671ae07e`.
+- Release input fingerprint: `2ff38ee0601210f4780532ff723d9531c46feac8ce58851e7acc8b23b19c4027`; all 155 inputs matched the final archive/export and distribution source.
+- Signed artifact checks passed app/widget identity, version/build, deep signature verification, production APNs/App Attest/iCloud, Apple sign-in, PCC, background identifiers, and the exact Firebase app. Explicit manual app/widget profiles match the build-17 receipt and expire 5 March 2027. Export is Internal-only.
+
+Close now keeps an editing draft while narration continues. Explicit Discard separately cancels related operations and retains durable receipts against late cloud results. Older deleted drafts expose available owned audio through a listen-only recovery screen, including cold notification taps before cloud metadata arrives. Repeated discard and failed deletion are protected. Backend Live Activity registration succeeds independently of delivery; its private outbox retries within an eight-hour expiry when APNs is unavailable.
+
+Validation: **103 integrated Internal local app tests** passed, followed by **17 creator tests** after the final repeated-discard guard. The original close/discard regression and repeated-discard edge both failed before their corrections. Local SDK isolation passed. Seeded iPad editor checks passed **4/4 in English and 4/4 in Polish**, retaining and reopening the same real editing draft while a seeded narration stayed running. Backend validation passed **29 unit + 42 emulator tests**. The previously validated **58 worker**, **9 core**, **6 authoring** tests, six real English/Polish Gemini storyteller probes, and private no-op queue probe remain applicable because their source did not change in this follow-up.
+
+The five affected functions are ACTIVE; private trigger invocation grants were preserved, and the pending-delivery index is READY with a successful read-only production query. See [runtime diagnosis and regression evidence](BACKGROUND_OPERATIONS_QA_FIXES.md) and [backend deployment evidence](BACKGROUND_OPERATIONS_BACKEND.md).
+
+The generic strict TestFlight validator reports four missing beta-review contact fields (first/last name, email, phone). These external-review metadata gaps remain unchanged; the exact Internal-only build is already IN_BETA_TESTING with confirmed group access and saved notes. No external beta or App Store review was submitted.
+
+The owner explicitly deferred Firebase APNs credential setup. Remote notification delivery and server-driven suspended/terminated-app Live Activity updates remain pending that setup and physical-device validation. In-app banners and local-operation alerts are implemented. Existing tester states do not establish installation of build 18; the supplied physical-device log identifies build 17. Raw logs, private audio, credentials, state and release artifacts remain outside Git in protected/ignored locations.
+[Open TestFlight](https://appstoreconnect.apple.com/apps/6818278413/testflight/ios).
+
+## 1.0 (17) — 4 October 2026
+
+Durable background operations, completion banners/deep links, the Settings operations list, Live Activities, and three built-in storytellers each for English and Polish are processed and available to **Internal Testers**. Exact readback confirms **VALID / INTERNAL_ONLY / IN_BETA_TESTING**, complete effective group access, and matching saved English/Polish What to Test notes.
+
+- Build/upload ID: `971365f6-eec4-49ed-9497-a600e483ca77`.
+- App: `6818278413`; bundle `com.matteozajac.bedtimestories`; team `4TCJLR98Y5`.
+- Group: `20328e88-9f9c-4c47-be78-c33a809d1a71` (**Internal Testers**, explicit and all-build access).
+- Notes: English `0e433536-dd7d-4580-8084-5cbb16f2fd87`; Polish `ddba311c-4ed2-4cef-bcbb-17c481796174`.
+- Minimum iOS/iPadOS, compatible Mac and visionOS: 27.0.
+- IPA SHA256: `9692b79592bf832d877d4e02382e0fef6337a1e7be5dd5489ff218da4bc93e9c`.
+- Release input fingerprint: `e2f83102ba2619369f4dce6d0a1d95bb133ec9715517d7bfe223ec7e4c2d129b`; all 153 inputs matched the final archive/export and distribution source.
+- The signed artifact verifies production APNs, the embedded `com.matteozajac.bedtimestories.operations` ActivityKit widget, permitted continued-processing identifiers, matching Firebase identity, production App Attest/iCloud, Apple sign-in, and PCC. Internal uses `PrivateCloudCompute.entitlements`; its push entitlement is included explicitly.
+- Export uses explicit manual profiles after automatic signing timed out: app `39d41d49-9646-441c-af80-06f1cf3de91f`, widget `d1084a6b-7d9c-40f4-babd-1488c1fef7af`; both expire 5 March 2027. Internal-only export and version/build 1.0/17 were verified before upload. An upload discovery timeout was resolved by reading the existing processed build; no second upload was needed.
+
+Validation passed **91 native app tests**, the final **21 operation tests**, **28 backend unit + 40 emulator tests**, **58 worker tests**, **9 core tests**, **6 authoring tests**, and the Local binary SDK isolation audit. Seeded iPad UI checks passed six scenarios in each language, including exact-book banner/list/URL navigation and the Settings entry. Six real Gemini requests produced valid English/Polish audio for every shipped storyteller. A live no-op Cloud Task returned HTTP 204 through the private API identity, created no documents/provider calls, and was removed after success.
+
+Functions, Firestore rules/indexes, the immutable worker revision, queue and event invocation permissions, and protected Terraform state were deployed/reconciled and read back. See [the operation audit](BACKGROUND_OPERATIONS.md), [backend evidence](BACKGROUND_OPERATIONS_BACKEND.md), and [Polish UI evidence](qa/operations-evidence-pl.json). Existing story-generation repair changes are included.
+
+Both existing tester records are INSTALLED. A subsequent physical-device log confirms build 17 and exposes draft deletion on Close plus rejected Live Activity delivery; see [the runtime follow-up](BACKGROUND_OPERATIONS_QA_FIXES.md). This candidate is superseded by build 18. The owner deferred Firebase APNs credential configuration. Real remote notification delivery, suspended/terminated-app Dynamic Island updates, microphone/App Attest, cross-device iCloud behavior, and voice quality remain physical-device acceptance checks. No external beta or App Store review was submitted. Secrets, staged recording/audio probes, state, archives, and raw receipts remain outside Git in protected/ignored locations.
+[Open TestFlight](https://appstoreconnect.apple.com/apps/6818278413/testflight/ios).
+
 ## 1.0 (16) — 4 October 2026
 
 The iCloud Edit Book repair and provider diagnostics are processed and available

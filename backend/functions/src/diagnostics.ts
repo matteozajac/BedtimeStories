@@ -14,6 +14,10 @@ const safeStringCodes = new Set([
   "ECONNRESET", "ECONNREFUSED", "ETIMEDOUT", "EAI_AGAIN", "ENOTFOUND", "EPIPE", "ABORT_ERR",
   "auth/id-token-expired", "auth/id-token-revoked", "auth/user-disabled", "auth/user-not-found",
   "auth/invalid-id-token", "auth/argument-error", "auth/internal-error", "auth/insufficient-permission",
+  "messaging/third-party-auth-error", "messaging/invalid-apns-credentials", "messaging/authentication-error",
+  "messaging/mismatched-credential", "messaging/registration-token-not-registered", "messaging/invalid-registration-token",
+  "messaging/invalid-argument", "messaging/invalid-payload", "messaging/invalid-options",
+  "messaging/internal-error", "messaging/server-unavailable", "messaging/message-rate-exceeded", "messaging/device-message-rate-exceeded",
 ]);
 
 export function taskKey(task: WorkerTask): string {

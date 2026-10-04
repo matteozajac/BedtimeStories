@@ -2,6 +2,7 @@ import AuthenticationServices
 import SwiftUI
 
 struct StoryIdeaView: View {
+    @Environment(OperationCenter.self) private var operations
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.scenePhase) private var phase
     @AppStorage("bookCreatorStoryIdea") private var description = ""
@@ -11,6 +12,7 @@ struct StoryIdeaView: View {
     @AppStorage("bookCreatorReadingPace") private var wordsPerMinute = StoryReadingLength.defaultWordsPerMinute
     @State private var mode = StoryGenerationMode.onDevice
     @State private var generationID: UUID?
+    @State private var operationID: String?
     @State private var model: StoryGenerationModel
     @State private var cloudProcessingAccepted = false
     private let cloud: CloudNarrationModel
@@ -43,7 +45,7 @@ struct StoryIdeaView: View {
                 Text("Describe the characters, setting, and what happens. Your idea is saved on this device.")
             }
             .listRowBackground(Theme.surface)
-            .disabled(model.working)
+            .disabled(generationWorking)
 
             Section("Story Options") {
                 VStack(alignment: .leading, spacing: 10) {
@@ -68,7 +70,7 @@ struct StoryIdeaView: View {
                     .font(.footnote).foregroundStyle(.secondary)
             }
             .listRowBackground(Theme.surface)
-            .disabled(model.working)
+            .disabled(generationWorking)
 
             Section {
                 Picker("Create With", selection: $mode) {
@@ -82,7 +84,7 @@ struct StoryIdeaView: View {
                         .font(.subheadline).foregroundStyle(.secondary)
                     Toggle("I agree to send my story idea to Gemini", isOn: $cloudProcessingAccepted)
                         .accessibilityIdentifier("gemini-story-consent")
-                    Text("Your idea, reader age, language and reading time are sent through our server to Google Gemini. Processing may take place outside Europe. Our server does not save your idea or generated story. The finished draft is saved on this device. Avoid personal or sensitive details.")
+                    Text("Your idea, reader age, language and reading time are sent through our server to Google Gemini. Processing may take place outside Europe. Our server temporarily keeps your idea and completed story for up to 24 hours so creation can finish while you are away. The finished draft is saved on this device. Avoid personal or sensitive details.")
                         .font(.footnote).foregroundStyle(.secondary)
                 } else {
                     Label("Your description and story context are sent to Apple's Private Cloud Compute to create the book. An internet connection is required.", systemImage: "cloud")
@@ -93,7 +95,7 @@ struct StoryIdeaView: View {
                 Button("Check Availability", systemImage: "arrow.clockwise") { refreshAvailability() }
             } header: { Text("Processing") }
             .listRowBackground(Theme.surface)
-            .disabled(model.working)
+            .disabled(generationWorking)
 
             if mode == .gemini, cloud.isConfigured, cloud.isEnabled, cloud.userID == nil {
                 Section {
@@ -108,7 +110,7 @@ struct StoryIdeaView: View {
                 .listRowBackground(Theme.surface)
             }
 
-            if model.working {
+            if generationWorking {
                 Section {
                     HStack(spacing: 16) {
                         Image(systemName: "sparkles")
@@ -122,16 +124,17 @@ struct StoryIdeaView: View {
                     .padding(.vertical, 8)
                     Button("Stop Creating", role: .cancel) {
                         AppLog.debug("Story creation stop requested", category: "creator", metadata: ["mode": .string(mode.rawValue)])
+                        if let operationID { operations.cancel(id: operationID) }
                         generationID = nil
                     }
                         .accessibilityIdentifier("stop-story-generation")
                 } footer: {
                     Text("The entire book is written together and checked before it is saved to Your Drafts.")
-                    if mode == .gemini { Text("Stop Creating stops waiting and leaves no draft. Gemini may finish processing an idea already sent; wait a few minutes before trying again.") }
+                    if mode == .gemini { Text("You can leave this screen. We will let you know when your story is ready. Stop Creating cancels the job; an idea already being processed may finish on the server.") }
                 }
                 .listRowBackground(Theme.surface)
             } else {
-                if let message = model.message {
+                if let message = model.message ?? operations.operations.first(where: { $0.id == operationID })?.message {
                     Section {
                         Text(message).accessibilityIdentifier("story-generation-message")
                         if let draft = model.draft {
@@ -148,7 +151,7 @@ struct StoryIdeaView: View {
                 Section {
                     Button(model.draft == nil ? "Create Story Draft" : "Create Another Draft", systemImage: "sparkles") {
                         editingDescription = false
-                        generationID = UUID()
+                        startGeneration()
                     }
                     .buttonStyle(.storyProminent(fullWidth: true))
                     .disabled((mode == .gemini && !cloudProcessingAccepted) || availability != nil || durationWarning != nil || description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || description.count > StoryGenerationRequest.maximumDescriptionLength)
@@ -169,7 +172,7 @@ struct StoryIdeaView: View {
             AppLog.debug("Story idea creator opened", category: "creator", metadata: ["mode": .string(mode.rawValue)])
             refreshAvailability()
         }
-        .onDisappear { AppLog.trace("Story idea creator closed", category: "creator", metadata: ["generation_running": .bool(model.working)]) }
+        .onDisappear { AppLog.trace("Story idea creator closed", category: "creator", metadata: ["generation_running": .bool(generationWorking)]) }
         .onChange(of: language) { refreshAvailability() }
         .onChange(of: cloud.userID) {
             cloudProcessingAccepted = false
@@ -187,20 +190,51 @@ struct StoryIdeaView: View {
             AppLog.debug("Story reading pace changed", category: "creator", metadata: ["words_per_minute": .integer(value)])
             refreshAvailability()
         }
-        .onChange(of: phase) { _, phase in
-            if phase == .active { refreshAvailability() }
-            else {
-                if generationID != nil { AppLog.trace("Story generation stopped because the app became inactive", category: "creator", metadata: ["mode": .string(mode.rawValue)]) }
-                generationID = nil
+        .onChange(of: phase) { _, phase in if phase == .active { refreshAvailability() } }
+        .onChange(of: operations.operations) { _, _ in
+            guard let operationID, let operation = operations.operations.first(where: { $0.id == operationID }) else { return }
+            if operation.state == .ready, case .draft(let id) = operation.destination {
+                Task { if let draft = try? await model.store.load(id) { openDraft(draft) } }
+                self.operationID = nil
             }
         }
-        .task(id: generationID) {
-            guard generationID != nil else { return }
-            let request = StoryGenerationRequest(description: description.trimmingCharacters(in: .whitespacesAndNewlines), language: language, readerAge: readerAge, readingMinutes: readingMinutes, wordsPerMinute: wordsPerMinute, cloudProcessingAccepted: cloudProcessingAccepted)
-            await model.generate(request, mode: mode)
-            if model.completed, !Task.isCancelled, let draft = model.draft { openDraft(draft) }
-            refreshAvailability()
+
+    }
+
+    private func startGeneration() {
+        let request = StoryGenerationRequest(description: description.trimmingCharacters(in: .whitespacesAndNewlines), language: language,
+            readerAge: readerAge, readingMinutes: readingMinutes, wordsPerMinute: wordsPerMinute, cloudProcessingAccepted: cloudProcessingAccepted)
+        let selectedMode = mode
+        let id = UUID().uuidString.lowercased()
+        let draftID = UUID(uuidString: id)!
+        operationID = id
+        generationID = draftID
+        if selectedMode == .gemini {
+            operations.start(kind: .storyGeneration, title: String(localized: "Writing your story"), subtitle: String(localized: "Writing your complete story…"),
+                destination: .draft(draftID), ownerID: cloud.userID, id: id) { operationID in
+                operations.trackRemoteSubmission(operationID, remoteID: id)
+                let remoteID = try await cloud.startStory(request: request, requestID: id)
+                operations.attachRemote(operationID, remoteID: remoteID)
+                cloud.refreshOperations()
+            }
+            operations.setReadingPace(id, value: request.wordsPerMinute)
+        } else {
+            operations.start(kind: .storyGeneration, title: String(localized: "Writing your story"), subtitle: String(localized: "Writing your complete story…"),
+                destination: .draft(draftID), id: id) { operationID in
+                await model.generate(request, mode: selectedMode)
+                if let draft = model.draft { operations.update(operationID, destination: .draft(draft.id), title: draft.title) }
+                guard model.completed, let draft = model.draft else {
+                    if Task.isCancelled { throw CancellationError() }
+                    throw StoryGenerationFailure.unavailable(model.message ?? String(localized: "The story could not be completed. Try again with a shorter reading time or a simpler idea."))
+                }
+                operations.update(operationID, progress: 1, destination: .draft(draft.id), title: draft.title)
+            }
         }
+        Task { await operations.requestNotificationAuthorization() }
+    }
+    private var generationWorking: Bool {
+        guard let operationID else { return false }
+        return operations.operations.first(where: { $0.id == operationID })?.isActive == true
     }
 
     private func refreshAvailability() {

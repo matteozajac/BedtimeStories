@@ -6,6 +6,7 @@ import UniformTypeIdentifiers
 struct BookEditorView: View {
     @Environment(LibraryModel.self) private var library
     @Environment(CloudNarrationModel.self) private var cloud
+    @Environment(OperationCenter.self) private var operations
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var phase
     @State private var editor: BookEditorModel
@@ -19,8 +20,9 @@ struct BookEditorView: View {
     @State private var preview = DraftAudioPreview()
     @State private var creatingNarration = false
 
-    init(draft: BookDraft, store: BookDraftStore) {
+    init(draft: BookDraft, store: BookDraftStore, initiallyShowNarration: Bool = false) {
         _editor = State(initialValue: BookEditorModel(draft: draft, store: store))
+        _creatingNarration = State(initialValue: initiallyShowNarration)
     }
 
     private var diagnosticFields: [String: TelemetryValue] {
@@ -123,7 +125,7 @@ struct BookEditorView: View {
             .listRowBackground(Theme.surface)
             Section {
                 Label {
-                    Text(editor.isEditingBook ? "Save updates this book in your library. Discard leaves the library version unchanged." : "Save adds this book to your library to read, listen, and share with your family.")
+                    Text(editor.isEditingBook ? "Close keeps your draft and lets background operations continue. Save updates the book in your library." : "Close keeps your draft and lets background operations continue. Save adds the book to your library.")
                         .font(.subheadline).foregroundStyle(.secondary)
                 } icon: { Image(systemName: "books.vertical.fill").foregroundStyle(Theme.glow) }
             }
@@ -138,14 +140,21 @@ struct BookEditorView: View {
         .navigationDestination(for: UUID.self) { ChapterEditorView(editor: editor, chapterID: $0) }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Button(editor.hasChanges ? "Discard" : "Close", role: editor.hasChanges ? .destructive : nil) {
-                    if editor.hasChanges { discardChanges = true }
-                    else { Task { if await editor.discardAndClose() { dismiss() } } }
-                }.disabled(editor.working || loadingPhoto).accessibilityIdentifier("close-book-editor")
-                    .confirmationDialog("Discard your changes?", isPresented: $discardChanges, titleVisibility: .visible) {
-                        Button("Discard Changes", role: .destructive) { Task { if await editor.discardAndClose() { dismiss() } } }
-                        Button("Cancel", role: .cancel) { }
-                    } message: { Text("Changes from this editing session will be discarded. Your library book stays unchanged.") }
+                Button("Close") { Task { if await editor.close() { dismiss() } } }
+                    .disabled(editor.working || loadingPhoto).accessibilityIdentifier("close-book-editor")
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Button("Discard Changes", role: .destructive) { discardChanges = true }
+                } label: { Label("Book Options", systemImage: "ellipsis").labelStyle(.iconOnly) }
+                .disabled(editor.working || loadingPhoto)
+                .accessibilityIdentifier("book-editor-options")
+                .confirmationDialog("Discard your changes?", isPresented: $discardChanges, titleVisibility: .visible) {
+                    Button("Discard Changes", role: .destructive) { Task { if await editor.discardAndClose() { dismiss() } } }
+                    Button("Cancel", role: .cancel) { }
+                } message: {
+                    Text(editor.isEditingBook ? "This editing draft and its background operations will be discarded. Your library book stays unchanged." : "Changes from this editing session will be discarded, and its background operations will be cancelled.")
+                }
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Save") { Task { await save() } }
@@ -212,7 +221,13 @@ struct BookEditorView: View {
             Button("Save as a New Book") { Task { await save(asCopy: true) } }
             Button("Keep Editing", role: .cancel) { }
         } message: { Text(BookError.editConflict.localizedDescription) }
-        .onDisappear { preview.stop() }
+        .onAppear {
+            operations.setNavigationPreparation(id: editor.draft.id) { try await editor.persist() }
+        }
+        .onDisappear {
+            operations.clearNavigationPreparation(id: editor.draft.id)
+            preview.stop()
+        }
     }
 
     private func save(asCopy: Bool = false) async {

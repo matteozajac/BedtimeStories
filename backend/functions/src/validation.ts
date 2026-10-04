@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { HttpsError } from "firebase-functions/v2/https";
 import { CONSENT_VERSION, Chapter, Language, LIMITS, NARRATION_STYLES, NarrationInput, NarrationStyle, Principal, RecordingKind } from "./contracts";
+import { builtInVoice } from "./voice-catalog";
 
 export function object(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new HttpsError("invalid-argument", "Invalid request.");
@@ -84,6 +85,11 @@ export function narrationInput(raw: unknown): NarrationInput {
     requestId: uuid(data.requestId), voiceProfileId: identifier(data.voiceProfileId), draftId: identifier(data.draftId),
     snapshotHash: hash.toLowerCase(), language: language(data.language), preview: data.preview, chapters,
   };
+  const builtIn = builtInVoice(result.voiceProfileId);
+  if ((result.voiceProfileId.startsWith("builtin-") && !builtIn) || /^voice(?:key)?_/u.test(result.voiceProfileId)) {
+    throw new HttpsError("invalid-argument", "Choose an available narrator profile.");
+  }
+  if (builtIn && builtIn.language !== result.language) throw new HttpsError("invalid-argument", "Choose a narrator for this language.");
   if (Buffer.byteLength(JSON.stringify(result), "utf8") > 750000) throw new HttpsError("resource-exhausted", "This narration contains too much data.");
   return result;
 }

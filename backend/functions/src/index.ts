@@ -1,15 +1,20 @@
 import { initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
+import { getMessaging } from "firebase-admin/messaging";
 import { CallableRequest, HttpsError, onCall } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
+import { onTaskDispatched } from "firebase-functions/v2/tasks";
+import { onDocumentWritten } from "firebase-functions/v2/firestore";
 import { setGlobalOptions } from "firebase-functions/v2/options";
 import { Principal } from "./contracts";
 import { KMSRecordingStore } from "./encryption";
 import { CloudVoiceService } from "./service";
-import { CloudTaskDispatcher } from "./tasks";
+import { CloudTaskDispatcher, FirebaseStoryTaskDispatcher } from "./tasks";
 import { connection, operation, preserveCause } from "./diagnostics";
 import { StoryGenerationService, VertexStoryProvider } from "./story";
+import { StoryJobService } from "./storyJobs";
+import { OperationKind, OperationNotificationService } from "./operationNotifications";
 
 initializeApp();
 setGlobalOptions({ region: "europe-west1", maxInstances: 10, memory: "512MiB", timeoutSeconds: 120, serviceAccount: process.env.API_SERVICE_ACCOUNT });
@@ -22,6 +27,12 @@ function service(): CloudVoiceService {
     { enabled: () => process.env.ENABLE_CLOUD_NARRATION === "true" },
   );
 }
+function storyJobs(): StoryJobService {
+  const project = process.env.GCLOUD_PROJECT ?? process.env.GCP_PROJECT ?? "";
+  return new StoryJobService(getFirestore(), new VertexStoryProvider(project), new FirebaseStoryTaskDispatcher(),
+    { enabled: () => process.env.ENABLE_STORY_GENERATION === "true" });
+}
+function notifications(): OperationNotificationService { return new OperationNotificationService(getFirestore(), getMessaging()); }
 async function principal(request: CallableRequest): Promise<Principal> {
   if (request.app?.alreadyConsumed) throw new HttpsError("permission-denied", "This request token was already used. Try again.");
   if (!request.auth) throw new HttpsError("unauthenticated", "Sign in with Apple to continue.");
@@ -43,7 +54,32 @@ export const startNarration = onCall(secured, async (request) => operation("star
 export const cancelNarration = onCall(secured, async (request) => operation("cancelNarration", async () => service().cancelNarration(await principal(request), request.data)));
 export const deleteVoice = onCall(secured, async (request) => operation("deleteVoice", async () => service().deleteVoice(await principal(request), request.data)));
 export const deleteAccount = onCall(secured, async (request) => operation("deleteAccount", async () => service().deleteAccount(await principal(request), request.data)));
-export const retryPendingDispatches = onSchedule({ schedule: "every 5 minutes", timeZone: "UTC", timeoutSeconds: 120 }, async () => operation("retryPendingDispatches", async () => service().retryPendingDispatches()));
+export const retryPendingDispatches = onSchedule({ schedule: "every 5 minutes", timeZone: "UTC", timeoutSeconds: 120 }, async () => operation("retryPendingDispatches", async () => {
+  const results = await Promise.allSettled([service().retryPendingDispatches(), storyJobs().retryAndClean(), notifications().clean()]);
+  const failure = results.find((result) => result.status === "rejected");
+  if (failure?.status === "rejected") throw failure.reason;
+}));
+
+export const startStoryGeneration = onCall(secured, async (request) => operation("startStoryGeneration", async () => storyJobs().start(await principal(request), request.data)));
+export const cancelStoryGeneration = onCall(secured, async (request) => operation("cancelStoryGeneration", async () => storyJobs().cancel(await principal(request), request.data)));
+export const processStoryGeneration = onTaskDispatched({ timeoutSeconds: 420, maxInstances: 4, concurrency: 1,
+  invoker: process.env.API_SERVICE_ACCOUNT ?? "private", retryConfig: { maxAttempts: 8, minBackoffSeconds: 60, maxBackoffSeconds: 300 }, rateLimits: { maxConcurrentDispatches: 4, maxDispatchesPerSecond: 1 } },
+  async (request) => operation("processStoryGeneration", async () => storyJobs().process(request.data)));
+
+export const registerOperationDevice = onCall(secured, async (request) => operation("registerOperationDevice", async () => notifications().registerDevice(await principal(request), request.data)));
+export const unregisterOperationDevice = onCall(secured, async (request) => operation("unregisterOperationDevice", async () => notifications().unregisterDevice(await principal(request), request.data)));
+export const registerOperationActivity = onCall(secured, async (request) => operation("registerOperationActivity", async () => notifications().registerActivity(await principal(request), request.data)));
+
+function observeOperations(kind: OperationKind, collection: string) {
+  return onDocumentWritten({ document: `users/{uid}/${collection}/{id}`, retry: true, timeoutSeconds: 120 }, async (event) => operation("operationStateChanged", async () => {
+    const after = event.data?.after;
+    if (!after?.exists) return;
+    await notifications().changed(event.params.uid, event.params.id, kind, event.data?.before.data(), after.data(), after.updateTime!.toMillis());
+  }));
+}
+export const narrationOperationChanged = observeOperations("narration", "jobs");
+export const voiceOperationChanged = observeOperations("voiceEnrollment", "voices");
+export const storyOperationChanged = observeOperations("storyGeneration", "storyJobs");
 
 export const generateStoryBook = onCall({ ...secured, timeoutSeconds: 360, maxInstances: 4, concurrency: 4 }, async (request) => operation("generateStoryBook", async () => {
   const owner = await principal(request);

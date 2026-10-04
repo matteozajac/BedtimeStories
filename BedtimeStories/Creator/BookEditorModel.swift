@@ -25,9 +25,10 @@ final class BookEditorModel {
     @ObservationIgnored private var changeCountSincePersist = 0
     @ObservationIgnored private var loggedUnsavedChanges = false
     @ObservationIgnored private let logger: any AppLogging
+    @ObservationIgnored private let operationCenter: OperationCenter
 
-    init(draft: BookDraft, store: BookDraftStore, logger: any AppLogging = AppLog.logger) {
-        self.draft = draft; baseline = draft; self.store = store; self.logger = logger
+    init(draft: BookDraft, store: BookDraftStore, logger: any AppLogging = AppLog.logger, operationCenter: OperationCenter = .shared) {
+        self.draft = draft; baseline = draft; self.store = store; self.logger = logger; self.operationCenter = operationCenter
     }
 
     var hasChanges: Bool { (isEditingBook && !baselineAvailable) || !draft.hasSameContent(as: baseline) }
@@ -111,8 +112,23 @@ final class BookEditorModel {
         logger.log(LogEntry("Draft persistence completed", level: .debug, category: "creator", metadata: context.metadata))
     }
 
+    func close() async -> Bool {
+        guard !working, !closing else { return false }
+        working = true
+        defer { working = false }
+        do {
+            try await persist()
+            logger.trace("Book editing draft kept on close", category: "creator", metadata: diagnosticFields)
+            return true
+        } catch {
+            logger.error("Book editing draft close failed", error: error, category: "creator", metadata: diagnosticFields)
+            message = String(localized: "Your draft could not be saved. Keep the editor open and try again.")
+            return false
+        }
+    }
+
     func discardAndClose() async -> Bool {
-        guard !working else { return false }
+        guard !working, !closing else { return false }
         working = true
         defer { working = false }
         let context = BookOperationDiagnostics(bookID: draft.source?.bookID, draftID: draft.id, phase: "draft_discard")
@@ -120,8 +136,11 @@ final class BookEditorModel {
         closing = true
         autosave?.cancel()
         await autosave?.value
+        let discardOwner = operationCenter.currentOwnerID
         do {
-            if isEditingBook || baseline.isEmpty { try await store.remove(draft.id) }
+            let removingDraft = isEditingBook || baseline.isEmpty
+            operationCenter.retireDraftOperations(draft.id, sourceBookID: draft.source?.bookID, draftDeleted: removingDraft)
+            if removingDraft { try await store.remove(draft.id) }
             else {
                 var original = baseline; original.modifiedAt = Date()
                 try await store.save(original, context: context)
@@ -131,6 +150,7 @@ final class BookEditorModel {
             return true
         }
         catch {
+            operationCenter.clearDraftDiscardMarker(draft.id, ownerID: discardOwner)
             let failureEntry = context.failureEntry("Draft discard failed", error: error, category: "creator")
             await store.flushDiagnosticLogs()
             logger.log(failureEntry)
@@ -168,7 +188,15 @@ final class BookEditorModel {
         if let chapterID { context.details["chapter_id"] = .string(chapterID.uuidString) }
         logger.trace("Draft image update started", category: "creator", metadata: context.metadata)
         working = true
-        defer { working = false }
+        let trackedID = operationCenter.begin(kind: .importBook, title: draft.title, subtitle: String(localized: "Adding an illustration…"), destination: .draft(draft.id))
+        operationCenter.update(trackedID, state: .running)
+        operationCenter.beginExternal(trackedID)
+        var completed = false
+        defer {
+            working = false
+            operationCenter.endExternal(trackedID, success: completed)
+            operationCenter.update(trackedID, state: completed ? .ready : .failed, progress: completed ? 1 : nil, message: completed ? nil : message)
+        }
         do {
             guard data.count <= 50_000_000, let cgImage = await ArtworkDecoder.thumbnail(data),
                   let jpeg = UIImage(cgImage: cgImage).jpegData(compressionQuality: 0.85) else {
@@ -185,6 +213,7 @@ final class BookEditorModel {
             } else { draft.cover = path }
             context.phase = "draft_image_persist"
             try await persist(operationID: context.operationID)
+            completed = true
             logger.trace("Draft image update completed", category: "creator", metadata: context.metadata)
         } catch {
             let failureEntry = context.failureEntry("Draft image save failed", error: error, category: "creator")
@@ -202,7 +231,15 @@ final class BookEditorModel {
             return false
         }
         working = true
-        defer { working = false }
+        let trackedID = operationCenter.begin(kind: .importBook, title: draft.title, subtitle: String(localized: "Adding a recording…"), destination: .draft(draft.id))
+        operationCenter.update(trackedID, state: .running)
+        operationCenter.beginExternal(trackedID)
+        var completed = false
+        defer {
+            working = false
+            operationCenter.endExternal(trackedID, success: completed)
+            operationCenter.update(trackedID, state: completed ? .ready : .failed, progress: completed ? 1 : nil, message: completed ? nil : message)
+        }
         let previous = draft.chapters.first { $0.id == chapterID }
         var context = BookOperationDiagnostics(bookID: draft.source?.bookID, draftID: draft.id, phase: "chapter_audio_import")
         context.details["chapter_id"] = .string(chapterID.uuidString)
@@ -219,6 +256,7 @@ final class BookEditorModel {
             try await persist(operationID: context.operationID)
             context.details["duration_seconds"] = .double(audio.duration)
             logger.trace("Chapter recording attachment completed", category: "creator", metadata: context.metadata)
+            completed = true
             return true
         } catch {
             let failureEntry = context.failureEntry("Chapter recording save failed", error: error, category: "creator")
@@ -236,7 +274,15 @@ final class BookEditorModel {
     func setFullAudio(_ url: URL) async -> Bool {
         guard !working, !closing else { return false }
         working = true
-        defer { working = false }
+        let trackedID = operationCenter.begin(kind: .importBook, title: draft.title, subtitle: String(localized: "Adding a recording…"), destination: .draft(draft.id))
+        operationCenter.update(trackedID, state: .running)
+        operationCenter.beginExternal(trackedID)
+        var completed = false
+        defer {
+            working = false
+            operationCenter.endExternal(trackedID, success: completed)
+            operationCenter.update(trackedID, state: completed ? .ready : .failed, progress: completed ? 1 : nil, message: completed ? nil : message)
+        }
         let previous = draft
         var context = BookOperationDiagnostics(bookID: draft.source?.bookID, draftID: draft.id, phase: "full_audio_import")
         logger.trace("Full book recording attachment started", category: "creator", metadata: context.metadata)
@@ -250,6 +296,7 @@ final class BookEditorModel {
             try await persist(operationID: context.operationID)
             context.details["duration_seconds"] = .double(audio.duration)
             logger.trace("Full book recording attachment completed", category: "creator", metadata: context.metadata)
+            completed = true
             return true
         } catch {
             let failureEntry = context.failureEntry("Full book recording save failed", error: error, category: "creator")
@@ -282,6 +329,7 @@ final class BookEditorModel {
         pending?.cancel()
         await pending?.value
         var copied: [UUID: (path: String, duration: Double)] = [:]
+        var replacementSaved = false
         var context = BookOperationDiagnostics(bookID: draft.source?.bookID, draftID: draft.id, phase: "generated_audio_copy")
         context.details["chapter_count"] = .integer(chapterIDs.count)
         logger.trace("Generated narration attachment started", category: "creator", metadata: context.metadata)
@@ -294,7 +342,7 @@ final class BookEditorModel {
                 context.details["chapter_id"] = .string(chapter.id.uuidString)
                 copied[chapter.id] = try await store.addAudio(url, draftID: draft.id, operationID: context.operationID)
             }
-            guard authorized(), !closing, draft.hasSameContent(as: previous) else { throw CancellationError() }
+            guard authorized(), !Task.isCancelled, !closing, draft.hasSameContent(as: previous) else { throw CancellationError() }
             var replacement = previous
             replacement.audio = nil; replacement.audioDuration = nil
             for index in replacement.chapters.indices {
@@ -305,14 +353,10 @@ final class BookEditorModel {
             replacement.modifiedAt = Date()
             context.phase = "generated_audio_persist"
             try await store.save(replacement, context: context)
+            replacementSaved = true
             // Disk publication is atomic. An account change during it cannot attach
             // the result to another person's editor.
-            guard authorized(), !closing, draft.hasSameContent(as: previous) else {
-                var restored = previous; restored.modifiedAt = Date()
-                context.phase = "generated_audio_restore_previous"
-                try await store.save(restored, context: context)
-                throw CancellationError()
-            }
+            guard authorized(), !Task.isCancelled, !closing, draft.hasSameContent(as: previous) else { throw CancellationError() }
             draft = replacement
             autosave?.cancel(); saved = true
             await store.flushDiagnosticLogs()
@@ -320,14 +364,38 @@ final class BookEditorModel {
             return true
         } catch {
             let failureEntry = context.failureEntry("Generated narration save failed", error: error, category: "creator")
-            await store.removeMedia(copied.values.map(\.path), draftID: previous.id)
-            await store.flushDiagnosticLogs()
+            let copiedPaths = copied.values.map(\.path)
+            var restored = draft; restored.modifiedAt = Date()
+            context.phase = "generated_audio_restore_previous"
+            // An unstructured task does not inherit the caller's cancellation.
+            // Restore the manifest before removing media it may still reference.
+            let recovery = Task { @MainActor [store, logger] in
+                do {
+                    if replacementSaved {
+                        try await store.save(restored, context: context)
+                        let persisted = try await store.load(previous.id)
+                        guard Set(persisted.mediaPaths).isDisjoint(with: copiedPaths) else {
+                            logger.warning("Generated narration cleanup retained referenced audio", category: "creator", metadata: context.metadata)
+                            return false
+                        }
+                    }
+                    await store.removeMedia(copiedPaths, draftID: previous.id)
+                    await store.flushDiagnosticLogs()
+                    return true
+                } catch {
+                    logger.error("Generated narration rollback failed; audio retained for recovery", error: error, category: "creator", metadata: context.metadata)
+                    await store.flushDiagnosticLogs()
+                    return false
+                }
+            }
+            let recovered = await recovery.value
             if ErrorSnapshot.isCancellation(error) {
                 logger.trace("Generated narration save cancelled", category: "creator", metadata: context.metadata)
             } else {
                 logger.log(failureEntry)
                 message = String(localized: "Narration could not be added. Your previous recordings and text are still saved. Try again.")
             }
+            if !recovered { message = String(localized: "Your draft could not be saved. Keep the editor open and try again.") }
             return false
         }
     }
@@ -338,6 +406,17 @@ final class BookEditorModel {
         defer { working = false }
         conflict = false
         var context = BookOperationDiagnostics(bookID: draft.source?.bookID, draftID: draft.id, phase: "publication_persist")
+        let trackedID = operationCenter.begin(kind: .saveBook, title: draft.title, subtitle: String(localized: "Saving book…"), destination: .book(draft.source?.bookID ?? draft.id), id: context.operationID)
+        operationCenter.update(trackedID, state: .running)
+        operationCenter.beginExternal(trackedID)
+        defer {
+            let success = closing
+            operationCenter.endExternal(trackedID, success: success)
+            if success { operationCenter.update(trackedID, state: .ready, progress: 1) }
+            else if operationCenter.operations.first(where: { $0.id == trackedID })?.isActive == true {
+                operationCenter.update(trackedID, state: .failed, message: message ?? String(localized: "The book could not be saved to your library. Your edits are safe on this device. Check iCloud Drive and available storage, then try again."))
+            }
+        }
         context.details["as_copy"] = .bool(asCopy)
         context.details["chapter_count"] = .integer(draft.chapters.count)
         logger.trace("Book save requested", category: "creator", metadata: context.metadata)
@@ -351,6 +430,7 @@ final class BookEditorModel {
             context.phase = "publication_library_commit"
             do { try await library.saveBook(book, source: publication.source, operationID: context.operationID) }
             catch { await library.repository.discardImport(book); throw error }
+            operationCenter.markDraftPublished(draft.id, bookID: book.id)
             closing = true
             autosave?.cancel()
             do { try await store.remove(draft.id) }

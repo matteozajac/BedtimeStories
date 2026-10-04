@@ -5680,7 +5680,7 @@
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gotowy"
+            "value": "Gotowe"
           }
         }
       }
@@ -7525,6 +7525,1276 @@
           "stringUnit": {
             "state": "translated",
             "value": "Twój pomysł, wiek dziecka, język i czas czytania trafiają przez nasz serwer do Google Gemini. Dane mogą być przetwarzane poza Europą. Nasz serwer nie zapisuje pomysłu ani wygenerowanej bajki. Gotowy szkic zostanie zapisany na tym urządzeniu. Nie podawaj danych osobowych ani poufnych informacji."
+          }
+        }
+      }
+    },
+    "Ongoing Operations": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongoing Operations"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zadania w toku"
+          }
+        }
+      }
+    },
+    "In Progress": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In Progress"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "W toku"
+          }
+        }
+      }
+    },
+    "Recent Operations": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recent Operations"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ostatnie zadania"
+          }
+        }
+      }
+    },
+    "Clear History": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear History"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wyczyść historię"
+          }
+        }
+      }
+    },
+    "Clearing this list keeps your books, drafts, and voices.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clearing this list keeps your books, drafts, and voices."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Książki, szkice i głosy zostaną zachowane."
+          }
+        }
+      }
+    },
+    "A quiet moment": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A quiet moment"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chwila spokoju"
+          }
+        }
+      }
+    },
+    "Nothing is running right now. Start your next bedtime story whenever you’re ready.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing is running right now. Start your next bedtime story whenever you’re ready."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie ma żadnych zadań w toku. Rozpocznij kolejną opowieść, kiedy zechcesz."
+          }
+        }
+      }
+    },
+    "A little magic in progress": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A little magic in progress"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu dzieje się magia"
+          }
+        }
+      }
+    },
+    "You can keep exploring. We’ll let you know when your story or voice is ready.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can keep exploring. We’ll let you know when your story or voice is ready."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Korzystaj dalej z aplikacji. Damy znać, gdy opowieść lub głos będą gotowe."
+          }
+        }
+      }
+    },
+    "%lld in progress": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld in progress"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "W toku: %lld"
+          }
+        }
+      }
+    },
+    "You can keep exploring": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can keep exploring"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Korzystaj dalej z aplikacji"
+          }
+        }
+      }
+    },
+    "Ready for you": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ready for you"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Już gotowe"
+          }
+        }
+      }
+    },
+    "Needs your attention": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Needs your attention"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wymaga uwagi"
+          }
+        }
+      }
+    },
+    "Tap to open": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap to open"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dotknij, aby otworzyć"
+          }
+        }
+      }
+    },
+    "Dismiss update": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dismiss update"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zamknij powiadomienie"
+          }
+        }
+      }
+    },
+    "Started": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Started"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rozpoczęto"
+          }
+        }
+      }
+    },
+    "Updated": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updated"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zaktualizowano"
+          }
+        }
+      }
+    },
+    "Open Book": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Book"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otwórz książkę"
+          }
+        }
+      }
+    },
+    "Open Draft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Draft"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otwórz szkic"
+          }
+        }
+      }
+    },
+    "Open Voices": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Voices"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otwórz głosy"
+          }
+        }
+      }
+    },
+    "Review Narration": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review Narration"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprawdź nagranie"
+          }
+        }
+      }
+    },
+    "Review Import": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review Import"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprawdź importowaną książkę"
+          }
+        }
+      }
+    },
+    "View Details": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View Details"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zobacz szczegóły"
+          }
+        }
+      }
+    },
+    "Cancel this operation?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel this operation?"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anulować to zadanie?"
+          }
+        }
+      }
+    },
+    "Cancel Operation": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel Operation"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anuluj zadanie"
+          }
+        }
+      }
+    },
+    "Keep Working": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep Working"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontynuuj zadanie"
+          }
+        }
+      }
+    },
+    "The work in progress will stop. Books and recordings already saved stay in your library.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The work in progress will stop. Books and recordings already saved stay in your library."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zadanie zostanie przerwane. Zapisane książki i nagrania pozostaną w bibliotece."
+          }
+        }
+      }
+    },
+    "Waiting": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oczekuje"
+          }
+        }
+      }
+    },
+    "In progress": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In progress"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "W toku"
+          }
+        }
+      }
+    },
+    "Needs attention": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Needs attention"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wymaga uwagi"
+          }
+        }
+      }
+    },
+    "Cancelled": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelled"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anulowano"
+          }
+        }
+      }
+    },
+    "Interrupted": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interrupted"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przerwano"
+          }
+        }
+      }
+    },
+    "Background Activity": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Background Activity"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Praca w tle"
+          }
+        }
+      }
+    },
+    "Completion notifications": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completion notifications"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Powiadomienia o zakończeniu zadań"
+          }
+        }
+      }
+    },
+    "Enable Notifications": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enable Notifications"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Włącz powiadomienia"
+          }
+        }
+      }
+    },
+    "Follow your stories, voices, and downloads here. Updates appear in the app; notifications let you know when work finishes while you’re away.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Follow your stories, voices, and downloads here. Updates appear in the app; notifications let you know when work finishes while you’re away."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tutaj sprawdzisz postęp tworzenia opowieści i głosów oraz pobierania książek. Powiadomienia w aplikacji i systemie dadzą znać, gdy zadanie się zakończy."
+          }
+        }
+      }
+    },
+    "This book is not available yet. Check your library and try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This book is not available yet. Check your library and try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta książka nie jest jeszcze dostępna. Sprawdź bibliotekę i spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "This draft could not be opened. It may have already been saved to your library.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This draft could not be opened. It may have already been saved to your library."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się otworzyć tego szkicu. Być może książka jest już zapisana w bibliotece."
+          }
+        }
+      }
+    },
+    "This import is no longer waiting for review.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This import is no longer waiting for review."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta książka nie oczekuje już na potwierdzenie importu."
+          }
+        }
+      }
+    },
+    "Narration Language": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Narration Language"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Język narracji"
+          }
+        }
+      }
+    },
+    "Storytellers": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storytellers"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lektorzy"
+          }
+        }
+      }
+    },
+    "Warm and comforting": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warm and comforting"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ciepły i kojący"
+          }
+        }
+      }
+    },
+    "Soft and soothing": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soft and soothing"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Łagodny i wyciszający"
+          }
+        }
+      }
+    },
+    "Relaxed and friendly": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relaxed and friendly"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swobodny i przyjazny"
+          }
+        }
+      }
+    },
+    "Your operation is complete": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your operation is complete"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gotowe"
+          }
+        }
+      }
+    },
+    "An operation needs attention": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An operation needs attention"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprawdź trwające zadanie"
+          }
+        }
+      }
+    },
+    "Creating your voice": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Creating your voice"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tworzymy Twój głos"
+          }
+        }
+      }
+    },
+    "Writing your story": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Writing your story"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Piszemy Twoją bajkę"
+          }
+        }
+      }
+    },
+    "Creating narration": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Creating narration"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tworzymy narrację"
+          }
+        }
+      }
+    },
+    "Your voice is ready to review": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your voice is ready to review"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Twój głos jest gotowy do odsłuchania"
+          }
+        }
+      }
+    },
+    "Narration is ready to listen to": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Narration is ready to listen to"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Narracja jest gotowa do odsłuchania"
+          }
+        }
+      }
+    },
+    "Your story draft is ready": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your story draft is ready"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Twoja bajka jest gotowa do edycji"
+          }
+        }
+      }
+    },
+    "Downloading narration…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloading narration…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pobieramy narrację…"
+          }
+        }
+      }
+    },
+    "Uploading your recordings…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uploading your recordings…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przesyłamy Twoje nagrania…"
+          }
+        }
+      }
+    },
+    "Narration added to your draft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Narration added to your draft"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Narracja została dodana do szkicu"
+          }
+        }
+      }
+    },
+    "Your recordings could not be saved for upload. Free some space and try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your recordings could not be saved for upload. Free some space and try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się przygotować nagrań do przesłania. Zwolnij trochę miejsca i spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "Your story is ready, but could not be saved. Free some space and reopen the app to try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your story is ready, but could not be saved. Free some space and reopen the app to try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bajka jest gotowa, ale nie udało się jej zapisać. Zwolnij trochę miejsca i otwórz aplikację ponownie."
+          }
+        }
+      }
+    },
+    "This operation was interrupted. Your saved work is safe; open it to try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This operation was interrupted. Your saved work is safe; open it to try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To zadanie zostało przerwane. Zapisane materiały są bezpieczne. Otwórz je, aby spróbować ponownie."
+          }
+        }
+      }
+    },
+    "iOS paused this operation. Your saved work is safe; open it to try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iOS paused this operation. Your saved work is safe; open it to try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iOS wstrzymał to zadanie. Zapisane materiały są bezpieczne. Otwórz je, aby spróbować ponownie."
+          }
+        }
+      }
+    },
+    "This operation could not be cancelled. Try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This operation could not be cancelled. Try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się anulować zadania. Spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "Your current draft could not be saved. Keep the editor open and try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your current draft could not be saved. Keep the editor open and try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się zapisać otwartego szkicu. Pozostaw edytor otwarty i spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "Your voice could not be created. Open Your Voices to try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your voice could not be created. Open Your Voices to try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się utworzyć głosu. Otwórz Twoje głosy, aby spróbować ponownie."
+          }
+        }
+      }
+    },
+    "Your draft changed. Open it to review the narration again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your draft changed. Open it to review the narration again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Szkic został zmieniony. Otwórz go, aby ponownie sprawdzić narrację."
+          }
+        }
+      }
+    },
+    "Your idea, reader age, language and reading time are sent through our server to Google Gemini. Processing may take place outside Europe. Our server temporarily keeps your idea and completed story for up to 24 hours so creation can finish while you are away. The finished draft is saved on this device. Avoid personal or sensitive details.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your idea, reader age, language and reading time are sent through our server to Google Gemini. Processing may take place outside Europe. Our server temporarily keeps your idea and completed story for up to 24 hours so creation can finish while you are away. The finished draft is saved on this device. Avoid personal or sensitive details."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Twój pomysł, wiek dziecka, język i czas czytania są przesyłane przez nasz serwer do Google Gemini. Dane mogą być przetwarzane poza Europą. Serwer przechowuje pomysł i gotową bajkę przez maksymalnie 24 godziny, aby tworzenie mogło się zakończyć, gdy korzystasz z innych aplikacji. Gotowy szkic zapisujemy na tym urządzeniu. Nie podawaj danych osobowych ani wrażliwych informacji."
+          }
+        }
+      }
+    },
+    "You can leave this screen. We will let you know when your story is ready. Stop Creating cancels the job; an idea already being processed may finish on the server.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can leave this screen. We will let you know when your story is ready. Stop Creating cancels the job; an idea already being processed may finish on the server."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Możesz opuścić ten ekran. Damy Ci znać, gdy bajka będzie gotowa. Zatrzymaj tworzenie anuluje zadanie, choć przetwarzanie rozpoczęte już na serwerze może się jeszcze zakończyć."
+          }
+        }
+      }
+    },
+    "Adding an illustration…": {
+      "extractionState": "manual",
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodawanie ilustracji…"
+          }
+        }
+      }
+    },
+    "Adding a recording…": {
+      "extractionState": "manual",
+      "localizations": {
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodawanie nagrania…"
+          }
+        }
+      }
+    },
+    "Book Options": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Book Options"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcje książki"
+          }
+        }
+      }
+    },
+    "This editing draft and its background operations will be discarded. Your library book stays unchanged.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This editing draft and its background operations will be discarded. Your library book stays unchanged."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta wersja robocza zostanie usunięta, a powiązane z nią zadania anulowane. Książka w bibliotece pozostanie bez zmian."
+          }
+        }
+      }
+    },
+    "Changes from this editing session will be discarded, and its background operations will be cancelled.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changes from this editing session will be discarded, and its background operations will be cancelled."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odrzucimy wprowadzone zmiany i anulujemy powiązane z nimi zadania."
+          }
+        }
+      }
+    },
+    "Close keeps your draft and lets background operations continue. Save updates the book in your library.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close keeps your draft and lets background operations continue. Save updates the book in your library."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Po zamknięciu ekranu wersja robocza pozostaje zapisana, a rozpoczęte zadania trwają dalej. Przycisk Zapisz aktualizuje książkę w bibliotece."
+          }
+        }
+      }
+    },
+    "Close keeps your draft and lets background operations continue. Save adds the book to your library.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close keeps your draft and lets background operations continue. Save adds the book to your library."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Po zamknięciu ekranu wersja robocza pozostaje zapisana, a rozpoczęte zadania trwają dalej. Przycisk Zapisz dodaje książkę do biblioteki."
+          }
+        }
+      }
+    },
+    "The draft for this narration was removed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The draft for this narration was removed."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wersja robocza tej bajki została usunięta."
+          }
+        }
+      }
+    },
+    "You can listen to the recordings here. To add narration to a book, open it from your library and create it again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can listen to the recordings here. To add narration to a book, open it from your library and create it again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tutaj możesz posłuchać zachowanych nagrań. Aby dodać nagranie do książki, otwórz ją w bibliotece i utwórz je ponownie."
+          }
+        }
+      }
+    },
+    "This narration is still being created. You can leave this screen and return from Ongoing Operations.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This narration is still being created. You can leave this screen and return from Ongoing Operations."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagranie jest nadal przygotowywane. Możesz zamknąć ten ekran i wrócić do niego z listy trwających zadań."
+          }
+        }
+      }
+    },
+    "This recording is no longer available. Open the book from your library and create narration again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This recording is no longer available. Open the book from your library and create narration again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To nagranie nie jest już dostępne. Otwórz książkę w bibliotece i utwórz nagranie ponownie."
+          }
+        }
+      }
+    },
+    "Available Recordings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Available Recordings"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dostępne nagrania"
+          }
+        }
+      }
+    },
+    "Narration Recordings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Narration Recordings"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagrania bajki"
+          }
+        }
+      }
+    },
+    "View Ongoing Operations": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View Ongoing Operations"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pokaż trwające zadania"
+          }
+        }
+      }
+    },
+    "This draft is no longer on this device. Open the book from your library to create narration again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This draft is no longer on this device. Open the book from your library to create narration again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tej wersji roboczej nie ma już na tym urządzeniu. Otwórz książkę w bibliotece, aby ponownie utworzyć nagranie."
           }
         }
       }

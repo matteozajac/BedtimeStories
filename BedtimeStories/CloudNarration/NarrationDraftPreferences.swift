@@ -4,9 +4,30 @@ import Foundation
 /// Cloud-only preferences never enter BookDraft or a portable book.
 struct NarrationDraftPreferences: Codable, Equatable {
     var voiceID = ""
+    var language: StoryLanguage = .preferred
     var defaultStyle: NarrationStyle = .natural
     var styleOverrides: [UUID: [Int: NarrationStyle]] = [:]
     var chapterTextHashes: [UUID: String] = [:]
+
+    init() {}
+
+    private enum CodingKeys: String, CodingKey { case voiceID, language, defaultStyle, styleOverrides, chapterTextHashes }
+
+    init(from decoder: any Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        voiceID = try values.decodeIfPresent(String.self, forKey: .voiceID) ?? ""
+        language = try values.decodeIfPresent(StoryLanguage.self, forKey: .language) ?? .preferred
+        defaultStyle = try values.decodeIfPresent(NarrationStyle.self, forKey: .defaultStyle) ?? .natural
+        styleOverrides = try values.decodeIfPresent([UUID: [Int: NarrationStyle]].self, forKey: .styleOverrides) ?? [:]
+        chapterTextHashes = try values.decodeIfPresent([UUID: String].self, forKey: .chapterTextHashes) ?? [:]
+    }
+
+    mutating func selectAvailableVoice(personalVoices: [VoiceProfile], personalVoicesLoaded: Bool = true) {
+        // A missing profile is meaningful only after the account's first remote snapshot.
+        if !personalVoicesLoaded && !voiceID.isEmpty && !voiceID.hasPrefix("builtin-") { return }
+        let available = VoiceProfile.available(for: language, personalVoices: personalVoices)
+        if !available.contains(where: { $0.id == voiceID }) { voiceID = available.first?.id ?? "" }
+    }
 
     @MainActor static func load(userID: String, draftID: UUID) -> Self {
         do {

@@ -3,7 +3,7 @@ locals {
   worker_enabled = var.worker_image != null
   services = toset([
     "serviceusage.googleapis.com", "cloudresourcemanager.googleapis.com", "iam.googleapis.com",
-    "firebase.googleapis.com", "firebasestorage.googleapis.com", "firebaseappcheck.googleapis.com",
+    "firebase.googleapis.com", "fcm.googleapis.com", "firebasestorage.googleapis.com", "firebaseappcheck.googleapis.com",
     "identitytoolkit.googleapis.com", "firestore.googleapis.com", "storage.googleapis.com",
     "cloudkms.googleapis.com", "aiplatform.googleapis.com", "cloudtasks.googleapis.com",
     "run.googleapis.com", "cloudscheduler.googleapis.com", "cloudfunctions.googleapis.com",
@@ -133,6 +133,8 @@ resource "google_cloud_run_v2_service" "worker" {
   }
   depends_on = [google_project_service.apis, google_project_iam_member.worker_permissions]
   lifecycle {
+    # Authorized image deployments use gcloud; its client metadata is descriptive.
+    ignore_changes = [client, client_version]
     precondition {
       condition     = startswith(var.worker_image, "europe-west1-docker.pkg.dev/${var.project_id}/")
       error_message = "The worker image must belong to this dedicated project."

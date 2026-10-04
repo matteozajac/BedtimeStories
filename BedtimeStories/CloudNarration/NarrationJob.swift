@@ -6,6 +6,7 @@ struct NarrationJob: Codable, Identifiable, Equatable, Sendable {
     let progress: Double
     let draftId: String
     let snapshotHash: String
+    var voiceProfileId: String?
     var preview: Bool = false
     var outputs: [NarrationOutput] = []
     var createdAt: Double = 0

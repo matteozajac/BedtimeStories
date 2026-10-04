@@ -28,6 +28,7 @@ resource "google_project_iam_member" "api_permissions" {
     datastore = "roles/datastore.user"
     usage     = "roles/serviceusage.serviceUsageConsumer"
     appcheck  = "roles/firebaseappcheck.tokenVerifier"
+    events    = "roles/eventarc.eventReceiver"
     auth      = google_project_iam_custom_role.auth_api.name
   }
   project = var.project_id
@@ -115,4 +116,46 @@ resource "google_project_iam_member" "story_generation" {
   project = var.project_id
   role    = google_project_iam_custom_role.story_generation.name
   member  = "serviceAccount:${google_service_account.app["voice-api"].email}"
+}
+
+# Durable story tasks execute as the API identity; only the queue can invoke them.
+resource "google_project_iam_custom_role" "operation_notifications" {
+  project     = var.project_id
+  role_id     = "bedtimeOperationNotifications"
+  title       = "BedtimeStories completion notifications"
+  permissions = ["cloudmessaging.messages.create"]
+}
+resource "google_project_iam_member" "operation_notifications" {
+  project = var.project_id
+  role    = google_project_iam_custom_role.operation_notifications.name
+  member  = "serviceAccount:${google_service_account.app["voice-api"].email}"
+}
+resource "google_service_account_iam_member" "story_task_identity" {
+  service_account_id = google_service_account.app["voice-api"].name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.app["voice-api"].email}"
+}
+resource "google_service_account_iam_member" "story_task_oidc" {
+  service_account_id = google_service_account.app["voice-api"].name
+  role               = "roles/iam.serviceAccountOpenIdTokenCreator"
+  member             = "serviceAccount:${google_project_service_identity.task_agent.email}"
+}
+
+# This queue is provisioned by Firebase task-functions deployment.
+resource "google_cloud_tasks_queue_iam_member" "story_enqueue" {
+  project  = var.project_id
+  location = local.region
+  name     = "processStoryGeneration"
+  role     = "roles/cloudtasks.enqueuer"
+  member   = "serviceAccount:${google_service_account.app["voice-api"].email}"
+}
+
+# Firebase manages these services; their Eventarc identity still needs invocation.
+resource "google_cloud_run_v2_service_iam_member" "operation_event_invokers" {
+  for_each = toset(["narrationoperationchanged", "voiceoperationchanged", "storyoperationchanged"])
+  project  = var.project_id
+  location = local.region
+  name     = each.value
+  role     = "roles/run.invoker"
+  member   = "serviceAccount:${google_service_account.app["voice-api"].email}"
 }

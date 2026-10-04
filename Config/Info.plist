@@ -78,6 +78,8 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
+		<string>processing</string>
+		<string>remote-notification</string>
 	</array>
 	<key>UIFileSharingEnabled</key>
 	<true/>
@@ -120,5 +122,13 @@
 			</dict>
 		</dict>
 	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER).operation.*</string>
+	</array>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
 </dict>
 </plist>

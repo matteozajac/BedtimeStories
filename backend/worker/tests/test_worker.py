@@ -111,7 +111,7 @@ class Provider:
         return voice
     def get_voice(self, voice):
         return {"id": voice} if voice in self.voices else None
-    def generate(self, voice, text, style):
+    def generate(self, voice, text, style, language=None):
         self.generated.append((voice, text, style))
         if self.hook:
             self.hook()
@@ -297,7 +297,7 @@ class WorkerTests(unittest.TestCase):
         self.assertIsNone(repo.get("users/alice/jobs/job"))
     def test_final_quota_retry_is_visible_failure(self):
         worker, repo, provider, objects, _ = fixture()
-        def exhausted(*args):
+        def exhausted(*args, **kwargs):
             raise ProviderError(429)
         provider.generate = exhausted
         with self.assertRaises(ProviderError) as error:

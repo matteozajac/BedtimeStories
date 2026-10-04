@@ -7,6 +7,7 @@ import { initializeTestEnvironment, RulesTestEnvironment, assertFails, assertSuc
 import { doc, getDoc, setDoc, collection, getDocs } from "firebase/firestore";
 import { ref, getBytes, uploadBytes, listAll } from "firebase/storage";
 import { Firestore, Timestamp } from "firebase-admin/firestore";
+import { HttpsError } from "firebase-functions/v2/https";
 import { CloudVoiceService } from "../service";
 import { Principal, RecordingStore, TaskDispatcher, WorkerTask } from "../contracts";
 
@@ -279,4 +280,62 @@ test("Story service: substantially incomplete books do not trigger an unbounded 
   }, { enabled: () => true, now: () => now });
   await assert.rejects(service.generate(principal("storyTooShort"), { ...storyRequest(), readingMinutes: 15 }), { code: "internal" });
   assert.equal(calls, 2); assert.equal(repairs, 0);
+});
+
+test("Story service: three-minute Polish story survives an unfinished expansion", async () => {
+  const { StoryGenerationService, parseStoryResponse, wordCount } = await import("../story");
+  let calls = 0, repairs = 0;
+  const short = { ...storyBook(), chapters: [{ title: "Pod gwiazdami", text: Array(252).fill("księżyc").join(" ") + " zasnął." }] };
+  const service = new StoryGenerationService(db, {
+    generate: async (_, previous, previousBook) => {
+      calls++;
+      if (calls === 1) return short;
+      assert.equal(previous, 253);
+      assert.deepEqual(previousBook, short);
+      return parseStoryResponse({ candidates: [{ finishReason: "MAX_TOKENS" }] });
+    },
+    supplement: async (_, book, missingWords) => {
+      repairs++;
+      assert.deepEqual(book, short);
+      assert.equal(missingWords, 35);
+      return { ...book, chapters: [{ ...book.chapters[0]!, text: book.chapters[0]!.text + " " + Array(106).fill("cisza").join(" ") + " zapadła." }] };
+    },
+  }, { enabled: () => true, now: () => now });
+  const result = await service.generate(principal("storyPolishThreeMinutes"), { ...storyRequest(), readingMinutes: 3, wordsPerMinute: 120 });
+  assert.equal(calls, 2);
+  assert.equal(repairs, 1);
+  assert.equal(wordCount(result.chapters[0]!.text), 360);
+  const account = await db.doc("privateAccounts/storyPolishThreeMinutes").get();
+  assert.equal(account.get("storyUsage.count"), 1);
+  assert.equal(account.get("storyGeneration"), undefined);
+});
+
+test("Story service: short-book recovery still rejects refusal, invalid repair and account deletion", async () => {
+  const { StoryGenerationService, StoryOutputError } = await import("../story");
+  const short = { ...storyBook(), chapters: [{ title: "Pod gwiazdami", text: Array(252).fill("księżyc").join(" ") + " zasnął." }] };
+  for (const scenario of ["refusal", "invalidRepair", "deletedAccount"] as const) {
+    const uid = `storyRepair_${scenario}`;
+    let calls = 0, repairs = 0;
+    const service = new StoryGenerationService(db, {
+      generate: async () => {
+        if (++calls === 1) return short;
+        if (scenario === "refusal") throw new HttpsError("failed-precondition", "Try a gentle idea.", { reason: "refused" });
+        throw new StoryOutputError("unfinished_response");
+      },
+      supplement: async () => {
+        repairs++;
+        if (scenario === "invalidRepair") return short;
+        await api().deleteAccount(principal(uid), {});
+        return { ...short, chapters: [{ ...short.chapters[0]!, text: Array(359).fill("księżyc").join(" ") + " zasnął." }] };
+      },
+    }, { enabled: () => true, now: () => now });
+    await assert.rejects(service.generate(principal(uid), { ...storyRequest(), readingMinutes: 3, wordsPerMinute: 120 }), {
+      code: scenario === "refusal" ? "failed-precondition" : scenario === "invalidRepair" ? "internal" : "permission-denied",
+    });
+    assert.equal(calls, 2);
+    assert.equal(repairs, scenario === "refusal" ? 0 : 1);
+    const account = await db.doc(`privateAccounts/${uid}`).get();
+    assert.equal(account.get("storyGeneration"), undefined);
+    assert.equal(account.get("state"), scenario === "deletedAccount" ? "deleting" : "active");
+  }
 });

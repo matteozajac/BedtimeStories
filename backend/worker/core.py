@@ -14,6 +14,16 @@ from typing import Iterable
 MODEL = "gemini-3.8-flash-tts"
 IDENTIFIER = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
 PROVIDER_IDENTIFIER = re.compile(r"^voice_[A-Za-z0-9_-]{1,256}$")
+# Same app-owned logical catalog as the callable API; no client-selected provider names.
+BUILT_IN_VOICES = {
+    "builtin-en-luna": ("en-US", "Sulafat"),
+    "builtin-en-milo": ("en-US", "Achernar"),
+    "builtin-en-robin": ("en-US", "Umbriel"),
+    "builtin-pl-luna": ("pl-PL", "Sulafat"),
+    "builtin-pl-milo": ("pl-PL", "Achernar"),
+    "builtin-pl-robin": ("pl-PL", "Umbriel"),
+}
+PREBUILT_PROVIDER_VOICES = frozenset(voice for _, voice in BUILT_IN_VOICES.values())
 STYLES = {
     "natural": "natural, warm conversational storytelling, unhurried",
     "gentle": "gentle, calm bedtime storytelling, soft and unhurried",
@@ -49,6 +59,23 @@ def provider_identity(value: object) -> str:
     if not isinstance(value, str) or not PROVIDER_IDENTIFIER.fullmatch(value):
         raise SafeError("invalid_provider_voice")
     return value
+
+
+def synthesis_voice(value: object) -> str:
+    if isinstance(value, str) and value in PREBUILT_PROVIDER_VOICES:
+        return value
+    return provider_identity(value)
+
+
+def built_in_voice(profile_id: str, language: object) -> str | None:
+    voice = BUILT_IN_VOICES.get(profile_id)
+    if voice:
+        if voice[0] != language:
+            raise SafeError("invalid_voice_language")
+        return voice[1]
+    if profile_id.startswith("builtin-"):
+        raise SafeError("invalid_builtin_voice")
+    return None
 
 
 def validate_task(payload: object) -> tuple[str, str, str]:

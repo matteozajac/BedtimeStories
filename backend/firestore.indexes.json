@@ -4,6 +4,18 @@
     { "collectionGroup": "jobs", "queryScope": "COLLECTION", "fields": [ { "fieldPath": "preview", "order": "ASCENDING" }, { "fieldPath": "state", "order": "ASCENDING" } ] }
   ],
   "fieldOverrides": [
+    { "collectionGroup": "notificationDevices", "fieldPath": "tokenHash", "indexes": [ { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" } ] },
+    { "collectionGroup": "notificationDevices", "fieldPath": "expiresAt", "indexes": [ { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" } ] },
+    { "collectionGroup": "notificationDevices", "fieldPath": "deviceToken", "indexes": [] },
+    { "collectionGroup": "activities", "fieldPath": "expiresAt", "indexes": [ { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" } ] },
+    { "collectionGroup": "activities", "fieldPath": "deliveryPending", "indexes": [ { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" } ] },
+    { "collectionGroup": "activities", "fieldPath": "activityToken", "indexes": [] },
+    { "collectionGroup": "deliveries", "fieldPath": "expiresAt", "indexes": [ { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" } ] },
+    { "collectionGroup": "storyJobs", "fieldPath": "dispatchPending", "indexes": [ { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" } ] },
+    { "collectionGroup": "storyJobs", "fieldPath": "deadlineAt", "indexes": [ { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" } ] },
+    { "collectionGroup": "storyJobs", "fieldPath": "expiresAt", "indexes": [ { "order": "ASCENDING", "queryScope": "COLLECTION" }, { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" } ] },
+    { "collectionGroup": "storyJobs", "fieldPath": "input", "indexes": [] },
+    { "collectionGroup": "storyJobs", "fieldPath": "result", "indexes": [] },
     { "collectionGroup": "voices", "fieldPath": "dispatchPending", "indexes": [ { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" } ] },
     { "collectionGroup": "jobs", "fieldPath": "dispatchPending", "indexes": [ { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" } ] },
     { "collectionGroup": "jobs", "fieldPath": "expiresAt", "indexes": [ { "order": "ASCENDING", "queryScope": "COLLECTION" }, { "order": "DESCENDING", "queryScope": "COLLECTION" }, { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" } ] },

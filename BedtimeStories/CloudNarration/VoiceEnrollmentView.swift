@@ -2,6 +2,7 @@ import SwiftUI
 
 struct VoiceEnrollmentView: View {
     private enum Take: String, Identifiable { case reference, consent; var id: String { rawValue } }
+    @Environment(OperationCenter.self) private var operations
     @Environment(CloudNarrationModel.self) private var cloud
     @Environment(\.dismiss) private var dismiss
     @State private var name = ""
@@ -205,25 +206,20 @@ struct VoiceEnrollmentView: View {
     }
 
     private func upload(_ enrollment: VoiceEnrollment) {
-        guard let referenceURL, let consentURL else {
-            AppLog.warning("Voice enrollment upload requires both recordings", category: "cloud_narration", metadata: ["has_reference": .bool(referenceURL != nil), "has_consent": .bool(consentURL != nil)])
-            return
+        guard let referenceURL, let consentURL, let owner = cloud.userID else { return }
+        let title = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let id = UUID().uuidString
+        let pending = PendingVoiceUpload(operationID: id, ownerID: owner, enrollment: enrollment)
+        do { try pending.stage(reference: referenceURL, consent: consentURL) }
+        catch { pending.remove(); message = String(localized: "Your recordings could not be saved for upload. Free some space and try again."); return }
+        operations.start(kind: .voiceEnrollment, title: title, subtitle: String(localized: "Uploading your recordings…"), destination: .voices, ownerID: owner, id: id) { _ in
+            try await pending.submit(cloud: cloud, center: operations)
         }
-        AppLog.debug("Voice enrollment upload requested by user", category: "cloud_narration")
-        operation?.cancel(); working = true; message = nil
-        operation = Task {
-            defer { working = false }
-            do {
-                _ = try await cloud.uploadEnrollment(enrollment: enrollment, referenceURL: referenceURL, consentURL: consentURL)
-                await VoiceEnrollmentAudio.shared.remove([referenceURL, consentURL])
-                AppLog.debug("Voice enrollment screen completed submission", category: "cloud_narration")
-                dismiss()
-            } catch is CancellationError { AppLog.trace("Voice enrollment screen upload cancelled", category: "cloud_narration") }
-            catch {
-                CloudNarrationDiagnostics.reportIfNeeded("Voice enrollment upload failed", error: error)
-                message = error.localizedDescription
-            }
-        }
+        Task { await VoiceEnrollmentAudio.shared.remove([referenceURL, consentURL]) }
+        // The operation owns the recordings until submission completes.
+        self.referenceURL = nil; self.consentURL = nil
+        Task { await operations.requestNotificationAuthorization() }
+        dismiss()
     }
 
     private func restart() {

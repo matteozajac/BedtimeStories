@@ -26,4 +26,6 @@ Open `BedtimeStories.xcodeproj` with Xcode 27. The UI uses a book grid, an adapt
 
 For device checks and evidence boundaries, see [validation](docs/VALIDATION.md).
 
+Long-running story, narration, voice, and library operations have a persistent app-owned history in **Settings → Ongoing Operations**. Completion banners and notification links open the original result, and cloud jobs continue independently of their screens. English and Polish each include three built-in storytellers. See [the operation audit and recovery behavior](docs/BACKGROUND_OPERATIONS.md) and [the backend contract](docs/BACKGROUND_OPERATIONS_BACKEND.md).
+
 Story creation also offers **Gemini**, through the same Apple-authenticated Firebase backend, for Polish and English. Accept the processing disclosure before sending an idea; the complete story opens in the existing draft editor. On-device Foundation Models and Private Cloud Compute remain explicit choices. See [creator processing and validation](docs/AI_CREATOR.md).

@@ -4,6 +4,7 @@ import { HttpsError } from "firebase-functions/v2/https";
 import { CONSENT_STATEMENTS, CONSENT_VERSION, LIMITS, Principal, RecordingKind, RecordingStore, TaskDispatcher, WorkerTask } from "./contracts";
 import { contentHash, decodeRecording, enrollmentInput, exactKeys, identifier, narrationInput, object, requireApple } from "./validation";
 import { connection, diagnostic, preserveCause, taskKey, withDiagnosticContext } from "./diagnostics";
+import { builtInVoice } from "./voice-catalog";
 
 interface ServiceOptions { enabled: () => boolean; now?: () => number }
 export class CloudVoiceService {
@@ -96,8 +97,19 @@ export class CloudVoiceService {
     const alreadySaved = await this.transaction(async (tx) => {
       const [account, enrollment] = await tx.getAll(this.account(uid), this.enrollment(uid, id));
       this.active(account!);
-      this.collecting(enrollment!, uid);
+      this.owned(enrollment!, uid);
       const existing = enrollment!.get(`recordings.${kind}`);
+      if (enrollment!.get("state") === "submitted") {
+        const profile = await tx.get(this.privateVoice(uid, id));
+        this.owned(profile, uid);
+        if (["deleting", "deleted"].includes(profile.get("status")) || !existing || existing.inputHash !== hash) {
+          throw new HttpsError("failed-precondition", "Start a new session to replace an uploaded recording.");
+        }
+        // A lost complete response can replay uploads. Immutable matching samples
+        // already attached to this owner's submitted profile require no new write.
+        return true;
+      }
+      this.collecting(enrollment!, uid);
       if (existing) {
         if (existing.inputHash === hash) return true;
         throw new HttpsError("failed-precondition", "Start a new session to replace an uploaded recording.");
@@ -106,7 +118,7 @@ export class CloudVoiceService {
       if (uploading?.expiresAt instanceof Timestamp && uploading.expiresAt.toMillis() > this.now()) throw new HttpsError("aborted", "The recording is still uploading. Try again shortly.");
       tx.update(this.enrollment(uid, id), { [`uploads.${kind}`]: { reservation, expiresAt: Timestamp.fromMillis(this.now() + 120000) } });
       return false;
-    });
+    }).catch((error) => { audio.fill(0); throw error; });
     if (alreadySaved) { audio.fill(0); return {}; }
     let saved: Awaited<ReturnType<RecordingStore["save"]>> | undefined;
     try {
@@ -171,18 +183,24 @@ export class CloudVoiceService {
     const { uid } = this.authenticated(principal);
     this.enabled();
     const input = narrationInput(raw);
+    const builtIn = builtInVoice(input.voiceProfileId);
     const jobId = input.requestId;
     const payloadHash = contentHash(input);
     await this.transaction(async (tx) => {
-      const [account, profile, existing] = await tx.getAll(this.account(uid), this.privateVoice(uid, input.voiceProfileId), this.privateJob(uid, jobId));
+      const [account, existing] = await tx.getAll(this.account(uid), this.privateJob(uid, jobId));
       this.active(account!);
-      this.owned(profile!, uid);
-      const status = profile!.get("status");
-      if ((status !== "ready" && !(input.preview && status === "awaitingApproval")) || !profile!.get("providerVoice")) throw new HttpsError("failed-precondition", "Listen to and approve this voice before generating a book.");
       if (existing!.exists) {
         this.owned(existing!, uid);
         if (existing!.get("payloadHash") !== payloadHash) throw new HttpsError("already-exists", "Use a new request ID for a different narration.");
+        // Acceptance stays recoverable even if the voice changed or was deleted
+        // after a response was lost. Its already accepted payload is immutable.
         return;
+      }
+      const profile = builtIn ? undefined : await tx.get(this.privateVoice(uid, input.voiceProfileId));
+      if (!builtIn) {
+        this.owned(profile!, uid);
+        const status = profile!.get("status");
+        if ((status !== "ready" && !(input.preview && status === "awaitingApproval")) || !profile!.get("providerVoice")) throw new HttpsError("failed-precondition", "Listen to and approve this voice before generating a book.");
       }
       if (!input.preview) {
         const activeBooks = await tx.get(this.db.collection(`privateAccounts/${uid}/jobs`).where("preview", "==", false).where("state", "in", ["queued", "processing"]).limit(1));
@@ -192,7 +210,7 @@ export class CloudVoiceService {
       const createdAt = Timestamp.fromMillis(this.now());
       const expiresAt = Timestamp.fromMillis(this.now() + LIMITS.outputTTLSeconds * 1000);
       tx.create(this.privateJob(uid, jobId), { uid, jobId, ...input, payloadHash, state: "queued", createdAt, expiresAt, cancelRequested: false, taskKind: "narrate", dispatchPending: true });
-      tx.create(this.publicJob(uid, jobId), { uid, id: jobId, state: "queued", progress: 0, preview: input.preview, draftId: input.draftId, snapshotHash: input.snapshotHash, createdAt, expiresAt, outputs: [] });
+      tx.create(this.publicJob(uid, jobId), { uid, id: jobId, state: "queued", progress: 0, preview: input.preview, voiceProfileId: input.voiceProfileId, draftId: input.draftId, snapshotHash: input.snapshotHash, createdAt, expiresAt, outputs: [] });
     });
     await this.dispatch({ kind: "narrate", uid, id: jobId }, this.privateJob(uid, jobId));
     return { jobId };

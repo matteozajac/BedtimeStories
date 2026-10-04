@@ -351,6 +351,125 @@ struct BookCreatorTests {
         #expect(Set(try FileManager.default.contentsOfDirectory(atPath: mediaDirectory.path)) == previousFiles)
     }
 
+    @Test(arguments: [false, true])
+    func cancellationOrAccountChangeAfterAudioDiskWriteRestoresPreviousNarration(cancelTask: Bool) async throws {
+        let root = workspace(); defer { try? FileManager.default.removeItem(at: root) }
+        let store = BookDraftStore(root: root.appendingPathComponent("Drafts"))
+        var draft = try await store.create(); draft.title = "Saved Narration"
+        draft.chapters[0].text = "A fox sleeps under the stars."
+        let recording = root.appendingPathComponent("voice.wav"); try wave().write(to: recording)
+        draft.audio = try await store.addAudio(recording, draftID: draft.id).path
+        try await store.save(draft)
+        let originalAudio = try await store.mediaURL(try #require(draft.audio), draftID: draft.id)
+        let mediaDirectory = originalAudio.deletingLastPathComponent()
+        let originalFiles = Set(try FileManager.default.contentsOfDirectory(atPath: mediaDirectory.path))
+        let editor = BookEditorModel(draft: draft, store: store)
+        var checks = 0
+        let attachment = Task { @MainActor in
+            await editor.setGeneratedAudio([draft.chapters[0].id: recording], expectedSnapshot: draft) {
+                checks += 1
+                // Initial admission, chapter copy, pre-write, then post-write.
+                if checks == 4 {
+                    if cancelTask { withUnsafeCurrentTask { $0?.cancel() } }
+                    return cancelTask
+                }
+                return true
+            }
+        }
+        #expect(await attachment.value == false)
+        #expect(checks == 4)
+        #expect(editor.draft.hasSameContent(as: draft))
+        let recovered = try await BookDraftStore(root: root.appendingPathComponent("Drafts")).load(draft.id)
+        #expect(recovered.hasSameContent(as: draft))
+        #expect(FileManager.default.fileExists(atPath: originalAudio.path))
+        #expect(Set(try FileManager.default.contentsOfDirectory(atPath: mediaDirectory.path)) == originalFiles)
+    }
+
+    @Test func closeKeepsEditingDraftAvailableForBackgroundNarrationReview() async throws {
+        let root = workspace(); defer { try? FileManager.default.removeItem(at: root) }
+        let store = BookDraftStore(root: root.appendingPathComponent("Drafts"))
+        var draft = try await store.create(); draft.title = "The Fox"; draft.chapters[0].text = "The fox sleeps."
+        draft.source = BookEditSource(bookID: UUID(), libraryRoot: root, fingerprint: "original")
+        try await store.save(draft)
+        let center = OperationCenter(directory: root.appendingPathComponent("Operations"), systemEnabled: false)
+        center.changedOwner("alice")
+        let operation = center.begin(kind: .narration, title: draft.title, subtitle: "Creating", destination: .narration(draft.id), ownerID: "alice")
+        center.attachRemote(operation, remoteID: "narration-job"); center.update(operation, state: .running)
+        let editor = BookEditorModel(draft: draft, store: store, operationCenter: center)
+        editor.draft.title = "The Fox Returns"
+        #expect(await editor.close())
+        #expect((try? await store.load(draft.id))?.title == "The Fox Returns")
+        #expect(center.operations.first { $0.id == operation }?.state == .running)
+        center.update(operation, state: .ready)
+        center.routeNotification(operationID: "narration-job", ownerID: "alice")
+        for _ in 0..<20 { await Task.yield() }
+        #expect(center.requestedDestination == .narration(draft.id))
+        #expect((try? await store.load(draft.id)) != nil)
+    }
+
+    @Test func explicitDiscardRetiresActiveAndCompletedDraftOperationsBeforeDeletingCheckout() async throws {
+        let root = workspace(); defer { try? FileManager.default.removeItem(at: root) }
+        let store = BookDraftStore(root: root.appendingPathComponent("Drafts"))
+        var draft = try await store.create(); draft.title = "The Fox"; draft.chapters[0].text = "The fox sleeps."
+        let bookID = UUID(); draft.source = BookEditSource(bookID: bookID, libraryRoot: root, fingerprint: "original")
+        try await store.save(draft)
+        let directory = root.appendingPathComponent("Operations")
+        let center = OperationCenter(directory: directory, systemEnabled: false); center.changedOwner("alice")
+        let active = center.begin(kind: .narration, title: draft.title, subtitle: "Creating", destination: .narration(draft.id), ownerID: "alice")
+        center.attachRemote(active, remoteID: "active-job"); center.update(active, state: .running)
+        let ready = center.begin(kind: .voicePreview, title: draft.title, subtitle: "Preview", destination: .draft(draft.id), ownerID: "alice")
+        center.attachRemote(ready, remoteID: "ready-job"); center.update(ready, state: .ready)
+        let unrelated = center.begin(kind: .narration, title: "Another Book", subtitle: "Creating", destination: .narration(UUID()), ownerID: "alice")
+        let editor = BookEditorModel(draft: draft, store: store, operationCenter: center)
+        #expect(await editor.discardAndClose())
+        // A queued second activation must not remove the durable discard marker.
+        #expect(await editor.discardAndClose() == false)
+        #expect((try? await store.load(draft.id)) == nil)
+        for id in [active, ready] {
+            #expect(center.operations.first { $0.id == id }?.state == .cancelled)
+            #expect(center.operations.first { $0.id == id }?.hiddenFromHistory == true)
+            #expect(center.operations.first { $0.id == id }?.destination == .book(bookID))
+            #expect(!center.shouldReconcileRemote(id, state: "processing"))
+            #expect(!center.shouldReconcileRemote(id, state: "ready"))
+        }
+        #expect(center.operations.first { $0.id == unrelated }?.state == .queued)
+        #expect(center.banner == nil)
+        center.clearHistory()
+        let restored = OperationCenter(directory: directory, systemEnabled: false); restored.changedOwner("alice")
+        restored.routeNotification(operationID: "active-job", ownerID: "alice")
+        for _ in 0..<20 { await Task.yield() }
+        #expect(restored.requestedDestination == .book(bookID))
+        let replay = restored.begin(kind: .narration, title: draft.title, subtitle: "Recovered", destination: .narration(draft.id), ownerID: "alice")
+        restored.attachRemote(replay, remoteID: "late-job")
+        restored.update(replay, state: .ready, destination: .narration(draft.id))
+        #expect(restored.operations.first { $0.id == replay }?.state == .cancelled)
+        #expect(restored.operations.first { $0.id == replay }?.destination == .book(bookID))
+        #expect(restored.operations.first { $0.id == replay }?.hiddenFromHistory == true)
+        #expect(restored.banner == nil)
+    }
+
+    @Test func failedDiscardKeepsCancelledReceiptsButAllowsDraftSaveAndNewNarration() async throws {
+        let root = workspace(); defer { try? FileManager.default.removeItem(at: root) }
+        let store = BookDraftStore(root: root.appendingPathComponent("Drafts"))
+        var draft = try await store.create(); draft.title = "The Fox"; draft.chapters[0].text = "The fox sleeps."
+        draft.source = BookEditSource(bookID: UUID(), libraryRoot: root, fingerprint: "original")
+        try await store.save(draft)
+        let center = OperationCenter(directory: root.appendingPathComponent("Operations"), systemEnabled: false); center.changedOwner("alice")
+        let old = center.begin(kind: .narration, title: draft.title, subtitle: "Creating", destination: .narration(draft.id), ownerID: "alice")
+        center.attachRemote(old, remoteID: "old-job")
+        let editor = BookEditorModel(draft: draft, store: store, operationCenter: center)
+        // An externally missing folder makes the real atomic removal fail.
+        try await store.remove(draft.id)
+        #expect(await editor.discardAndClose() == false)
+        #expect(editor.message != nil)
+        #expect(center.operations.first { $0.id == old }?.state == .cancelled)
+        #expect(await editor.close())
+        #expect((try? await store.load(draft.id)) != nil)
+        let fresh = center.begin(kind: .narration, title: draft.title, subtitle: "Creating", destination: .narration(draft.id), ownerID: "alice")
+        #expect(center.operations.first { $0.id == fresh }?.state == .queued)
+        #expect(center.operations.first { $0.id == fresh }?.hiddenFromHistory != true)
+    }
+
     private func workspace() -> URL { URL.temporaryDirectory.appendingPathComponent("CreatorTest-\(UUID().uuidString)") }
     private func wave(seconds: Int = 1) -> Data {
         var data = Data()

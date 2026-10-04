@@ -17,6 +17,10 @@ service cloud.firestore {
       allow get, list: if owner(uid) && active(uid);
       allow write: if false;
     }
+    match /users/{uid}/storyJobs/{jobId} {
+      allow get, list: if owner(uid) && active(uid);
+      allow write: if false;
+    }
     match /{document=**} { allow read, write: if false; }
   }
 }
