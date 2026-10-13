@@ -1,7 +1,7 @@
 # App diagnostics
 
-BedtimeStories uses MZAppFoundation **0.5.1**, resolved to
-`4c882c99e6c6aec87b7b8990f8ce711bef72744e`, with Firebase **12.19.2** and Pulse **5.2.1**.
+BedtimeStories uses MZAppFoundation **0.6.2**, resolved to
+`0594bf52cf518b777194cc03fed43f98bdabe756`, with Firebase **13.0.0** and Pulse **5.2.1**.
 
 ## Console, keyboard help and bug reports
 
@@ -18,8 +18,9 @@ startup history, counters, the reporting console and recording preferences.
 The console's Ladybug action prepares a ZIP containing the screenshot, Pulse logs,
 Foundation diagnostics, schema-2 manifest, optional recent silent screen recording
 and an optional voice message. All capture and files stay local until shared.
-The recent-activity buffer is bounded to 60 seconds and can be disabled in the
-recording page. ReplayKit and voice recording use the system's consent UI.
+Screen video recording defaults off when no preference is saved. Enable **Record
+screen video** in App Foundation to capture a silent buffer of up to 60 seconds.
+Explicit saved recording choices persist; developer access does not opt into capture. ReplayKit and voice recording use the system's consent UI.
 Developer mode revocation closes tools and waits for pending exports before cleanup.
 
 Use `bedtimestories://developer/enable` and `bedtimestories://developer/disable`.
@@ -34,7 +35,8 @@ A saved developer preference wins over the build default.
 The device app retains Firebase Auth/App Check/Firestore/Functions/Storage for
 Cloud Narration. `AppFoundationDiagnostics` passively reads the bundled Firebase
 configuration, SDK version, and current project/app identity. Cloud Narration owns
-initialization. Foundation adds no Analytics adapter and does not initialize SDKs
+initialization. The app explicitly enables Firebase 13’s `Firestore` package trait;
+the setup overlay preserves it. Foundation adds no Analytics adapter and does not initialize SDKs
 when inspecting configuration. RevenueCat and Sentry remain unconfigured.
 
 The local app bundles no Google configuration and links no remote SDKs.
@@ -64,8 +66,8 @@ Hosted tests disable recent recording before presentation to avoid ReplayKit
 consent dialogs in unit tests.
 
 Current evidence is in `validation.json`, with raw logs/results under
-`.build/mz-upgrade-0.5.1/` and release artifacts under `.build/pti/1.0-13/`.
-The previous 0.5.0 and 0.3.1 validation records are preserved separately.
+`.build/mz-upgrade-0.6.2/`. The upgrade is included in Internal TestFlight 1.0 (19); see the release receipt below. Provider resources are unchanged.
+The previous 0.5.1, 0.5.0 and 0.3.1 validation records are preserved separately.
 Physical Magic Keyboard, accelerometer, ReplayKit, microphone, iCloud and provider
 acceptance remain distinct from automated simulator and signed build evidence.
 See [Internal TestFlight receipts](../docs/TESTFLIGHT.md).

@@ -2,6 +2,28 @@ import XCTest
 @testable import BedtimeCore
 
 final class NarrationSnapshotTests: XCTestCase {
+    func testFreeTextIsNotTruncatedOrInterpretedAsMarkdown() throws {
+        let text = "# Read this literally\n\n- Keep this prefix.\n" + String(repeating: "Goodnight. ", count: 100)
+        let draft = try FreeTextNarrationDraft.make(text: text, title: "Free Text Narration")
+        let snapshot = NarrationSnapshot(draft: draft, styles: [:], defaultStyle: .natural, plainText: true)
+        XCTAssertEqual(draft.id, FreeTextNarrationDraft.id)
+        XCTAssertEqual(snapshot.chapters.count, 1)
+        XCTAssertEqual(snapshot.chapters[0].paragraphs.map(\.text), [text])
+        XCTAssertEqual(snapshot.chapters[0].paragraphs.map(\.style), [.natural])
+        XCTAssertNil(draft.source)
+        XCTAssertTrue(draft.mediaPaths.isEmpty)
+    }
+
+    func testFreeTextLimitsMatchBackendUTF16Counting() throws {
+        XCTAssertFalse(FreeTextNarrationDraft.isValid(" \n\t"))
+        XCTAssertFalse(FreeTextNarrationDraft.isValid("Hello\0world"))
+        XCTAssertTrue(FreeTextNarrationDraft.isValid(String(repeating: "a", count: 4_000)))
+        XCTAssertFalse(FreeTextNarrationDraft.isValid(String(repeating: "a", count: 4_001)))
+        XCTAssertTrue(FreeTextNarrationDraft.isValid(String(repeating: "🌙", count: 2_000)))
+        XCTAssertFalse(FreeTextNarrationDraft.isValid(String(repeating: "🌙", count: 2_001)))
+        XCTAssertThrowsError(try FreeTextNarrationDraft.make(text: "", title: ""))
+    }
+
     func testSnapshotKeepsSpokenTextSeparateFromEmotion() throws {
         var draft = BookDraft()
         let chapter = DraftChapter(title: "Night", text: "# Night\n\nThe fox was curious.\n\nThen he fell asleep.")

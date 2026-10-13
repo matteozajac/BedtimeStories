@@ -277,14 +277,14 @@ final class CloudNarrationModel {
     }
 
     func startNarration(draft: BookDraft, voiceID: String, styles: [UUID: [NarrationStyle]],
-                        defaultStyle: NarrationStyle, preview: Bool, operationID: String? = nil) async throws -> String {
+                        defaultStyle: NarrationStyle, preview: Bool, operationID: String? = nil, plainText: Bool = false) async throws -> String {
         try await withOperation("start_narration", metadata: ["preview": .bool(preview), "chapter_count": .integer(draft.chapters.count), "default_style": .string(defaultStyle.rawValue)]) { operation in
             let session = try currentSession()
             guard let voice = voices.first(where: { $0.id == voiceID }) ?? VoiceProfile.builtInVoices.first(where: { $0.id == voiceID }),
                   voice.status == "ready" || (preview && voice.status == "awaitingApproval") else {
                 throw CloudNarrationFailure.staleVoice
             }
-            let snapshot = NarrationSnapshot(draft: draft, styles: styles, defaultStyle: defaultStyle)
+            let snapshot = NarrationSnapshot(draft: draft, styles: styles, defaultStyle: defaultStyle, plainText: plainText)
             let hash = try snapshot.hash
             var chapters = snapshot.chapters.filter { !$0.paragraphs.isEmpty }
             if preview, let first = chapters.first {
@@ -595,9 +595,9 @@ final class CloudNarrationModel {
                 throw CloudNarrationFailureContext(presentation: error, underlyingLogError: evidence)
             }
             let code = (error as NSError).code
-            if name == "generateStoryBook" {
-                let details = (error as NSError).userInfo[FunctionsErrorDetailsKey] as? [String: Any]
-                let reason = details?["reason"] as? String
+            let details = (error as NSError).userInfo[FunctionsErrorDetailsKey] as? [String: Any]
+            let reason = details?["reason"] as? String
+            if name == "generateStoryBook" || name == "startStoryGeneration" {
                 let presentation: StoryGenerationFailure
                 switch FunctionsErrorCode(rawValue: code) {
                 case .unauthenticated: presentation = .geminiSignInRequired
@@ -614,7 +614,17 @@ final class CloudNarrationModel {
             switch FunctionsErrorCode(rawValue: code) {
             case .unauthenticated: throw CloudNarrationFailureContext(presentation: CloudNarrationFailure.signInRequired, underlyingLogError: evidence)
             case .permissionDenied: throw CloudNarrationFailureContext(presentation: CloudNarrationFailure.permissionDenied, underlyingLogError: evidence)
-            case .resourceExhausted: throw CloudNarrationFailureContext(presentation: CloudNarrationFailure.limitReached, underlyingLogError: evidence)
+            case .resourceExhausted:
+                let presentation: CloudNarrationFailure = switch (reason, details?["limit"] as? String) {
+                case ("daily_limit", "books"): .dailyBookLimit
+                case ("daily_limit", "previews"): .dailyPreviewLimit
+                case ("daily_limit", "enrollments"): .dailyEnrollmentLimit
+                case ("voice_limit", _): .voiceLimit
+                case ("busy", _): .narrationInProgress
+                case ("too_long", _): .narrationTooLong
+                default: .limitReached
+                }
+                throw CloudNarrationFailureContext(presentation: presentation, underlyingLogError: evidence)
             case .invalidArgument: throw CloudNarrationFailureContext(presentation: CloudNarrationFailure.invalidRecording, underlyingLogError: evidence)
             case .failedPrecondition:
                 if name == "deleteVoice" || name == "deleteAccount" { throw CloudNarrationFailureContext(presentation: CloudNarrationFailure.confirmWithApple, underlyingLogError: evidence) }

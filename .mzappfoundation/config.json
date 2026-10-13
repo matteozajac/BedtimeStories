@@ -6,7 +6,7 @@
   "url_scheme": "bedtimestories",
   "platform": "iOS",
   "deployment_target": "27.0",
-  "package_version": "0.5.1",
+  "package_version": "0.6.2",
   "bug_reporting": true,
   "analytics_enabled": false,
   "diagnostics_enabled": false,

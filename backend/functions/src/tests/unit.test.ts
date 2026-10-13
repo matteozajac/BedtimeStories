@@ -55,10 +55,10 @@ test("narration rejects owner overrides, path traversal, duplicate chapters and 
   const input = validInput(); input.chapters.push(input.chapters[0]!);
   assert.throws(() => narrationInput(input), { code: "invalid-argument" });
   const costly = validInput(); costly.chapters[0]!.paragraphs[0]!.text = "a".repeat(1501);
-  assert.throws(() => narrationInput(costly), { code: "resource-exhausted" });
+  assert.throws(() => narrationInput(costly), { code: "resource-exhausted", details: { reason: "too_long" } });
   const excessiveWords = validInput(); excessiveWords.preview = false;
   excessiveWords.chapters[0]!.paragraphs = Array.from({ length: 6 }, () => ({ text: "a ".repeat(1000).trim(), style: "gentle" }));
-  assert.throws(() => narrationInput(excessiveWords), { code: "resource-exhausted" });
+  assert.throws(() => narrationInput(excessiveWords), { code: "resource-exhausted", details: { reason: "too_long" } });
 });
 test("AES-GCM binds encrypted recordings to owner, profile and recording kind and detects tampering", () => {
   const key = randomBytes(32);

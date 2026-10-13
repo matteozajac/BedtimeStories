@@ -76,7 +76,7 @@ test("built-in narration charges once, permits cancellation, and stays isolated 
   const second = await api().startNarration(principal(uid), request);
   assert.equal(second.jobId, first.jobId);
   assert.equal((await db.doc(`privateAccounts/${uid}`).get()).get("limits.books"), 1);
-  await assert.rejects(api().startNarration(principal(uid), input("builtin-en-milo")), { code: "resource-exhausted" });
+  await assert.rejects(api().startNarration(principal(uid), input("builtin-en-milo")), { code: "resource-exhausted", details: { reason: "busy" } });
   await assert.rejects(api().cancelNarration(principal("builtin-other"), { jobId: first.jobId }), { code: "not-found" });
   await api().cancelNarration(principal(uid), { jobId: first.jobId });
   const third = await api().startNarration(principal(uid), input("builtin-en-milo"));

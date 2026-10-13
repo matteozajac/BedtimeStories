@@ -17,10 +17,10 @@ public struct NarrationSnapshot: Codable, Equatable, Sendable {
     public let draftId: String
     public let chapters: [Chapter]
 
-    public init(draft: BookDraft, styles: [UUID: [NarrationStyle]], defaultStyle: NarrationStyle) {
+    public init(draft: BookDraft, styles: [UUID: [NarrationStyle]], defaultStyle: NarrationStyle, plainText: Bool = false) {
         draftId = draft.id.uuidString
         chapters = draft.chapters.map { chapter in
-            let blocks = Self.paragraphs(in: chapter)
+            let blocks = plainText ? [chapter.text].filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty } : Self.paragraphs(in: chapter)
             let selected = styles[chapter.id] ?? []
             return Chapter(id: chapter.id.uuidString, title: chapter.title, sourceText: chapter.text,
                            paragraphs: blocks.enumerated().map { index, text in

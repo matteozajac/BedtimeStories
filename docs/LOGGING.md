@@ -1,6 +1,6 @@
 # Diagnosing app and Gemini failures
 
-The app uses the resolved MZAppFoundation 0.5.1 logger and local Pulse store.
+The app uses the resolved MZAppFoundation 0.6.2 logger and local Pulse store.
 Open **Settings → Developer → Open Logs**, or enable Developer Mode and shake
 the device. Select a log entry, then tap **Info** to inspect its source and metadata. Keep the
 Debug level included in the console filters to see connection traces.

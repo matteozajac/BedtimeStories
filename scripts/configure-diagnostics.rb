@@ -2,15 +2,21 @@
 # Complete native setup for this app's synchronized source groups and existing backend.
 require 'xcodeproj'
 
+# Xcode 26.4+ package traits are not modeled by xcodeproj 1.27.0 yet.
+unless Xcodeproj::Project::Object::XCRemoteSwiftPackageReference.method_defined?(:traits)
+  Xcodeproj::Project::Object::XCRemoteSwiftPackageReference.class_eval { attribute :traits, Array }
+end
+
 root = File.expand_path('..', __dir__)
 project = Xcodeproj::Project.open(File.join(root, 'BedtimeStories.xcodeproj'))
 app = project.targets.find { |target| target.name == 'BedtimeStories' }
 local = project.targets.find { |target| target.name == 'BedtimeStoriesLocal' }
 raise 'Run the MZAppFoundation setup apply command first' unless app && local
 
-# MZAppFoundation 0.5.1 and the existing backend share the app's Firebase pin.
+# MZAppFoundation 0.6.2 and the existing backend share the app's Firebase pin.
 firebase = project.root_object.package_references.find { |ref| ref.respond_to?(:repositoryURL) && ref.repositoryURL.include?('firebase-ios-sdk') }
-firebase.requirement = { 'kind' => 'exactVersion', 'version' => '12.19.2' }
+firebase.requirement = { 'kind' => 'exactVersion', 'version' => '13.0.0' }
+firebase.traits = ['Firestore']
 
 # Keep app-owned Firebase inspection separate from the generated provider composition.
 bootstrap_path = File.join(root, '.mzappfoundation', 'Generated', 'MZBootstrap.swift')

@@ -7,7 +7,11 @@ import UserNotifications
 final class OperationCenter {
     static let shared = OperationCenter()
     private(set) var operations: [AppOperation] = []
-    var banner: AppOperation?
+    var banner: AppOperation? {
+        didSet { if banner?.id != oldValue?.id { scheduleBannerDismissal() } }
+    }
+    /// Presentation surfaces in appearance order; only the last one draws the banner.
+    private(set) var feedbackSurfaces: [UUID] = []
     var showingOperations = false
     var requestedDestination: OperationDestination?
     var message: String?
@@ -30,6 +34,8 @@ final class OperationCenter {
     @ObservationIgnored private let systemEnabled: Bool
     @ObservationIgnored private var active = true
     @ObservationIgnored private var activityDriver: OperationLiveActivities?
+    @ObservationIgnored private var quietCompletions: Set<String> = []
+    @ObservationIgnored private var bannerDismissal: Task<Void, Never>?
 
     init(directory: URL? = nil, defaults: UserDefaults = .standard, systemEnabled: Bool = true) {
         self.directory = directory ?? URL.applicationSupportDirectory.appendingPathComponent("Operations", isDirectory: true)
@@ -92,8 +98,11 @@ final class OperationCenter {
 
     @discardableResult
     func begin(kind: AppOperation.Kind, title: String, subtitle: String, destination: OperationDestination,
-               ownerID: String? = nil, id: String = UUID().uuidString, progress: Double? = nil) -> String {
+               ownerID: String? = nil, id: String = UUID().uuidString, progress: Double? = nil,
+               announcesCompletion: Bool = true) -> String {
         guard !operations.contains(where: { $0.id == id }) else { return id }
+        // Work whose result the user is already looking at stays in history without a banner.
+        if !announcesCompletion { quietCompletions.insert(id) }
         var operation = AppOperation(id: id, kind: kind, title: title, subtitle: subtitle, progress: progress,
                                      destination: destination, ownerID: ownerID)
         if let replacement = discardedDestination(destination, ownerID: ownerID) {
@@ -105,10 +114,10 @@ final class OperationCenter {
     }
     @discardableResult
     func start(kind: AppOperation.Kind, title: String, subtitle: String, destination: OperationDestination,
-               ownerID: String? = nil, id: String = UUID().uuidString,
+               ownerID: String? = nil, id: String = UUID().uuidString, announcesCompletion: Bool = true,
                work: @escaping @MainActor (String) async throws -> Void) -> String {
         guard !operations.contains(where: { $0.id == id }) else { return id }
-        let id = begin(kind: kind, title: title, subtitle: subtitle, destination: destination, ownerID: ownerID, id: id)
+        let id = begin(kind: kind, title: title, subtitle: subtitle, destination: destination, ownerID: ownerID, id: id, announcesCompletion: announcesCompletion)
         run(id: id, work: work)
         return id
     }
@@ -220,8 +229,10 @@ final class OperationCenter {
         fulfillRemoteRoute()
         runtime.update(id: id, progress: operation.progress, title: operation.title, subtitle: operation.subtitle)
         if systemEnabled { activityDriver?.update(operation) }
+        let quiet = operation.isTerminal && quietCompletions.remove(id) != nil
         if previous != operation.state && (previous == .running || previous == .queued) && (operation.state == .ready || operation.state == .failed) {
-            if operation.ownerID == nil || operation.ownerID == currentOwnerID {
+            if quiet { markCompletionPresented(operation.id) }
+            else if operation.ownerID == nil || operation.ownerID == currentOwnerID {
                 if active, operation.completionPresentedAt == nil { banner = operation; markCompletionPresented(operation.id) }
                 else if operation.remoteID == nil { notify(operation) }
             }
@@ -285,6 +296,21 @@ final class OperationCenter {
         deferredRemoteRoute = nil; openOperation(id: route.id)
     }
     func dismissBanner() { banner = nil }
+    /// For failures the caller reports itself, so the same problem is not shown twice.
+    func silenceCompletion(_ id: String) { quietCompletions.insert(id) }
+    func surfaceAppeared(_ id: UUID) { feedbackSurfaces.removeAll { $0 == id }; feedbackSurfaces.append(id) }
+    func surfaceDisappeared(_ id: UUID) { feedbackSurfaces.removeAll { $0 == id } }
+    private func scheduleBannerDismissal() {
+        bannerDismissal?.cancel()
+        guard let banner, !UIAccessibility.isVoiceOverRunning else { return }
+        let id = banner.id
+        let delay: Duration = banner.state == .failed ? .seconds(10) : .seconds(6)
+        bannerDismissal = Task {
+            try? await Task.sleep(for: delay)
+            guard !Task.isCancelled, self.banner?.id == id else { return }
+            self.banner = nil
+        }
+    }
     func clearHistory() {
         for index in operations.indices where operations[index].isTerminal && operations[index].remoteID != nil && (operations[index].ownerID == nil || operations[index].ownerID == currentOwnerID) {
             // Keep a receipt for cloud replay without retaining a visible history row.

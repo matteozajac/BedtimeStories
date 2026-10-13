@@ -1,5 +1,28 @@
 # Internal TestFlight
 
+## 1.0 (19) — 13 October 2026
+
+Free-text developer narration, MZAppFoundation 0.6.2 and editor/operation feedback improvements are available to **Internal Testers**. Exact readback confirms **VALID / INTERNAL_ONLY / IN_BETA_TESTING**, complete effective group access, and matching saved English/Polish What to Test notes.
+
+- Build/upload ID: `701aeb42-fdbb-4842-b398-24cc1b24e0fb`.
+- App: `6818278413`; bundle `com.matteozajac.bedtimestories`; team `4TCJLR98Y5`.
+- Group: `20328e88-9f9c-4c47-be78-c33a809d1a71` (**Internal Testers**, explicit and all-build access).
+- Notes: English `3b32d6e6-83a3-44e9-abba-e4102c4515c5`; Polish `693e7114-536c-4257-a0d5-ec026a3e4df8`.
+- Minimum iOS/iPadOS, compatible Mac and visionOS: 27.0.
+- IPA SHA256: `562e578d7ac4902893f86ea7a2bc1abf880cf9b2dd34fb57aff2bad1152eb502`.
+- Release input fingerprint: `bce401faf375d4861c535b59044c35f2c3fb36574e3524a4f6a1acd83aa0b691`; all **179 inputs** matched through archive, export and distribution.
+- Signed app/widget identities, versions and deep signatures passed. Production APNs, App Attest and iCloud, Apple sign-in, PCC, background identifiers and the exact Firebase configuration were verified in the exported IPA. Manual distribution profiles remain valid until 5 March 2027. Export is Internal-only.
+
+With Developer Mode enabled, **Settings → Developer → Free Text Narration** accepts up to 4,000 characters and lets you choose English/Polish, a built-in storyteller or ready personal voice, and a delivery style. Generation uses the existing private narration API. Listen to available results and reopen the tool from completion links without adding a book. Book editing now opens its sheet immediately while preparing the editing copy; closing cancels preparation. Completion banners belong to the frontmost surface and dismiss automatically unless VoiceOver is running; saves, shares and alert-presented failures avoid redundant banners.
+
+MZAppFoundation is pinned to **0.6.2** at `0594bf52cf518b777194cc03fed43f98bdabe756`, with Firebase **13.0.0** and an explicit Firestore trait. All 14 shared pins match the Foundation sample. Screen video recording defaults off without a saved choice. Existing analytics/diagnostics preferences and app-owned Firebase initialization are preserved.
+
+Validation passed **105 optimized Internal app tests**, **29 backend unit tests** and **43 Firestore/Storage emulator tests**, with no failures/skips. The unchanged app core and pinned Foundation core passed **14** and **52** tests respectively during this workflow's dependency validation. Local binary SDK isolation passed, and setup repeatability retained the app-owned composition and Firestore trait. Evidence and signed release artifacts are retained under `.build/pti/1.0-19/` and `.build/mz-upgrade-0.6.2/`.
+
+The upload command timed out after Apple committed the IPA; direct reads recovered the same build, which processed successfully. No duplicate IPA upload was attempted. The generic TestFlight validator still reports four unchanged beta-review contact fields; these concern external review, while this Internal-only build is already IN_BETA_TESTING with complete group access. Both existing testers remain INSTALLED, which does not establish installation of build 19. Physical voice/authentication, microphone, ReplayKit, iCloud and APNs delivery checks remain separate. Backend quota-detail changes are included in Git; this workflow does not deploy Functions or change provider resources.
+
+[Open TestFlight](https://appstoreconnect.apple.com/apps/6818278413/testflight/ios).
+
 ## 1.0 (18) — 4 October 2026
 
 Background operations and the physical-device runtime follow-up are available to **Internal Testers**. Exact readback confirms **VALID / INTERNAL_ONLY / IN_BETA_TESTING**, complete effective group access, and matching saved English/Polish What to Test notes.

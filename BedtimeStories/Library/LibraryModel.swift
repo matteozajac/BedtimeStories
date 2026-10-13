@@ -25,6 +25,8 @@ final class LibraryModel {
     var showingPlayer = false
     var showingCreator = false
     var editingDraft: BookDraft?
+    private(set) var openingBook: LibraryBook?
+    private(set) var openingFailure: String?
     var search = ""
     private(set) var repository: LibraryRepository
     private(set) var progress: LocalProgress
@@ -43,6 +45,7 @@ final class LibraryModel {
     @ObservationIgnored private var restoredPlayback = false
     @ObservationIgnored private var trackedOperationID: String?
     @ObservationIgnored private var operationTask: Task<Void, Never>?
+    @ObservationIgnored private var editorTask: Task<Void, Never>?
     @ObservationIgnored private var currentOperation: BookOperationDiagnostics?
     @ObservationIgnored private var images: [String: UIImage] = [:]
     @ObservationIgnored private var session = UUID()
@@ -125,10 +128,11 @@ final class LibraryModel {
 
     private func activate(_ next: LibraryLocation) {
         guard location != next else { return }
-        player.stop(); operationTask?.cancel(); debounce?.cancel()
+        player.stop(); operationTask?.cancel(); editorTask?.cancel(); debounce?.cancel()
         if let presenter { NSFileCoordinator.removeFilePresenter(presenter) }
         cloudObserver?.stop()
         session = UUID(); root = next.root; location = next; cloudStorage = next.isCloud
+        openingBook = nil; openingFailure = nil
         logger.log(LogEntry("Library activated", category: "library", metadata: ["icloud": .bool(next.isCloud)]))
         var namespaces = defaults.dictionary(forKey: "defaultLibraryNamespaces") as? [String: String] ?? [:]
         let namespace = namespaces[next.account] ?? (namespaces.isEmpty || (namespaces.count == 1 && namespaces["device"] != nil) ? defaults.string(forKey: "libraryNamespace") ?? UUID().uuidString : UUID().uuidString)
@@ -279,25 +283,69 @@ final class LibraryModel {
         showingCreator = true
     }
 
+    /// Presents the editor immediately and prepares the draft behind its loading state.
     func editBook(_ book: LibraryBook) {
-        perform("Opening book for editing…", phase: "edit", bookID: book.id) { [self] operationID in
-            guard let root else { throw BookError.unavailable("Your library is still opening. Try again in a moment.") }
-            let token = session; let account = location?.account
-            if player.book?.id == book.id { player.stop() }
-            let operationRepo = repository
-            let checkout = try await operationRepo.checkout(book, root: root, operationID: operationID)
-            await operationRepo.flushDiagnosticLogs()
+        guard activity == nil, !preparingLibrary, openingBook == nil, editingDraft == nil else {
+            logger.trace("Book editor opening deferred while library is busy", category: "creator", metadata: ["preparing_library": .bool(preparingLibrary), "library_operation_active": .bool(activity != nil)])
+            return
+        }
+        openingBook = book; openingFailure = nil
+        prepareEditor(book)
+    }
+
+    func retryEditBook() {
+        guard let openingBook, editorTask == nil, activity == nil, !preparingLibrary else { return }
+        openingFailure = nil
+        prepareEditor(openingBook)
+    }
+
+    func closeEditor() {
+        editorTask?.cancel(); editorTask = nil
+        openingBook = nil; openingFailure = nil; editingDraft = nil
+    }
+
+    private func prepareEditor(_ book: LibraryBook) {
+        var context = BookOperationDiagnostics(bookID: book.id, phase: "edit")
+        context.details["icloud"] = .bool(cloudStorage)
+        let operationID = context.operationID
+        let token = session; let account = location?.account
+        let operationRepo = repository
+        activity = String(localized: "Opening book for editing…")
+        logger.trace("Library operation started", category: "library", metadata: context.metadata)
+        if player.book?.id == book.id { player.stop() }
+        editorTask = Task { [self] in
+            defer { activity = nil; editorTask = nil }
             do {
-                guard token == session else { throw BookError.editConflict }
-                let source = BookEditSource(bookID: checkout.source.bookID, libraryRoot: checkout.source.libraryRoot, fingerprint: checkout.source.fingerprint, libraryAccount: account)
-                logger.trace("Book edit draft preparation started", category: "library", metadata: ["book_id": .string(book.id.uuidString), "operation_id": .string(operationID)])
-                let draft = try await BookDraftStore.shared.createEditingDraft(BookEditCheckout(book: checkout.book, source: source), operationID: operationID)
+                guard let root else { throw BookError.unavailable("Your library is still opening. Try again in a moment.") }
+                let checkout = try await operationRepo.checkout(book, root: root, operationID: operationID)
+                await operationRepo.flushDiagnosticLogs()
+                do {
+                    try Task.checkCancellation()
+                    guard token == session else { throw BookError.editConflict }
+                    let source = BookEditSource(bookID: checkout.source.bookID, libraryRoot: checkout.source.libraryRoot, fingerprint: checkout.source.fingerprint, libraryAccount: account)
+                    logger.trace("Book edit draft preparation started", category: "library", metadata: ["book_id": .string(book.id.uuidString), "operation_id": .string(operationID)])
+                    let draft = try await BookDraftStore.shared.createEditingDraft(BookEditCheckout(book: checkout.book, source: source), operationID: operationID)
+                    await BookDraftStore.shared.flushDiagnosticLogs()
+                    await operationRepo.discardImport(checkout.book)
+                    guard token == session, openingBook?.id == book.id, !Task.isCancelled else {
+                        // Closed before the editor was ready, so nothing in this draft is user work yet.
+                        try? await BookDraftStore.shared.remove(draft.id)
+                        logger.trace("Book editor preparation finished after close", category: "creator", metadata: context.metadata)
+                        return
+                    }
+                    openingBook = nil; editingDraft = draft
+                    logger.trace("Book editor ready", category: "creator", metadata: ["book_id": .string(book.id.uuidString), "draft_id": .string(draft.id.uuidString), "operation_id": .string(operationID), "chapter_count": .integer(draft.chapters.count)])
+                } catch { await operationRepo.discardImport(checkout.book); throw error }
+            } catch is CancellationError {
+                await operationRepo.flushDiagnosticLogs()
+                logger.trace("Library operation cancelled", category: "library", metadata: context.metadata)
+            } catch {
+                let failureEntry = context.failureEntry("Library operation failed", error: error, category: "library")
+                await operationRepo.flushDiagnosticLogs()
                 await BookDraftStore.shared.flushDiagnosticLogs()
-                guard token == session else { throw BookError.editConflict }
-                editingDraft = draft
-                logger.trace("Book editor ready", category: "creator", metadata: ["book_id": .string(book.id.uuidString), "draft_id": .string(draft.id.uuidString), "operation_id": .string(operationID), "chapter_count": .integer(draft.chapters.count)])
-                await repository.discardImport(checkout.book)
-            } catch { await repository.discardImport(checkout.book); throw error }
+                logger.log(failureEntry)
+                if token == session, openingBook?.id == book.id { openingFailure = error.localizedDescription }
+            }
         }
     }
 
@@ -310,7 +358,8 @@ final class LibraryModel {
         if let account = source?.libraryAccount, account != location?.account { throw BookError.editConflict }
         activity = String(localized: "Saving book…")
         let center = OperationCenter.shared
-        let trackedID = center.begin(kind: .saveBook, title: book.manifest.title, subtitle: String(localized: "Saving book…"), destination: .book(book.id), id: operationID)
+        // The editor waits for this save and then shows the book, so a banner would only repeat that.
+        let trackedID = center.begin(kind: .saveBook, title: book.manifest.title, subtitle: String(localized: "Saving book…"), destination: .book(book.id), id: operationID, announcesCompletion: false)
         center.update(trackedID, state: .running)
         let operationRepo = repository
         var context = BookOperationDiagnostics(operationID: operationID, bookID: book.id, phase: source == nil ? "publish_new_book" : "publish_book_edit")
@@ -361,7 +410,8 @@ final class LibraryModel {
         let destination: OperationDestination = bookID.map { .book($0) } ?? (phase == "stage_import" ? .importReview : .operations)
         let kind: AppOperation.Kind = phase == "keep_offline" ? .download : phase == "share" ? .shareBook : phase.contains("import") ? .importBook : .saveBook
         let title = bookID.flatMap { id in books.first(where: { $0.id == id })?.manifest.title } ?? NSLocalizedString(label, comment: "")
-        trackedOperationID = center.start(kind: kind, title: title, subtitle: NSLocalizedString(label, comment: ""), destination: destination, id: context.operationID) { [self] id in
+        // Failures already raise an alert and most results open in place; only a download may finish after the user moves on.
+        trackedOperationID = center.start(kind: kind, title: title, subtitle: NSLocalizedString(label, comment: ""), destination: destination, id: context.operationID, announcesCompletion: phase == "keep_offline") { [self] id in
             defer { activity = nil; if currentOperation?.operationID == context.operationID { currentOperation = nil; trackedOperationID = nil } }
             do {
                 try await operation(context.operationID)
@@ -378,12 +428,12 @@ final class LibraryModel {
                 await operationRepo.flushDiagnosticLogs()
                 await BookDraftStore.shared.flushDiagnosticLogs()
                 logger.log(failureEntry)
+                center.silenceCompletion(id)
                 message = error.localizedDescription
                 throw error
             }
             activity = nil
             await refresh()
-            if let editingDraft, phase == "edit" { center.update(id, destination: .draft(editingDraft.id)) }
             if phase == "commit_import", importCandidate != nil { center.update(id, destination: .importReview) }
         }
     }

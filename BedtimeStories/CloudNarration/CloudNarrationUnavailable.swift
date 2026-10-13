@@ -35,7 +35,7 @@ final class CloudNarrationModel {
     func approveVoice(profileID: String) async throws { throw CloudNarrationFailure.unavailable }
     func startVoicePreview(profileID: String, operationID: String? = nil) async throws -> String { throw CloudNarrationFailure.unavailable }
     func startNarration(draft: BookDraft, voiceID: String, styles: [UUID: [NarrationStyle]],
-                        defaultStyle: NarrationStyle, preview: Bool, operationID: String? = nil) async throws -> String { throw CloudNarrationFailure.unavailable }
+                        defaultStyle: NarrationStyle, preview: Bool, operationID: String? = nil, plainText: Bool = false) async throws -> String { throw CloudNarrationFailure.unavailable }
     func snapshotHash(draft: BookDraft, styles: [UUID: [NarrationStyle]], defaultStyle: NarrationStyle) -> String {
         do { return try NarrationSnapshot(draft: draft, styles: styles, defaultStyle: defaultStyle).hash }
         catch {

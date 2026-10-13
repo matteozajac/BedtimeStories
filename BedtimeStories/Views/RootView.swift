@@ -1,3 +1,4 @@
+import MZAppFoundation
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -5,11 +6,13 @@ struct RootView: View {
     @Environment(LibraryModel.self) private var library
     @Environment(OperationCenter.self) private var operations
     @Environment(CloudNarrationModel.self) private var cloud
+    @Environment(DeveloperOptions.self) private var developerOptions
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var bookPath: [LibraryBook] = []
     @State private var showingVoices = false
+    @State private var showingFreeTextNarration = false
     @State private var suspendedImportReview = false
     @State private var rootPresentationVisible = false
     @State private var pendingDestination: OperationDestination?
@@ -82,10 +85,17 @@ struct RootView: View {
                 .operationFeedback()
                 .onAppear { rootPresentationVisible = true }
         }
-        .sheet(item: $library.editingDraft, onDismiss: presentationDismissed) { draft in
-            NavigationStack { BookEditorView(draft: draft, store: .shared, initiallyShowNarration: initialNarrationDraftID == draft.id) }
-                .operationFeedback()
-                .onAppear { rootPresentationVisible = true }
+        // One sheet covers loading and editing so the editor appears immediately and its content swaps in place.
+        .sheet(isPresented: Binding(get: { library.editingDraft != nil || library.openingBook != nil }, set: { if !$0 { library.closeEditor() } }), onDismiss: presentationDismissed) {
+            NavigationStack {
+                if let draft = library.editingDraft {
+                    BookEditorView(draft: draft, store: .shared, initiallyShowNarration: initialNarrationDraftID == draft.id).id(draft.id)
+                } else {
+                    BookEditorLoadingView()
+                }
+            }
+            .operationFeedback()
+            .onAppear { rootPresentationVisible = true }
         }
         .fullScreenCover(isPresented: $library.showingPlayer, onDismiss: presentationDismissed) {
             NowPlayingView()
@@ -110,6 +120,14 @@ struct RootView: View {
             NavigationStack {
                 YourVoicesView()
                     .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showingVoices = false } } }
+            }
+            .operationFeedback()
+            .onAppear { rootPresentationVisible = true }
+        }
+        .sheet(isPresented: $showingFreeTextNarration, onDismiss: presentationDismissed) {
+            NavigationStack {
+                FreeTextNarrationView()
+                    .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showingFreeTextNarration = false } } }
             }
             .operationFeedback()
             .onAppear { rootPresentationVisible = true }
@@ -219,11 +237,12 @@ struct RootView: View {
         operations.consumeDestination()
         library.showingSettings = false
         library.showingCreator = false
-        library.editingDraft = nil
+        library.closeEditor()
         library.showingPlayer = false
         library.showingImportPicker = false
         library.shareURL = nil
         showingVoices = false
+        showingFreeTextNarration = false
         narrationRecovery = nil
         operations.showingOperations = false
         if library.importCandidate != nil { suspendedImportReview = true }
@@ -264,6 +283,11 @@ struct RootView: View {
                 library.selectedBook = book
                 bookPath = [book]
             case .draft(let id), .narration(let id):
+                if id == FreeTextNarrationDraft.id {
+                    if developerOptions.isEnabled { showingFreeTextNarration = true }
+                    else { library.showingSettings = true }
+                    return
+                }
                 do {
                     let draft = try await BookDraftStore.shared.load(id)
                     guard generation == operations.ownerGeneration else { return }

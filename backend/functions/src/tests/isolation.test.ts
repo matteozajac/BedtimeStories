@@ -85,12 +85,18 @@ test("Narration idempotency freezes payload and charges quota once", async () =>
 test("One active full book prevents different request IDs from duplicating chargeable work; previews are separate", async () => {
   await seedVoice("singleBook");
   const { jobId } = await api().startNarration(principal("singleBook"), input("voice"));
-  await assert.rejects(api().startNarration(principal("singleBook"), input("voice")), { code: "resource-exhausted" });
+  await assert.rejects(api().startNarration(principal("singleBook"), input("voice")), { code: "resource-exhausted", details: { reason: "busy" } });
   const preview = await api().startNarration(principal("singleBook"), input("voice", true));
   assert.equal((await db.doc(`users/singleBook/jobs/${preview.jobId}`).get()).get("preview"), true);
   assert.equal((await db.doc(`privateAccounts/singleBook`).get()).get("limits.books"), 1);
   await api().cancelNarration(principal("singleBook"), { jobId });
   await api().startNarration(principal("singleBook"), input("voice"));
+});
+test("Exhausted daily quotas report which limit was reached", async () => {
+  await seedVoice("dailyLimit");
+  await db.doc("privateAccounts/dailyLimit").set({ limits: { day: new Date(now).toISOString().slice(0, 10), books: 5, previews: 20 } }, { merge: true });
+  await assert.rejects(api().startNarration(principal("dailyLimit"), input("voice")), { code: "resource-exhausted", details: { reason: "daily_limit", limit: "books" } });
+  await assert.rejects(api().startNarration(principal("dailyLimit"), input("voice", true)), { code: "resource-exhausted", details: { reason: "daily_limit", limit: "previews" } });
 });
 test("Concurrent full-book requests serialize through account quota without duplicate work", async () => {
   await seedVoice("concurrentBook");

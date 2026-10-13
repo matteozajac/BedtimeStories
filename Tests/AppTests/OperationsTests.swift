@@ -65,6 +65,43 @@ struct OperationsTests {
         #expect(center.banner == nil)
     }
 
+    @Test func quietCompletionStaysInHistoryWithoutBanner() {
+        let fixture = OperationFixture()
+        defer { fixture.remove() }
+        let center = fixture.center()
+        let saved = center.begin(kind: .saveBook, title: "Stars", subtitle: "Saving", destination: .book(UUID()), announcesCompletion: false)
+        center.update(saved, state: .running)
+        center.update(saved, state: .ready, progress: 1)
+        #expect(center.banner == nil)
+        #expect(center.completedOperations.map(\.id) == [saved])
+        #expect(center.operations.first { $0.id == saved }?.completionPresentedAt != nil)
+        let download = center.begin(kind: .download, title: "Moon", subtitle: "Downloading", destination: .book(UUID()))
+        center.update(download, state: .running)
+        center.silenceCompletion(download)
+        center.update(download, state: .failed, message: "Offline")
+        #expect(center.banner == nil)
+        let next = center.begin(kind: .download, title: "Sun", subtitle: "Downloading", destination: .book(UUID()))
+        center.update(next, state: .running)
+        center.update(next, state: .ready)
+        #expect(center.banner?.id == next)
+    }
+
+    @Test func bannerBelongsToTopmostSurface() {
+        let fixture = OperationFixture()
+        defer { fixture.remove() }
+        let center = fixture.center()
+        let root = UUID(), sheet = UUID()
+        center.surfaceAppeared(root)
+        center.surfaceAppeared(sheet)
+        #expect(center.feedbackSurfaces.last == sheet)
+        center.surfaceAppeared(root)
+        center.surfaceDisappeared(root)
+        #expect(center.feedbackSurfaces == [sheet])
+        center.surfaceAppeared(root)
+        center.surfaceDisappeared(sheet)
+        #expect(center.feedbackSurfaces.last == root)
+    }
+
     @Test func alreadyPresentedCompletionStaysDismissedAfterRelaunch() {
         let fixture = OperationFixture()
         defer { fixture.remove() }

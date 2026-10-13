@@ -78,9 +78,9 @@ export function narrationInput(raw: unknown): NarrationInput {
   });
   if (new Set(chapters.map((chapter) => chapter.id)).size !== chapters.length) throw new HttpsError("invalid-argument", "Duplicate chapter identifiers.");
   const characters = chapters.reduce((total, chapter) => total + chapter.paragraphs.reduce((sum, paragraph) => sum + paragraph.text.length, 0), 0);
-  if (characters > (data.preview ? LIMITS.maxPreviewCharacters : LIMITS.maxBookCharacters)) throw new HttpsError("resource-exhausted", "This narration is too long.");
+  if (characters > (data.preview ? LIMITS.maxPreviewCharacters : LIMITS.maxBookCharacters)) throw new HttpsError("resource-exhausted", "This narration is too long.", { reason: "too_long" });
   const words = chapters.reduce((total, chapter) => total + chapter.paragraphs.reduce((sum, paragraph) => sum + paragraph.text.trim().split(/\s+/u).length, 0), 0);
-  if (!data.preview && words > LIMITS.maxBookWords) throw new HttpsError("resource-exhausted", "A cloud narration can contain up to 5,400 words.");
+  if (!data.preview && words > LIMITS.maxBookWords) throw new HttpsError("resource-exhausted", "A cloud narration can contain up to 5,400 words.", { reason: "too_long" });
   const result: NarrationInput = {
     requestId: uuid(data.requestId), voiceProfileId: identifier(data.voiceProfileId), draftId: identifier(data.draftId),
     snapshotHash: hash.toLowerCase(), language: language(data.language), preview: data.preview, chapters,
@@ -90,7 +90,7 @@ export function narrationInput(raw: unknown): NarrationInput {
     throw new HttpsError("invalid-argument", "Choose an available narrator profile.");
   }
   if (builtIn && builtIn.language !== result.language) throw new HttpsError("invalid-argument", "Choose a narrator for this language.");
-  if (Buffer.byteLength(JSON.stringify(result), "utf8") > 750000) throw new HttpsError("resource-exhausted", "This narration contains too much data.");
+  if (Buffer.byteLength(JSON.stringify(result), "utf8") > 750000) throw new HttpsError("resource-exhausted", "This narration contains too much data.", { reason: "too_long" });
   return result;
 }
 export function contentHash(value: unknown): string { return createHash("sha256").update(JSON.stringify(value)).digest("hex"); }

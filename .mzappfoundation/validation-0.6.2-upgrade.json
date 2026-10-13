@@ -1,0 +1,76 @@
+{
+  "verified_on": "2026-10-13",
+  "previous_validation": "validation-0.5.1.json",
+  "scope": "MZAppFoundation dependency upgrade only; preserves app-owned backend, logging, provider defaults and free-text narration",
+  "package": {
+    "version": "0.6.2",
+    "revision": "0594bf52cf518b777194cc03fed43f98bdabe756",
+    "firebase_version": "13.0.0",
+    "pulse_version": "5.2.1",
+    "lockfile_sha256": "5fb0c15ad908f9c87f35a350614a731fdd7b3937fb88fd63794bec02a70ca181",
+    "shared_sample_pins_matched": 14,
+    "firestore_trait_explicitly_enabled": true
+  },
+  "configuration": {
+    "analytics_enabled": false,
+    "diagnostics_enabled": false,
+    "providers": {},
+    "firebase_initialization_owner": "CloudNarrationModel",
+    "screen_video_default": "off without a saved choice; explicit saved choices persist"
+  },
+  "setup": {
+    "repeat_apply_and_overlay": "passed",
+    "evidence": ".build/mz-upgrade-0.6.2/idempotence.json",
+    "generic_source_verifier": "Reports deliberate app-owned bootstrap/vendor import overrides; native builds, hosted tests and binary inspection validate the composition"
+  },
+  "tests": {
+    "app_hosted": {
+      "passed": 105,
+      "failed": 0,
+      "skipped": 0,
+      "scheme": "BedtimeStoriesLocal",
+      "configuration": "Debug",
+      "result_bundle": ".build/mz-upgrade-0.6.2/AppTests-Final.xcresult"
+    },
+    "app_core": {
+      "xctest_passed": 5,
+      "swift_testing_passed": 9,
+      "failed": 0
+    },
+    "foundation_core": {
+      "passed": 52,
+      "failed": 0
+    }
+  },
+  "builds": {
+    "local": {
+      "configuration": "Debug",
+      "passed": true,
+      "sdk": "iphonesimulator",
+      "cloud_narration_enabled": false,
+      "log": "/Users/mateusz/Library/Developer/MobileBuildMCP/workspaces/BedtimeStories-a0f5f2b1c950/logs/build_sim_2026-10-13T10-44-51-302Z_pid59224_a8cdc4f6.log"
+    },
+    "device": {
+      "configuration": "Internal",
+      "passed": true,
+      "sdk": "iphoneos",
+      "code_signing_allowed": false,
+      "cloud_narration_enabled": true,
+      "log": "/Users/mateusz/Library/Developer/MobileBuildMCP/workspaces/BedtimeStories-a0f5f2b1c950/logs/build_device_2026-10-13T10-41-02-047Z_pid50934_e00c31a4.log"
+    }
+  },
+  "binary_audits": {
+    "local": ".build/mz-upgrade-0.6.2/local-binary-audit.json",
+    "device": ".build/mz-upgrade-0.6.2/device-binary-audit.json",
+    "backend_sdks": ".build/mz-upgrade-0.6.2/backend-sdk-audit.json",
+    "local_remote_sdk_matches": []
+  },
+  "built_metadata": ".build/mz-upgrade-0.6.2/built-metadata.json",
+  "not_performed": [
+    "App archive or TestFlight upload",
+    "Backend deployment or provider provisioning",
+    "Git commit or push",
+    "Physical-device Firebase, voice generation, microphone, ReplayKit and iCloud validation",
+    "New Foundation settings manual UI walkthrough: simulator AX transport was unstable; hosted console restoration test passed"
+  ]
+}

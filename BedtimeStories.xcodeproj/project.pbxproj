@@ -415,7 +415,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "python3 \"$SRCROOT/.mzappfoundation/Generated/generate_build_metadata.py\" --app-root \"$SRCROOT\" --foundation-version 0.5.1 --channel \"$CONFIGURATION\" --stamp-build-time --output \"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/MZFoundationBuildMetadata.plist\"";
+			shellScript = "python3 \"$SRCROOT/.mzappfoundation/Generated/generate_build_metadata.py\" --app-root \"$SRCROOT\" --foundation-version 0.6.2 --channel \"$CONFIGURATION\" --stamp-build-time --output \"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/MZFoundationBuildMetadata.plist\"";
 		};
 		93DB73F5BB4D4AC3742D3E9D /* MZ Build Metadata */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -434,7 +434,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "python3 \"$SRCROOT/.mzappfoundation/Generated/generate_build_metadata.py\" --app-root \"$SRCROOT\" --foundation-version 0.5.1 --channel \"$CONFIGURATION\" --stamp-build-time --output \"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/MZFoundationBuildMetadata.plist\"";
+			shellScript = "python3 \"$SRCROOT/.mzappfoundation/Generated/generate_build_metadata.py\" --app-root \"$SRCROOT\" --foundation-version 0.6.2 --channel \"$CONFIGURATION\" --stamp-build-time --output \"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/MZFoundationBuildMetadata.plist\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -500,7 +500,7 @@
 				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
 				CODE_SIGN_ENTITLEMENTS = Config/BedtimeStories.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -682,7 +682,7 @@
 				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
 				CODE_SIGN_ENTITLEMENTS = Config/BedtimeStories.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -721,7 +721,7 @@
 				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
 				CODE_SIGN_ENTITLEMENTS = Config/PrivateCloudCompute.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -781,7 +781,7 @@
 				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
 				CODE_SIGN_ENTITLEMENTS = Config/PrivateCloudCompute.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -821,7 +821,7 @@
 				BEDTIME_CLOUD_NARRATION_ENABLED = YES;
 				CODE_SIGN_ENTITLEMENTS = Config/PrivateCloudCompute.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -974,7 +974,7 @@
 				BEDTIME_CLOUD_NARRATION_ENABLED = NO;
 				CODE_SIGN_ENTITLEMENTS = Config/PrivateCloudCompute.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				DEVELOPMENT_TEAM = 4TCJLR98Y5;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -1006,9 +1006,9 @@
 			};
 			name = Internal;
 		};
-        A10000000000000000000013 = {isa = XCBuildConfiguration; buildSettings = { APPLICATION_EXTENSION_API_ONLY = YES; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 18; DEVELOPMENT_TEAM = 4TCJLR98Y5; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = OperationsWidget/Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 27.0; MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories.operations; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SKIP_INSTALL = YES; SWIFT_VERSION = 6.0; SWIFT_STRICT_CONCURRENCY = complete; TARGETED_DEVICE_FAMILY = "1,2"; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@executable_path/../../Frameworks", ); }; name = Debug; };
-        A10000000000000000000014 = {isa = XCBuildConfiguration; buildSettings = { APPLICATION_EXTENSION_API_ONLY = YES; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 18; DEVELOPMENT_TEAM = 4TCJLR98Y5; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = OperationsWidget/Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 27.0; MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories.operations; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SKIP_INSTALL = YES; SWIFT_VERSION = 6.0; SWIFT_STRICT_CONCURRENCY = complete; TARGETED_DEVICE_FAMILY = "1,2"; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@executable_path/../../Frameworks", ); }; name = Release; };
-        A10000000000000000000015 = {isa = XCBuildConfiguration; buildSettings = { APPLICATION_EXTENSION_API_ONLY = YES; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 18; DEVELOPMENT_TEAM = 4TCJLR98Y5; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = OperationsWidget/Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 27.0; MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories.operations; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SKIP_INSTALL = YES; SWIFT_VERSION = 6.0; SWIFT_STRICT_CONCURRENCY = complete; TARGETED_DEVICE_FAMILY = "1,2"; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@executable_path/../../Frameworks", ); }; name = Internal; };
+        A10000000000000000000013 = {isa = XCBuildConfiguration; buildSettings = { APPLICATION_EXTENSION_API_ONLY = YES; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 19; DEVELOPMENT_TEAM = 4TCJLR98Y5; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = OperationsWidget/Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 27.0; MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories.operations; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SKIP_INSTALL = YES; SWIFT_VERSION = 6.0; SWIFT_STRICT_CONCURRENCY = complete; TARGETED_DEVICE_FAMILY = "1,2"; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@executable_path/../../Frameworks", ); }; name = Debug; };
+        A10000000000000000000014 = {isa = XCBuildConfiguration; buildSettings = { APPLICATION_EXTENSION_API_ONLY = YES; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 19; DEVELOPMENT_TEAM = 4TCJLR98Y5; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = OperationsWidget/Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 27.0; MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories.operations; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SKIP_INSTALL = YES; SWIFT_VERSION = 6.0; SWIFT_STRICT_CONCURRENCY = complete; TARGETED_DEVICE_FAMILY = "1,2"; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@executable_path/../../Frameworks", ); }; name = Release; };
+        A10000000000000000000015 = {isa = XCBuildConfiguration; buildSettings = { APPLICATION_EXTENSION_API_ONLY = YES; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 19; DEVELOPMENT_TEAM = 4TCJLR98Y5; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = OperationsWidget/Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 27.0; MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.matteozajac.bedtimestories.operations; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SKIP_INSTALL = YES; SWIFT_VERSION = 6.0; SWIFT_STRICT_CONCURRENCY = complete; TARGETED_DEVICE_FAMILY = "1,2"; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@executable_path/../../Frameworks", ); }; name = Internal; };
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1069,9 +1069,12 @@
 		41380ABFC1B8187E6B42AC19 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			traits = (
+				Firestore,
+			);
 			requirement = {
 				kind = exactVersion;
-				version = 12.19.2;
+				version = 13.0.0;
 			};
 		};
 		EEB9ED7AAC32B3FBB84B3FF3 /* XCRemoteSwiftPackageReference "MZAppFoundation" */ = {
@@ -1079,7 +1082,7 @@
 			repositoryURL = "git@github.com:matteozajac/MZAppFoundation.git";
 			requirement = {
 				kind = exactVersion;
-				version = 0.5.1;
+				version = 0.6.2;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

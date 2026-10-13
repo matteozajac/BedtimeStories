@@ -8798,6 +8798,339 @@
           }
         }
       }
+    },
+    "%lld / 4,000 characters": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld / 4,000 characters"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld / 4000 znaków"
+          }
+        }
+      }
+    },
+    "Another book is still being narrated. Wait for it to finish, then try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Another book is still being narrated. Wait for it to finish, then try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inna książka jest jeszcze nagrywana. Poczekaj, aż narracja się zakończy, i spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "Audio generation failed. Try again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio generation failed. Try again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się wygenerować nagrania. Spróbuj ponownie."
+          }
+        }
+      }
+    },
+    "Creation cancelled.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Creation cancelled."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tworzenie anulowane."
+          }
+        }
+      }
+    },
+    "Delivery Style": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delivery Style"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sposób czytania"
+          }
+        }
+      }
+    },
+    "Enable Developer Mode to generate free text narration.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enable Developer Mode to generate free text narration."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Włącz tryb deweloperski, aby wygenerować nagranie dowolnego tekstu."
+          }
+        }
+      }
+    },
+    "Free Text": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Free Text"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dowolny tekst"
+          }
+        }
+      }
+    },
+    "Free Text Narration": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Free Text Narration"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Czytanie dowolnego tekstu"
+          }
+        }
+      }
+    },
+    "Free text narration requires a cloud-enabled build and a signed-in voice account.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Free text narration requires a cloud-enabled build and a signed-in voice account."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Czytanie dowolnego tekstu wymaga wersji aplikacji z obsługą chmury i zalogowania na konto głosowe."
+          }
+        }
+      }
+    },
+    "Generate Audio": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Generate Audio"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wygeneruj nagranie"
+          }
+        }
+      }
+    },
+    "Generated Audio": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Generated Audio"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wygenerowane nagrania"
+          }
+        }
+      }
+    },
+    "Text to Read": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text to Read"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tekst do przeczytania"
+          }
+        }
+      }
+    },
+    "The complete text is processed by the cloud voice service. Audio stays separate from your book library. Generation continues after you close this screen; return here to listen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The complete text is processed by the cloud voice service. Audio stays separate from your book library. Generation continues after you close this screen; return here to listen."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cały tekst jest przetwarzany przez usługę głosową w chmurze. Nagranie nie trafia do biblioteki książek. Tworzenie trwa także po zamknięciu tego ekranu. Wróć tutaj, aby posłuchać."
+          }
+        }
+      }
+    },
+    "This audio has expired. Generate it again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This audio has expired. Generate it again."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To nagranie wygasło. Wygeneruj je ponownie."
+          }
+        }
+      }
+    },
+    "This book is too long for voice narration. Shorten it to 5,400 words or fewer.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This book is too long for voice narration. Shorten it to 5,400 words or fewer."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta książka jest za długa na narrację. Skróć ją do maksymalnie 5400 słów."
+          }
+        }
+      }
+    },
+    "Unable to open book": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unable to open book"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się otworzyć książki"
+          }
+        }
+      }
+    },
+    "You can keep up to 3 voices. Delete one before adding another.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can keep up to 3 voices. Delete one before adding another."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Możesz mieć maksymalnie 3 głosy. Usuń jeden, zanim dodasz kolejny."
+          }
+        }
+      }
+    },
+    "You have listened to 20 voice previews today. Try again tomorrow.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You have listened to 20 voice previews today. Try again tomorrow."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dziś odsłuchano już 20 próbek głosu. Spróbuj ponownie jutro."
+          }
+        }
+      }
+    },
+    "You have narrated 5 books today. Try again tomorrow.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You have narrated 5 books today. Try again tomorrow."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dziś utworzono już 5 narracji książek. Spróbuj ponownie jutro."
+          }
+        }
+      }
+    },
+    "You have started 5 voice recordings today. Try again tomorrow.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You have started 5 voice recordings today. Try again tomorrow."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dziś rozpoczęto już 5 nagrań głosu. Spróbuj ponownie jutro."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

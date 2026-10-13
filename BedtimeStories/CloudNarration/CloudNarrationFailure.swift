@@ -4,6 +4,7 @@ import MZAppFoundation
 enum CloudNarrationFailure: LocalizedError, LoggableError {
     case unavailable, signInRequired, accountChanged, invalidResponse, invalidAudio, expired, staleVoice
     case limitReached, retryLater, permissionDenied, confirmWithApple, invalidRecording
+    case dailyBookLimit, dailyPreviewLimit, dailyEnrollmentLimit, voiceLimit, narrationInProgress, narrationTooLong
 
     var logMessage: String {
         switch self {
@@ -14,7 +15,13 @@ enum CloudNarrationFailure: LocalizedError, LoggableError {
         case .invalidAudio: "Cloud narration audio failed integrity or format validation."
         case .expired: "The narration or enrollment is no longer valid."
         case .staleVoice: "The selected voice is not eligible for this narration."
-        case .limitReached: "The cloud narration service reported an exhausted limit."
+        case .limitReached: "The cloud narration service reported an exhausted limit without a recognized reason."
+        case .dailyBookLimit: "The daily cloud book narration limit was reached."
+        case .dailyPreviewLimit: "The daily cloud voice preview limit was reached."
+        case .dailyEnrollmentLimit: "The daily voice enrollment attempt limit was reached."
+        case .voiceLimit: "The account already has the maximum number of active voices."
+        case .narrationInProgress: "Another book narration is still queued or processing for this account."
+        case .narrationTooLong: "The narration exceeds the server character, word, or payload limit."
         case .retryLater: "The cloud narration operation requires a retry."
         case .permissionDenied: "The cloud narration service rejected access."
         case .confirmWithApple: "The cloud narration operation requires Apple confirmation."
@@ -32,6 +39,12 @@ enum CloudNarrationFailure: LocalizedError, LoggableError {
         case .expired: String(localized: "This narration has expired. Generate it again to continue.")
         case .staleVoice: String(localized: "Choose a voice from your account to continue.")
         case .limitReached: String(localized: "Your narration limit has been reached. Try again tomorrow.")
+        case .dailyBookLimit: String(localized: "You have narrated 5 books today. Try again tomorrow.")
+        case .dailyPreviewLimit: String(localized: "You have listened to 20 voice previews today. Try again tomorrow.")
+        case .dailyEnrollmentLimit: String(localized: "You have started 5 voice recordings today. Try again tomorrow.")
+        case .voiceLimit: String(localized: "You can keep up to 3 voices. Delete one before adding another.")
+        case .narrationInProgress: String(localized: "Another book is still being narrated. Wait for it to finish, then try again.")
+        case .narrationTooLong: String(localized: "This book is too long for voice narration. Shorten it to 5,400 words or fewer.")
         case .retryLater: String(localized: "Voice generation could not connect. Your book is still saved. Try again shortly.")
         case .permissionDenied: String(localized: "This private voice or narration is unavailable for your account.")
         case .confirmWithApple: String(localized: "Confirm with Apple before deleting your voice or account.")

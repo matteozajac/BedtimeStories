@@ -20,6 +20,12 @@ struct AppDeveloperSettings: View {
             )
             FoundationKeyboardShortcutsLink(options: options)
             if options.isEnabled {
+                NavigationLink {
+                    FreeTextNarrationView()
+                } label: {
+                    Label("Free Text Narration", systemImage: "text.bubble.fill")
+                }
+                .accessibilityIdentifier("developer.free-text-narration")
                 Button {
                     options.requestConsole()
                 } label: {

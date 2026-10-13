@@ -40,7 +40,7 @@ export class CloudVoiceService {
     const old = account.get("limits") as Record<string, unknown> | undefined;
     const current: Record<string, unknown> = old?.day === day ? { ...old } : { day, enrollments: 0, previews: 0, books: 0 };
     const used = typeof current[kind] === "number" ? current[kind] as number : 0;
-    if (used >= maximum) throw new HttpsError("resource-exhausted", "Your daily cloud narration limit has been reached.");
+    if (used >= maximum) throw new HttpsError("resource-exhausted", "Your daily cloud narration limit has been reached.", { reason: "daily_limit", limit: kind });
     current[kind] = used + 1;
     tx.set(this.account(uid), { state: "active", limits: current }, { merge: true });
   }
@@ -73,7 +73,7 @@ export class CloudVoiceService {
       const account = await tx.get(this.account(uid));
       this.active(account);
       const voices = await tx.get(this.db.collection(`privateAccounts/${uid}/voices`).where("status", "in", ["processing", "awaitingApproval", "ready", "failed", "deleting"]));
-      if (voices.size >= LIMITS.activeVoices) throw new HttpsError("resource-exhausted", "Delete an existing voice before adding another.");
+      if (voices.size >= LIMITS.activeVoices) throw new HttpsError("resource-exhausted", "Delete an existing voice before adding another.", { reason: "voice_limit" });
       this.quota(tx, account, uid, "enrollments", LIMITS.enrollmentAttemptsPerDay);
       tx.create(this.enrollment(uid, id), {
         uid, enrollmentId: id, ...input, consentLanguage: input.language === "pl-PL" ? "pl" : "en", consentVersion: CONSENT_VERSION,
@@ -163,7 +163,7 @@ export class CloudVoiceService {
       const consent = enrollment!.get("recordings.consent");
       if (!reference || !consent || Object.keys(enrollment!.get("uploads") ?? {}).length !== 0) throw new HttpsError("failed-precondition", "Record and upload both voice samples first.");
       const voices = await tx.get(this.db.collection(`privateAccounts/${uid}/voices`).where("status", "in", ["processing", "awaitingApproval", "ready", "failed", "deleting"]));
-      if (voices.size >= LIMITS.activeVoices) throw new HttpsError("resource-exhausted", "Delete an existing voice before adding another.");
+      if (voices.size >= LIMITS.activeVoices) throw new HttpsError("resource-exhausted", "Delete an existing voice before adding another.", { reason: "voice_limit" });
       const createdAt = Timestamp.fromMillis(this.now());
       const displayName = enrollment!.get("displayName");
       const language = enrollment!.get("language");
@@ -204,7 +204,7 @@ export class CloudVoiceService {
       }
       if (!input.preview) {
         const activeBooks = await tx.get(this.db.collection(`privateAccounts/${uid}/jobs`).where("preview", "==", false).where("state", "in", ["queued", "processing"]).limit(1));
-        if (!activeBooks.empty) throw new HttpsError("resource-exhausted", "Wait for your current book narration to finish before starting another.");
+        if (!activeBooks.empty) throw new HttpsError("resource-exhausted", "Wait for your current book narration to finish before starting another.", { reason: "busy" });
       }
       this.quota(tx, account!, uid, input.preview ? "previews" : "books", input.preview ? LIMITS.previewsPerDay : LIMITS.booksPerDay);
       const createdAt = Timestamp.fromMillis(this.now());
